@@ -1,5 +1,6 @@
 // app/layout.tsx o pages/_app.tsx
 import "../styles/globals.css";
+import { CartProvider } from "@/context/CartContext";
 
 import { Inter } from "next/font/google";
 
@@ -15,7 +16,9 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="es">
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <CartProvider>{children}</CartProvider>{" "}
+      </body>
     </html>
   );
 }
