@@ -1,5 +1,6 @@
 import { getProducts } from "@/lib/fudo/products";
 import { getCategories } from "@/lib/fudo/categories";
+import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
@@ -22,9 +23,12 @@ export async function GET() {
       ),
     }));
 
-    return Response.json(menu);
+    return NextResponse.json(menu);
   } catch (error) {
     console.error("Error al construir el menú:", error);
-    return new Response("Error obteniendo menú", { status: 500 });
+    return NextResponse.json(
+      { error: "Error obteniendo menú" },
+      { status: 500 }
+    );
   }
 }

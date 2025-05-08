@@ -13,6 +13,11 @@ export default function HomePage() {
     const fetchMenu = async () => {
       try {
         const res = await fetch("/api/menu");
+        if (!res.ok) {
+          // si hay error, leerlo como texto o JSON según hayas elegido
+          const errText = await res.text();
+          throw new Error(errText);
+        }
         const data = await res.json();
         setMenu(data);
       } catch (err) {
@@ -21,7 +26,6 @@ export default function HomePage() {
         setLoading(false);
       }
     };
-
     fetchMenu();
   }, []);
 

@@ -25,6 +25,7 @@ export default function CheckoutPage() {
     baseDeliveryCost: 0,
     pricePerKm: 0,
   });
+  const [selectedKitchenId, setSelectedKitchenId] = useState(null);
 
   useEffect(() => {
     const fetchConfig = async () => {
@@ -81,16 +82,27 @@ export default function CheckoutPage() {
 
       if (zonaGratis) {
         setShippingCost(0);
-        setError(null); // ✅ Limpiar mensaje de error
+        setSelectedKitchenId("1"); // por ejemplo, cocina central
+        setError(null);
       } else {
-        const cocinaCentro = turf.point([-58.8344, -27.4748]); // tu local central
-        const distanciaKm = turf.distance(point, cocinaCentro, {
+        const cocinaCentro = turf.point([-58.8344, -27.4748]); // Cocina central
+        const cocinaGodoy = turf.point([-58.8226, -27.4725]); // Cocina godoycruz
+
+        const distanciaCentro = turf.distance(point, cocinaCentro, {
           units: "kilometers",
         });
 
+        const distanciaGodoy = turf.distance(point, cocinaGodoy, {
+          units: "kilometers",
+        });
+
+        const cocinaElegida = distanciaCentro <= distanciaGodoy ? "1" : "3";
+        setSelectedKitchenId(cocinaElegida);
+
+        const distanciaMenor = Math.min(distanciaCentro, distanciaGodoy);
         const costo = Math.ceil(
           deliveryConfig.baseDeliveryCost +
-            distanciaKm * deliveryConfig.pricePerKm
+            distanciaMenor * deliveryConfig.pricePerKm
         );
 
         setShippingCost(costo);
@@ -127,6 +139,7 @@ export default function CheckoutPage() {
           customer,
           shippingCost,
           notes: pedidoNotas,
+          kitchenId: selectedKitchenId,
           cart: cart.map((item) => ({
             id: item.id,
             quantity: item.quantity,
