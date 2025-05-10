@@ -1,25 +1,34 @@
-import { getProducts } from "@/lib/fudo/products";
-import { getCategories } from "@/lib/fudo/categories";
+// app/api/menu/route.js
+import { db } from "@/lib/firebase";
+import { collection, getDocs, query, orderBy } from "firebase/firestore";
 import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
-    const [productsResponse, categoriesResponse] = await Promise.all([
-      getProducts(),
-      getCategories(),
+    const [prodSnap, catSnap] = await Promise.all([
+      getDocs(query(collection(db, "products"), orderBy("name"))),
+      getDocs(query(collection(db, "categories"), orderBy("name"))),
     ]);
 
-    const products = productsResponse.products || productsResponse;
-    const categories =
-      categoriesResponse.productCategories || categoriesResponse;
+    const products = prodSnap.docs.map((doc) => ({
+      id: doc.id,
+      attributes: doc.data(),
+    }));
+
+    const categories = catSnap.docs.map((doc) => ({
+      id: doc.id,
+      name: doc.data().name,
+      inOrder:doc.data().inOrder,
+      active:doc.data().active
+    }));
 
     const menu = categories.map((category) => ({
       id: category.id,
       name: category.name,
+      active:category.active,
+      inOrder:category.inOrder,
       items: products.filter(
-        (p) =>
-          p.relationships?.productCategory?.data?.id &&
-          p.relationships.productCategory.data.id === category.id
+        (p) => p.attributes.categoryId === category.id
       ),
     }));
 

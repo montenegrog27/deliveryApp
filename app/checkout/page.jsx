@@ -3,9 +3,12 @@ import { useCart } from "@/context/CartContext";
 import { useState, useEffect } from "react";
 import AddressInput from "@/components/AddressInput";
 import * as turf from "@turf/turf";
+import { useRouter } from "next/navigation";
 
 export default function CheckoutPage() {
+  const router = useRouter();
   const { cart, clearCart } = useCart();
+
   const [customer, setCustomer] = useState({
     name: "",
     phone: "",
@@ -132,7 +135,7 @@ export default function CheckoutPage() {
     }
 
     try {
-      const res = await fetch("/api/send-to-fudo", {
+      const res = await fetch("/api/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -261,7 +264,10 @@ export default function CheckoutPage() {
           />
 
           <button
-            onClick={handleSubmit}
+            onClick={()=>{
+              handleSubmit();
+              router.push("/");
+            }}
             disabled={loading || cart.length === 0}
             className="mt-6 w-full bg-[#E00000] text-white py-2 rounded-xl font-semibold disabled:bg-gray-400"
           >
