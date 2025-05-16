@@ -1,5 +1,5 @@
 // app/api/delivery-config/route.js
-import { db } from "@/lib/zones/firebase";
+import { db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
 
 export async function GET() {

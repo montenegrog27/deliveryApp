@@ -25,6 +25,7 @@ export async function POST(req) {
       couponDiscount,
       manualDiscount,
       paymentMethod,
+      paid
     } = body;
 
     // 1. Guardar cliente
@@ -47,7 +48,7 @@ export async function POST(req) {
       items: cart,
       notes,
       paymentMethodId: paymentMethod || "cash",
-      paid: paymentMethod === "cash",
+      paid: paid || false,
       status: "preparing",
       total,
       coupon: coupon || null,
