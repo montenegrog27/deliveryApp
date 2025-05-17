@@ -1,11 +1,9 @@
 import { MercadoPagoConfig, Preference } from 'mercadopago';
 import { NextResponse } from 'next/server';
 
-// ⚠️ Usamos directamente la URL para descartar variables mal resueltas
 const client = new MercadoPagoConfig({
   accessToken: process.env.MP_ACCESS_TOKEN,
 });
-
 
 export async function POST(req) {
   try {
@@ -27,6 +25,22 @@ export async function POST(req) {
       });
     }
 
+    // ✅ Generamos un external_reference simple y limpio
+    const timestamp = Date.now();
+    const phone = body.customer.phone || "sinTelefono";
+    const externalRef = `mordisco-${phone}-${timestamp}`;
+
+    const orderPayload = {
+      customer: body.customer,
+      cart: body.cart,
+      shippingCost: body.shippingCost,
+      kitchenId: body.kitchenId,
+      paymentMethod: body.paymentMethodId,
+      paid: true,
+      notes: body.notes || "",
+      external_reference: externalRef,
+    };
+
     const preference = await new Preference(client).create({
       body: {
         items,
@@ -34,17 +48,21 @@ export async function POST(req) {
           name: body.customer.name || "Cliente",
           email: body.customer.email || "cliente@mordisco.com",
         },
-        auto_return: "approved", // ✅
         back_urls: {
-          success: `${process.env.NEXT_PUBLIC_SITE_URL}/checkout/success`,
+          success: `${process.env.NEXT_PUBLIC_SITE_URL}/checkout/success?ref=${externalRef}`,
           failure: `${process.env.NEXT_PUBLIC_SITE_URL}/checkout/failure`,
           pending: `${process.env.NEXT_PUBLIC_SITE_URL}/checkout/pending`,
         },
-        // auto_return: "approved", // ✅ solo funciona si back_urls.success está bien
+        auto_return: "approved",
+        external_reference: externalRef,
+        notification_url: `${process.env.NEXT_PUBLIC_SITE_URL}/api/mercadopago/webhook`,
       },
     });
 
-    return NextResponse.json({ init_point: preference.init_point }, { status: 200 });
+    return NextResponse.json(
+      { init_point: preference.init_point, external_reference: externalRef, orderPayload },
+      { status: 200 }
+    );
   } catch (err) {
     console.error("❌ Error creando preferencia MercadoPago:", err);
     return NextResponse.json(

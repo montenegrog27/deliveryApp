@@ -1,17 +1,25 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function SuccessPage() {
   const [status, setStatus] = useState("guardando");
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const ref = searchParams.get("ref");
 
   useEffect(() => {
     const guardarPedido = async () => {
-      const pending = localStorage.getItem("pendingOrder");
-      const alreadyCreated = localStorage.getItem("orderCreated");
+      if (!ref) {
+        console.error("❌ No se encontró 'ref' en la URL");
+        setStatus("error");
+        return;
+      }
 
-      // Si ya se guardó antes, no volver a enviarlo
+      const pendingKey = `pendingOrder_${ref}`;
+      const pending = localStorage.getItem(pendingKey);
+      const alreadyCreated = localStorage.getItem(`orderCreated_${ref}`);
+
       if (!pending || alreadyCreated === "true") {
         setStatus("error");
         return;
@@ -27,6 +35,25 @@ export default function SuccessPage() {
       }
 
       try {
+        const existsRes = await fetch("/api/order-exists", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ phone: pedido.customer.phone, cart: pedido.cart }),
+        });
+
+        const existsData = await existsRes.json();
+        if (existsData.exists) {
+          console.warn("⚠️ El pedido ya fue registrado");
+          localStorage.removeItem(pendingKey);
+          setStatus("ok");
+          setTimeout(() => router.push("/"), 3000);
+          return;
+        }
+      } catch (err) {
+        console.error("⚠️ Error verificando duplicados:", err);
+      }
+
+      try {
         const res = await fetch("/api/create-order", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -35,14 +62,12 @@ export default function SuccessPage() {
 
         if (!res.ok) throw new Error(await res.text());
 
-        // ✅ Marcamos como creado para evitar duplicación
-        localStorage.setItem("orderCreated", "true");
-        localStorage.removeItem("pendingOrder");
+        localStorage.setItem(`orderCreated_${ref}`, "true");
+        localStorage.removeItem(pendingKey);
 
         setStatus("ok");
-
         setTimeout(() => {
-          localStorage.removeItem("orderCreated");
+          localStorage.removeItem(`orderCreated_${ref}`);
           router.push("/");
         }, 4000);
       } catch (err) {
@@ -52,7 +77,7 @@ export default function SuccessPage() {
     };
 
     guardarPedido();
-  }, []);
+  }, [ref]);
 
   return (
     <div className="p-8 text-center">

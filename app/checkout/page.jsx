@@ -32,7 +32,7 @@ export default function CheckoutPage() {
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("");
 
   const fetchBranches = async () => {
-    const res = await fetch("/api/branches"); // creás este endpoint si no lo tenés
+    const res = await fetch("/api/branches");
     const data = await res.json();
     return data;
   };
@@ -40,7 +40,7 @@ export default function CheckoutPage() {
   useEffect(() => {
     const fetchPaymentMethods = async () => {
       try {
-        const res = await fetch("/api/payment-methods"); // 👈 debes crear este endpoint si no existe
+        const res = await fetch("/api/payment-methods");
         const data = await res.json();
         const activos = data.filter((m) => m.active);
         setPaymentMethods(activos);
@@ -67,7 +67,6 @@ export default function CheckoutPage() {
     fetchConfig();
   }, []);
 
-  // ✅ Traer zonas desde la API al montar el componente
   useEffect(() => {
     const fetchZones = async () => {
       try {
@@ -75,13 +74,9 @@ export default function CheckoutPage() {
         if (!res.ok) throw new Error("Error al obtener zonas");
 
         const text = await res.text();
-        if (!text) {
-          console.warn("⚠️ La respuesta está vacía");
-          return;
-        }
+        if (!text) return;
 
         const data = JSON.parse(text);
-        console.log("📦 Zonas traídas desde Firebase:", data); // 👈 Ver en consola
         setZones(data);
       } catch (err) {
         console.error("❌ Error al traer zonas:", err);
@@ -91,7 +86,6 @@ export default function CheckoutPage() {
     fetchZones();
   }, []);
 
-  // 🔁 Esto reemplaza tu useEffect anterior
   const calcularEnvio = async () => {
     if (!customer.lat || !customer.lng || !deliveryConfig) return;
 
@@ -110,18 +104,13 @@ export default function CheckoutPage() {
     if (zona) {
       setShippingCost(zona.cost ?? 0);
       setSelectedKitchenId(zona.cocinaId);
-      if (zona.cost === 0) {
-        setError(null);
-      } else {
-        setError(`Costo de envío: $${zona.cost}`);
-      }
+      setError(zona.cost === 0 ? null : `Costo de envío: $${zona.cost}`);
       return;
     }
 
     try {
       const branches = await fetchBranches();
       if (!branches.length) {
-        console.warn("⚠️ No hay sucursales disponibles");
         setError("No hay sucursales disponibles para calcular envío");
         return;
       }
@@ -134,22 +123,13 @@ export default function CheckoutPage() {
       }));
 
       const branchMasCercana = distances.sort((a, b) => a.dist - b.dist)[0];
-      if (!branchMasCercana) {
-        console.warn("⚠️ No se encontró sucursal más cercana");
-        setError("No se encontró una sucursal cercana para el envío");
-        return;
-      }
-
       setSelectedKitchenId(branchMasCercana.id);
       const costo = Math.ceil(
-        deliveryConfig.baseDeliveryCost +
-          branchMasCercana.dist * deliveryConfig.pricePerKm
+        deliveryConfig.baseDeliveryCost + branchMasCercana.dist * deliveryConfig.pricePerKm
       );
-
       setShippingCost(costo);
       setError(`Fuera de zona. Costo de envío: $${costo}`);
     } catch (err) {
-      console.error("❌ Error calculando distancia a sucursal:", err);
       setError("Hubo un problema calculando el envío.");
     }
   };
@@ -165,67 +145,67 @@ export default function CheckoutPage() {
     setError(null);
     setSuccess(false);
     if (!direccionConfirmada || !customer.isValidAddress) {
-      setError(
-        "Por favor seleccioná una dirección válida que incluya calle y altura (número)."
-      );
+      setError("Por favor seleccioná una dirección válida que incluya calle y altura (número).");
       setLoading(false);
       return;
     }
 
-if (selectedPaymentMethod.toLowerCase().includes("mercado")) {
-  try {
-    const response = await fetch("/api/mercadopago/create-preference", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        customer,
-        cart: cart.map((item) => ({
-          id: item.id,
-          name: item.attributes.name,
-          quantity: item.quantity,
-          price: item.attributes.price,
-        })),
-        shippingCost,
-        kitchenId: selectedKitchenId,
-        paymentMethodId: selectedPaymentMethod,
-      }),
-    });
+    const uniqueRef = `${customer.phone}-${Date.now()}`;
 
-    // ⚠️ Verificamos si el fetch fue exitoso
-    if (!response.ok) {
-      const text = await response.text();
-      throw new Error(`MercadoPago Error: ${text}`);
+    if (selectedPaymentMethod.toLowerCase().includes("mercado")) {
+      try {
+        const response = await fetch("/api/mercadopago/create-preference", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            customer,
+            cart: cart.map((item) => ({
+              id: item.id,
+              name: item.attributes.name,
+              quantity: item.quantity,
+              price: item.attributes.price,
+            })),
+            shippingCost,
+            kitchenId: selectedKitchenId,
+            paymentMethodId: selectedPaymentMethod,
+            notes: pedidoNotas,
+            ref: uniqueRef,
+          }),
+        });
+
+        if (!response.ok) {
+          const text = await response.text();
+          throw new Error(`MercadoPago Error: ${text}`);
+        }
+
+        const { init_point } = await response.json();
+
+        localStorage.setItem(
+          "pendingOrder_" + uniqueRef,
+          JSON.stringify({
+            customer,
+            cart: cart.map((item) => ({
+              id: item.id,
+              quantity: item.quantity,
+              price: item.attributes.price,
+              discountPrice: item.discountPrice || item.attributes.price,
+            })),
+            shippingCost,
+            kitchenId: selectedKitchenId,
+            paymentMethod: selectedPaymentMethod,
+            paid: true,
+            notes: pedidoNotas || "",
+          })
+        );
+
+        router.push(`${init_point}&ref=${uniqueRef}`);
+        return;
+      } catch (err) {
+        setError("No se pudo iniciar el pago con Mercado Pago.");
+        setLoading(false);
+        return;
+      }
     }
-
-    const { init_point } = await response.json();
-
-    localStorage.setItem(
-      "pendingOrder",
-      JSON.stringify({
-        customer,
-        cart: cart.map((item) => ({
-          id: item.id,
-          quantity: item.quantity,
-          price: item.attributes.price,
-          discountPrice: item.discountPrice || item.attributes.price,
-        })),
-        shippingCost,
-        kitchenId: selectedKitchenId,
-        paymentMethod: selectedPaymentMethod,
-        paid: true,
-        notes: pedidoNotas || "",
-      })
-    );
-
-    router.push(init_point);
-    return;
-  } catch (err) {
-    console.error("❌ Error al generar preferencia de Mercado Pago:", err);
-    setError("No se pudo iniciar el pago con Mercado Pago.");
-    setLoading(false);
-    return;
-  }
-}
 
     try {
       const res = await fetch("/api/create-order", {
@@ -233,7 +213,7 @@ if (selectedPaymentMethod.toLowerCase().includes("mercado")) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           customer,
-          paid: false, // 👈 cuando NO es Mercado Pago, el pago se hace después
+          paid: false,
           shippingCost,
           notes: pedidoNotas,
           kitchenId: selectedKitchenId,
@@ -249,14 +229,12 @@ if (selectedPaymentMethod.toLowerCase().includes("mercado")) {
       setSuccess(true);
       clearCart();
     } catch (err) {
-      console.error(err);
       setError("Error al confirmar pedido.");
     } finally {
       setLoading(false);
     }
   };
 
-  const contieneNumero = /\d/.test(customer.address);
 
   return (
     <div className="min-h-screen px-6 py-10 max-w-3xl mx-auto font-inter">
