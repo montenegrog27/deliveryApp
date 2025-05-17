@@ -34,6 +34,7 @@ export async function POST(req) {
           name: body.customer.name || "Cliente",
           email: body.customer.email || "cliente@mordisco.com",
         },
+        auto_return: "approved", // ✅
         back_urls: {
           success: `${process.env.NEXT_PUBLIC_SITE_URL}/checkout/success`,
           failure: `${process.env.NEXT_PUBLIC_SITE_URL}/checkout/failure`,
