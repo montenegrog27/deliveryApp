@@ -6,6 +6,7 @@ const client = new MercadoPagoConfig({
   accessToken: process.env.MP_ACCESS_TOKEN,
 });
 
+
 export async function POST(req) {
   try {
     const body = await req.json();
@@ -34,9 +35,9 @@ export async function POST(req) {
           email: body.customer.email || "cliente@mordisco.com",
         },
         back_urls: {
-          success: "http://localhost:3000/checkout/success",
-          failure: "http://localhost:3000/checkout/failure",
-          pending: "http://localhost:3000/checkout/pending",
+          success: `${process.env.NEXT_PUBLIC_SITE_URL}/checkout/success`,
+          failure: `${process.env.NEXT_PUBLIC_SITE_URL}/checkout/failure`,
+          pending: `${process.env.NEXT_PUBLIC_SITE_URL}/checkout/pending`,
         },
         // auto_return: "approved", // ✅ solo funciona si back_urls.success está bien
       },
