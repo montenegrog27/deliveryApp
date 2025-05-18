@@ -1,9 +1,8 @@
 "use client";
-
-import { useEffect, useState, Suspense } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
-function SuccessContent() {
+export default function SuccessPage() {
   const [status, setStatus] = useState("guardando");
   const [trackingId, setTrackingId] = useState(null);
   const router = useRouter();
@@ -29,9 +28,12 @@ function SuccessContent() {
         pedido = null;
       }
 
-      const pagoConMP = pedido?.paymentMethod?.toLowerCase().includes("mercado");
+      const pagoConMP = pedido?.paymentMethod
+        ?.toLowerCase()
+        .includes("mercado");
 
-      if (alreadyCreated === "true") {
+      // ✅ Si ya estaba creado o es un método manual, solo buscamos el tracking
+      if (alreadyCreated === "true" || !pagoConMP) {
         try {
           const res = await fetch("/api/order-exists", {
             method: "POST",
@@ -40,46 +42,41 @@ function SuccessContent() {
           });
 
           const data = await res.json();
-          if (data.exists && data.trackingId) {
-            setTrackingId(data.trackingId);
-            setStatus("ok");
-            return;
+          if (data.exists) {
+            setTrackingId(data.trackingId || null);
           }
-        } catch (err) {
-          console.error("⚠️ Error consultando trackingId:", err);
-        }
-
-        setStatus("ok");
-        return;
-      }
-
-      if (pagoConMP) {
-        try {
-          const res = await fetch("/api/mark-paid", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ ref }),
-          });
-
-          if (!res.ok) throw new Error(await res.text());
-
-          const data = await res.json();
-          setTrackingId(data.trackingId);
 
           localStorage.setItem(`orderCreated_${ref}`, "true");
           localStorage.removeItem(pendingKey);
           setStatus("ok");
           return;
         } catch (err) {
-          console.error("❌ Error al confirmar pago:", err);
-          setStatus("error");
+          console.error("⚠️ Error consultando trackingId:", err);
+          setStatus("ok"); // igual lo dejamos pasar para no cortar la experiencia
           return;
         }
       }
 
-      localStorage.setItem(`orderCreated_${ref}`, "true");
-      localStorage.removeItem(pendingKey);
-      setStatus("ok");
+      // ✅ Si es MercadoPago y no estaba creado aún, marcamos como pagado
+      try {
+        const res = await fetch("/api/mark-paid", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ref }),
+        });
+
+        if (!res.ok) throw new Error(await res.text());
+
+        const data = await res.json();
+        setTrackingId(data.trackingId);
+
+        localStorage.setItem(`orderCreated_${ref}`, "true");
+        localStorage.removeItem(pendingKey);
+        setStatus("ok");
+      } catch (err) {
+        console.error("❌ Error al confirmar pago:", err);
+        setStatus("error");
+      }
     };
 
     confirmarPago();
@@ -91,15 +88,19 @@ function SuccessContent() {
 
       {status === "ok" && (
         <>
-          <h1 className="text-2xl font-bold text-green-600 mb-2">¡Pedido confirmado!</h1>
+          <h1 className="text-2xl font-bold text-green-600 mb-2">
+            ¡Pedido confirmado!
+          </h1>
           <p className="mb-4">Tu pedido fue registrado con éxito.</p>
-          {trackingId && (
+          {trackingId ? (
             <a
               href={`/tracking/${trackingId}`}
               className="inline-block mt-4 px-6 py-2 bg-blue-600 text-white font-medium rounded-lg shadow hover:bg-blue-700 transition"
             >
               Ver seguimiento en tiempo real
             </a>
+          ) : (
+            <p className="text-gray-500 mt-4">Estamos preparando tu pedido.</p>
           )}
         </>
       )}
@@ -111,13 +112,5 @@ function SuccessContent() {
         </>
       )}
     </div>
-  );
-}
-
-export default function SuccessPage() {
-  return (
-    <Suspense fallback={<div className="p-8 text-center">Cargando...</div>}>
-      <SuccessContent />
-    </Suspense>
   );
 }
