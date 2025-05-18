@@ -1,8 +1,9 @@
 "use client";
-import { useEffect, useState } from "react";
+
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
-export default function SuccessPage() {
+function SuccessContent() {
   const [status, setStatus] = useState("guardando");
   const [trackingId, setTrackingId] = useState(null);
   const router = useRouter();
@@ -10,79 +11,76 @@ export default function SuccessPage() {
   const ref = searchParams.get("ref");
 
   useEffect(() => {
-   const confirmarPago = async () => {
-  if (!ref) {
-    console.error("❌ No se encontró 'ref' en la URL");
-    setStatus("error");
-    return;
-  }
+    const confirmarPago = async () => {
+      if (!ref) {
+        console.error("❌ No se encontró 'ref' en la URL");
+        setStatus("error");
+        return;
+      }
 
-  const pendingKey = `pendingOrder_${ref}`;
-  const alreadyCreated = localStorage.getItem(`orderCreated_${ref}`);
-  const pendingData = localStorage.getItem(pendingKey);
+      const pendingKey = `pendingOrder_${ref}`;
+      const alreadyCreated = localStorage.getItem(`orderCreated_${ref}`);
+      const pendingData = localStorage.getItem(pendingKey);
 
-  let pedido = null;
-  try {
-    pedido = pendingData ? JSON.parse(pendingData) : null;
-  } catch {
-    pedido = null;
-  }
+      let pedido = null;
+      try {
+        pedido = pendingData ? JSON.parse(pendingData) : null;
+      } catch {
+        pedido = null;
+      }
 
-  const pagoConMP = pedido?.paymentMethod?.toLowerCase().includes("mercado");
+      const pagoConMP = pedido?.paymentMethod?.toLowerCase().includes("mercado");
 
-  if (alreadyCreated === "true") {
-    try {
-      const res = await fetch("/api/order-exists", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ref }),
-      });
+      if (alreadyCreated === "true") {
+        try {
+          const res = await fetch("/api/order-exists", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ref }),
+          });
 
-      const data = await res.json();
-      if (data.exists && data.trackingId) {
-        setTrackingId(data.trackingId);
+          const data = await res.json();
+          if (data.exists && data.trackingId) {
+            setTrackingId(data.trackingId);
+            setStatus("ok");
+            return;
+          }
+        } catch (err) {
+          console.error("⚠️ Error consultando trackingId:", err);
+        }
+
         setStatus("ok");
         return;
       }
-    } catch (err) {
-      console.error("⚠️ Error consultando trackingId:", err);
-    }
 
-    setStatus("ok");
-    return;
-  }
+      if (pagoConMP) {
+        try {
+          const res = await fetch("/api/mark-paid", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ref }),
+          });
 
-  // Solo llamar a mark-paid si es MercadoPago
-  if (pagoConMP) {
-    try {
-      const res = await fetch("/api/mark-paid", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ref }),
-      });
+          if (!res.ok) throw new Error(await res.text());
 
-      if (!res.ok) throw new Error(await res.text());
+          const data = await res.json();
+          setTrackingId(data.trackingId);
 
-      const data = await res.json();
-      setTrackingId(data.trackingId);
+          localStorage.setItem(`orderCreated_${ref}`, "true");
+          localStorage.removeItem(pendingKey);
+          setStatus("ok");
+          return;
+        } catch (err) {
+          console.error("❌ Error al confirmar pago:", err);
+          setStatus("error");
+          return;
+        }
+      }
 
       localStorage.setItem(`orderCreated_${ref}`, "true");
       localStorage.removeItem(pendingKey);
       setStatus("ok");
-      return;
-    } catch (err) {
-      console.error("❌ Error al confirmar pago:", err);
-      setStatus("error");
-      return;
-    }
-  }
-
-  // Si no es MP, solo marcamos como creado
-  localStorage.setItem(`orderCreated_${ref}`, "true");
-  localStorage.removeItem(pendingKey);
-  setStatus("ok");
-};
-
+    };
 
     confirmarPago();
   }, [ref]);
@@ -113,5 +111,13 @@ export default function SuccessPage() {
         </>
       )}
     </div>
+  );
+}
+
+export default function SuccessPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center">Cargando...</div>}>
+      <SuccessContent />
+    </Suspense>
   );
 }

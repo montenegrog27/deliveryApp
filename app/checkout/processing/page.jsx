@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
-export default function ProcessingPage() {
+function ProcessingContent() {
   const [status, setStatus] = useState("verificando");
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -32,12 +32,15 @@ export default function ProcessingPage() {
         return;
       }
 
-      // Validar si ya existe
       try {
         const existsRes = await fetch("/api/order-exists", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ phone: pedido.customer.phone, cart: pedido.cart }),
+          body: JSON.stringify({
+            phone: pedido.customer.phone,
+            cart: pedido.cart,
+            ref,
+          }),
         });
 
         const existsData = await existsRes.json();
@@ -51,12 +54,11 @@ export default function ProcessingPage() {
         console.warn("⚠️ No se pudo verificar duplicado:", err);
       }
 
-      // Crear si no existe
       try {
         const res = await fetch("/api/create-order", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(pedido),
+          body: JSON.stringify({ ...pedido, ref }),
         });
 
         if (!res.ok) throw new Error(await res.text());
@@ -89,5 +91,13 @@ export default function ProcessingPage() {
         </>
       )}
     </div>
+  );
+}
+
+export default function ProcessingPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center">Cargando...</div>}>
+      <ProcessingContent />
+    </Suspense>
   );
 }
