@@ -10,7 +10,7 @@ export async function POST(req) {
   if (topic !== "payment") return NextResponse.json({ ok: true });
 
   try {
-    // 🔍 Pedí los datos reales del pago
+    // Obtener detalles del pago desde MercadoPago
     const res = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
       headers: {
         Authorization: `Bearer ${process.env.MP_ACCESS_TOKEN}`,
@@ -20,13 +20,13 @@ export async function POST(req) {
     const payment = await res.json();
 
     if (payment.status === "approved") {
-      const externalRef = JSON.parse(payment.external_reference);
-      
-      // 🔥 Crear la orden con los datos originales
-      await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/create-order`, {
+      const externalRef = payment.external_reference;
+
+      // ✅ Marcar la orden existente como pagada
+      await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/mark-paid`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(externalRef),
+        body: JSON.stringify({ ref: externalRef }),
       });
     }
 

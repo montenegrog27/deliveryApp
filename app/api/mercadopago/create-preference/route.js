@@ -25,21 +25,19 @@ export async function POST(req) {
       });
     }
 
-    // ✅ Generamos un external_reference simple y limpio
-    const timestamp = Date.now();
-    const phone = body.customer.phone || "sinTelefono";
-    const externalRef = `mordisco-${phone}-${timestamp}`;
+const externalRef = body.ref;
 
-    const orderPayload = {
-      customer: body.customer,
-      cart: body.cart,
-      shippingCost: body.shippingCost,
-      kitchenId: body.kitchenId,
-      paymentMethod: body.paymentMethodId,
-      paid: true,
-      notes: body.notes || "",
-      external_reference: externalRef,
-    };
+const orderPayload = {
+  customer: body.customer,
+  cart: body.cart,
+  shippingCost: body.shippingCost,
+  kitchenId: body.kitchenId,
+  paymentMethod: body.paymentMethodId,
+  paid: true,
+  notes: body.notes || "",
+  external_reference: externalRef,
+};
+
 
     const preference = await new Preference(client).create({
       body: {

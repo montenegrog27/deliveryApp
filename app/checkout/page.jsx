@@ -30,6 +30,7 @@ export default function CheckoutPage() {
   const [selectedKitchenId, setSelectedKitchenId] = useState(null);
   const [paymentMethods, setPaymentMethods] = useState([]);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("");
+  const [distanciaSucursal, setDistanciaSucursal] = useState(null);
 
   const fetchBranches = async () => {
     const res = await fetch("/api/branches");
@@ -86,10 +87,10 @@ export default function CheckoutPage() {
     fetchZones();
   }, []);
 
-  const calcularEnvio = async () => {
-    if (!customer.lat || !customer.lng || !deliveryConfig) return;
+const calcularEnvio = async (customCustomer = customer) => {
+  if (!customCustomer.lat || !customCustomer.lng || !deliveryConfig) return;
 
-    const point = turf.point([customer.lng, customer.lat]);
+  const point = turf.point([customCustomer.lng, customCustomer.lat]);
 
     const zona = zones.find((z) => {
       if (!z.enabled) return false;
@@ -102,12 +103,41 @@ export default function CheckoutPage() {
     });
 
     if (zona) {
-      setShippingCost(zona.cost ?? 0);
       setSelectedKitchenId(zona.cocinaId);
-      setError(zona.cost === 0 ? null : `Costo de envío: $${zona.cost}`);
+
+      if (zona.freeShipping) {
+        setShippingCost(0);
+        setError(null);
+      } else {
+        const branches = await fetchBranches();
+        const branch = branches.find((b) => b.id === zona.cocinaId);
+        if (!branch) {
+          setError("No se pudo determinar la sucursal.");
+          return;
+        }
+
+        const distanciaKm = turf.distance(
+          point,
+          turf.point([branch.lng, branch.lat]),
+          {
+            units: "kilometers",
+          }
+        );
+
+        const costo =
+          distanciaKm <= 10
+            ? zona.cost
+            : zona.cost +
+              Math.ceil((distanciaKm - 10) * (zona.pricePerKm || 0));
+
+        setShippingCost(costo);
+        setError(`Costo de envío: $${costo}`);
+      }
+
       return;
     }
 
+    // 🟥 Si no está en ninguna zona, calcular sucursal más cercana y tarifa genérica
     try {
       const branches = await fetchBranches();
       if (!branches.length) {
@@ -124,9 +154,12 @@ export default function CheckoutPage() {
 
       const branchMasCercana = distances.sort((a, b) => a.dist - b.dist)[0];
       setSelectedKitchenId(branchMasCercana.id);
+
       const costo = Math.ceil(
-        deliveryConfig.baseDeliveryCost + branchMasCercana.dist * deliveryConfig.pricePerKm
+        deliveryConfig.baseDeliveryCost +
+          branchMasCercana.dist * deliveryConfig.pricePerKm
       );
+
       setShippingCost(costo);
       setError(`Fuera de zona. Costo de envío: $${costo}`);
     } catch (err) {
@@ -140,100 +173,73 @@ export default function CheckoutPage() {
   );
   const total = subtotal + shippingCost;
 
-  const handleSubmit = async () => {
-    setLoading(true);
-    setError(null);
-    setSuccess(false);
-    if (!direccionConfirmada || !customer.isValidAddress) {
-      setError("Por favor seleccioná una dirección válida que incluya calle y altura (número).");
-      setLoading(false);
+const handleSubmit = async () => {
+  setLoading(true);
+  setError(null);
+  setSuccess(false);
+
+  if (!direccionConfirmada || !customer.isValidAddress) {
+    setError("Por favor seleccioná una dirección válida que incluya calle y altura (número).");
+    setLoading(false);
+    return;
+  }
+
+  const ref = `${customer.phone}-${Date.now()}`;
+
+  const orderPayload = {
+    customer,
+    cart: cart.map((item) => ({
+      id: item.id,
+      quantity: item.quantity,
+      price: item.attributes.price,
+      discountPrice: item.discountPrice || item.attributes.price,
+    })),
+    shippingCost,
+    kitchenId: selectedKitchenId,
+    paymentMethod: selectedPaymentMethod,
+    paid: false,
+    notes: pedidoNotas || "",
+    ref,
+  };
+
+  try {
+    // Crear orden en Firestore con paid: false
+    const res = await fetch("/api/create-order", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(orderPayload),
+    });
+
+    if (!res.ok) throw new Error(await res.text());
+
+    // Guardar localmente por si vuelve desde MP
+    localStorage.setItem("pendingOrder_" + ref, JSON.stringify(orderPayload));
+
+    // Si paga con MercadoPago, generar preferencia y redirigir
+    if (selectedPaymentMethod.toLowerCase().includes("mercado")) {
+      const mpRes = await fetch("/api/mercadopago/create-preference", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(orderPayload),
+      });
+
+      if (!mpRes.ok) throw new Error("Error al crear preferencia de pago");
+
+      const { init_point } = await mpRes.json();
+
+      router.push(`${init_point}&ref=${ref}`);
       return;
     }
 
-    const uniqueRef = `${customer.phone}-${Date.now()}`;
-
-    if (selectedPaymentMethod.toLowerCase().includes("mercado")) {
-      try {
-        const response = await fetch("/api/mercadopago/create-preference", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            customer,
-            cart: cart.map((item) => ({
-              id: item.id,
-              name: item.attributes.name,
-              quantity: item.quantity,
-              price: item.attributes.price,
-            })),
-            shippingCost,
-            kitchenId: selectedKitchenId,
-            paymentMethodId: selectedPaymentMethod,
-            notes: pedidoNotas,
-            ref: uniqueRef,
-          }),
-        });
-
-        if (!response.ok) {
-          const text = await response.text();
-          throw new Error(`MercadoPago Error: ${text}`);
-        }
-
-        const { init_point } = await response.json();
-
-        localStorage.setItem(
-          "pendingOrder_" + uniqueRef,
-          JSON.stringify({
-            customer,
-            cart: cart.map((item) => ({
-              id: item.id,
-              quantity: item.quantity,
-              price: item.attributes.price,
-              discountPrice: item.discountPrice || item.attributes.price,
-            })),
-            shippingCost,
-            kitchenId: selectedKitchenId,
-            paymentMethod: selectedPaymentMethod,
-            paid: true,
-            notes: pedidoNotas || "",
-          })
-        );
-
-        router.push(`${init_point}&ref=${uniqueRef}`);
-        return;
-      } catch (err) {
-        setError("No se pudo iniciar el pago con Mercado Pago.");
-        setLoading(false);
-        return;
-      }
-    }
-
-    try {
-      const res = await fetch("/api/create-order", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          customer,
-          paid: false,
-          shippingCost,
-          notes: pedidoNotas,
-          kitchenId: selectedKitchenId,
-          cart: cart.map((item) => ({
-            id: item.id,
-            quantity: item.quantity,
-          })),
-        }),
-      });
-
-      if (!res.ok) throw new Error(await res.text());
-
-      setSuccess(true);
-      clearCart();
-    } catch (err) {
-      setError("Error al confirmar pedido.");
-    } finally {
-      setLoading(false);
-    }
-  };
+    // Si es otro método, ir directo a success
+    clearCart();
+    router.push(`/checkout/success?ref=${ref}`);
+  } catch (err) {
+    console.error("❌ Error al confirmar pedido:", err);
+    setError("Error al confirmar pedido. Intentalo nuevamente.");
+    setLoading(false);
+  }
+};
 
 
   return (
@@ -297,35 +303,59 @@ export default function CheckoutPage() {
               className="w-full border px-4 py-2 rounded-md"
             />
 
-            <AddressInput
-              onSelect={(loc) => {
-                setCustomer((c) => ({
-                  ...c,
-                  address: loc.address,
-                  lat: loc.lat,
-                  lng: loc.lng,
-                  isValidAddress: loc.isValidAddress, // ✅ usamos esto para validar si tiene altura
-                }));
-              }}
-              setDireccionConfirmada={setDireccionConfirmada}
-            />
-          </div>
-          <button
-            onClick={calcularEnvio}
-            className="bg-blue-600 text-white px-4 py-2 rounded-xl mt-4"
-          >
-            Calcular envío
-          </button>
+<AddressInput
+  onSelect={(loc) => {
+    if (!loc || !loc.lat || !loc.lng) return;
 
-          {shippingCost > 0 && (
+    const updatedCustomer = {
+      ...customer,
+      address: loc.address,
+      lat: loc.lat,
+      lng: loc.lng,
+      isValidAddress: loc.isValidAddress,
+    };
+
+    setCustomer(updatedCustomer);
+    setDireccionConfirmada(true);
+
+    calcularEnvio(updatedCustomer);
+  }}
+  setDireccionConfirmada={setDireccionConfirmada} // ✅ Asegurate de agregar esta línea
+/>
+
+
+          </div>
+{selectedKitchenId && distanciaSucursal !== null && (
+  <div className="mt-3 text-sm">
+    {shippingCost === 0 ? (
+      <p className="text-green-600">
+        Envío gratuito — Estás dentro de la zona de cobertura de{" "}
+        <strong>{selectedKitchenId}</strong>.
+      </p>
+    ) : distanciaSucursal > 10 ? (
+      <p className="text-yellow-600">
+        Estás dentro de la zona de cobertura pero a{" "}
+        <strong>{distanciaSucursal.toFixed(1)}km</strong>. Se aplica un costo adicional.
+      </p>
+    ) : (
+      <p className="text-blue-600">
+        Estás dentro de la zona de cobertura de{" "}
+        <strong>{selectedKitchenId}</strong> (a{" "}
+        {distanciaSucursal.toFixed(1)}km).
+      </p>
+    )}
+  </div>
+)}
+
+
+          {shippingCost === 0 && selectedKitchenId ? (
+            <p className="mt-2 text-sm text-green-700">
+              Envío gratuito — Sucursal: <strong>{selectedKitchenId}</strong>
+            </p>
+          ) : (
             <p className="mt-2 text-sm text-gray-700">
               Envío: ${shippingCost} — Sucursal:{" "}
               <strong>{selectedKitchenId}</strong>
-            </p>
-          )}
-          {shippingCost === 0 && selectedKitchenId && (
-            <p className="mt-2 text-sm text-green-700">
-              Envío gratuito — Sucursal: <strong>{selectedKitchenId}</strong>
             </p>
           )}
 

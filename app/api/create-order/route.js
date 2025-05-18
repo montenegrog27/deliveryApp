@@ -25,10 +25,10 @@ export async function POST(req) {
       couponDiscount,
       manualDiscount,
       paymentMethod,
-      paid
+      paid,
+      ref: externalRef, // ✅ Traemos la referencia externa del body
     } = body;
 
-    // 1. Guardar cliente
     if (customer.phone) {
       await saveCustomer(customer);
     }
@@ -38,8 +38,15 @@ export async function POST(req) {
       0
     );
 
-    const discountAmount = totalBase * ((couponDiscount + manualDiscount) / 100);
-    const total = Math.max(totalBase - discountAmount + (shippingCost || 0), 0);
+    const discountAmount =
+      totalBase * ((couponDiscount + manualDiscount) / 100);
+
+    const total = Math.max(
+      totalBase - discountAmount + (shippingCost || 0),
+      0
+    );
+
+    const trackingId = `tracking_${externalRef}`; // ✅ Creamos el tracking ID
 
     const orderData = {
       branch: kitchenId === "1" ? "central" : "godoyCruz",
@@ -56,11 +63,13 @@ export async function POST(req) {
       discountAmount: discountAmount || 0,
       shippingCost,
       customer,
+      trackingId,     // ✅ Guardamos el tracking ID
+      externalRef,    // ✅ Guardamos la ref externa para evitar duplicados
     };
 
     const ref = await createOrderWithNumber(orderData);
 
-    // Descontar ingredientes
+    // 🔻 Descontar stock
     for (const item of cart) {
       const recipeQuery = query(
         collection(db, "recipes"),
@@ -70,14 +79,12 @@ export async function POST(req) {
 
       for (const docReceta of recipeSnap.docs) {
         const receta = docReceta.data();
-
         const ingredienteRef = doc(db, "ingredients", receta.ingredientId);
         const ingredienteSnap = await getDoc(ingredienteRef);
         if (!ingredienteSnap.exists()) continue;
 
         const ingrediente = ingredienteSnap.data();
         const cantidadOriginal = Number(ingrediente.stock ?? 0);
-
         const cantidadADescontar = receta.quantity * item.quantity;
 
         await updateDoc(ingredienteRef, {
@@ -86,7 +93,7 @@ export async function POST(req) {
       }
     }
 
-    return NextResponse.json({ ok: true }, { status: 200 });
+    return NextResponse.json({ ok: true, trackingId }, { status: 200 });
   } catch (err) {
     console.error("❌ Error en create-order:", err);
     return NextResponse.json(

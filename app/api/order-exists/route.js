@@ -1,11 +1,10 @@
-// app/api/order-exists/route.js
 import { db } from "@/lib/firebase";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { NextResponse } from "next/server";
 
 export async function POST(req) {
   try {
-    const { phone, cart } = await req.json();
+    const { phone, cart, ref } = await req.json();
 
     const q = query(
       collection(db, "orders"),
@@ -17,15 +16,20 @@ export async function POST(req) {
 
     for (const doc of snapshot.docs) {
       const order = doc.data();
+
       const match =
-        order.cart?.length === cart.length &&
-        order.cart.every((item, i) => {
+        order.items?.length === cart.length &&
+        order.items.every((item, i) => {
           const original = cart[i];
           return item.id === original.id && item.quantity === original.quantity;
         });
 
-      if (match) {
-        return NextResponse.json({ exists: true });
+      // Si coincide por contenido o por ref (más confiable)
+      if (match || order.externalRef === ref) {
+        return NextResponse.json({
+          exists: true,
+          trackingId: order.trackingId || null,
+        });
       }
     }
 

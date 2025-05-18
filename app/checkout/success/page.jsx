@@ -4,90 +4,108 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 export default function SuccessPage() {
   const [status, setStatus] = useState("guardando");
+  const [trackingId, setTrackingId] = useState(null);
   const router = useRouter();
   const searchParams = useSearchParams();
   const ref = searchParams.get("ref");
 
   useEffect(() => {
-    const guardarPedido = async () => {
-      if (!ref) {
-        console.error("❌ No se encontró 'ref' en la URL");
-        setStatus("error");
-        return;
-      }
+   const confirmarPago = async () => {
+  if (!ref) {
+    console.error("❌ No se encontró 'ref' en la URL");
+    setStatus("error");
+    return;
+  }
 
-      const pendingKey = `pendingOrder_${ref}`;
-      const pending = localStorage.getItem(pendingKey);
-      const alreadyCreated = localStorage.getItem(`orderCreated_${ref}`);
+  const pendingKey = `pendingOrder_${ref}`;
+  const alreadyCreated = localStorage.getItem(`orderCreated_${ref}`);
+  const pendingData = localStorage.getItem(pendingKey);
 
-      if (!pending || alreadyCreated === "true") {
-        setStatus("error");
-        return;
-      }
+  let pedido = null;
+  try {
+    pedido = pendingData ? JSON.parse(pendingData) : null;
+  } catch {
+    pedido = null;
+  }
 
-      let pedido;
-      try {
-        pedido = JSON.parse(pending);
-      } catch (err) {
-        console.error("❌ Error al parsear pedido:", err);
-        setStatus("error");
-        return;
-      }
+  const pagoConMP = pedido?.paymentMethod?.toLowerCase().includes("mercado");
 
-      try {
-        const existsRes = await fetch("/api/order-exists", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ phone: pedido.customer.phone, cart: pedido.cart }),
-        });
+  if (alreadyCreated === "true") {
+    try {
+      const res = await fetch("/api/order-exists", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ref }),
+      });
 
-        const existsData = await existsRes.json();
-        if (existsData.exists) {
-          console.warn("⚠️ El pedido ya fue registrado");
-          localStorage.removeItem(pendingKey);
-          setStatus("ok");
-          setTimeout(() => router.push("/"), 3000);
-          return;
-        }
-      } catch (err) {
-        console.error("⚠️ Error verificando duplicados:", err);
-      }
-
-      try {
-        const res = await fetch("/api/create-order", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(pedido),
-        });
-
-        if (!res.ok) throw new Error(await res.text());
-
-        localStorage.setItem(`orderCreated_${ref}`, "true");
-        localStorage.removeItem(pendingKey);
-
+      const data = await res.json();
+      if (data.exists && data.trackingId) {
+        setTrackingId(data.trackingId);
         setStatus("ok");
-        setTimeout(() => {
-          localStorage.removeItem(`orderCreated_${ref}`);
-          router.push("/");
-        }, 4000);
-      } catch (err) {
-        console.error("❌ Error al guardar pedido pagado:", err);
-        setStatus("error");
+        return;
       }
-    };
+    } catch (err) {
+      console.error("⚠️ Error consultando trackingId:", err);
+    }
 
-    guardarPedido();
+    setStatus("ok");
+    return;
+  }
+
+  // Solo llamar a mark-paid si es MercadoPago
+  if (pagoConMP) {
+    try {
+      const res = await fetch("/api/mark-paid", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ref }),
+      });
+
+      if (!res.ok) throw new Error(await res.text());
+
+      const data = await res.json();
+      setTrackingId(data.trackingId);
+
+      localStorage.setItem(`orderCreated_${ref}`, "true");
+      localStorage.removeItem(pendingKey);
+      setStatus("ok");
+      return;
+    } catch (err) {
+      console.error("❌ Error al confirmar pago:", err);
+      setStatus("error");
+      return;
+    }
+  }
+
+  // Si no es MP, solo marcamos como creado
+  localStorage.setItem(`orderCreated_${ref}`, "true");
+  localStorage.removeItem(pendingKey);
+  setStatus("ok");
+};
+
+
+    confirmarPago();
   }, [ref]);
 
   return (
     <div className="p-8 text-center">
       {status === "guardando" && <p>Guardando pedido...</p>}
+
       {status === "ok" && (
         <>
-          <h1 className="text-2xl font-bold text-green-600">¡Pago confirmado!</h1>
-          <p>Tu pedido fue registrado. Redirigiendo...</p>
+          <h1 className="text-2xl font-bold text-green-600 mb-2">¡Pedido confirmado!</h1>
+          <p className="mb-4">Tu pedido fue registrado con éxito.</p>
+          {trackingId && (
+            <a
+              href={`/tracking/${trackingId}`}
+              className="inline-block mt-4 px-6 py-2 bg-blue-600 text-white font-medium rounded-lg shadow hover:bg-blue-700 transition"
+            >
+              Ver seguimiento en tiempo real
+            </a>
+          )}
         </>
       )}
+
       {status === "error" && (
         <>
           <h1 className="text-2xl font-bold text-red-600">Error</h1>
