@@ -1,15 +1,16 @@
+// app/checkout/pending/page.jsx
 "use client";
-import { useEffect } from "react";
+
+import { useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
-export default function PendingPage() {
+function PendingContent() {
   const searchParams = useSearchParams();
   const ref = searchParams.get("ref");
   const router = useRouter();
 
   useEffect(() => {
     if (ref) {
-      // Aseguramos que no se borre el pedido si está pendiente
       const order = localStorage.getItem(`pendingOrder_${ref}`);
       if (order) {
         localStorage.setItem(`orderCreated_${ref}`, "pending");
@@ -18,7 +19,7 @@ export default function PendingPage() {
 
     const timeout = setTimeout(() => {
       router.push("/");
-    }, 15000); // te da 15 segs para leer el mensaje
+    }, 15000);
 
     return () => clearTimeout(timeout);
   }, [ref]);
@@ -34,5 +35,13 @@ export default function PendingPage() {
       </p>
       <p className="mt-4 text-sm text-gray-400">Redirigiendo al inicio...</p>
     </div>
+  );
+}
+
+export default function PendingPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center">Cargando...</div>}>
+      <PendingContent />
+    </Suspense>
   );
 }
