@@ -23,10 +23,7 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
-  const [deliveryConfig, setDeliveryConfig] = useState({
-    baseDeliveryCost: 0,
-    pricePerKm: 0,
-  });
+
   const [selectedKitchenId, setSelectedKitchenId] = useState(null);
   const [paymentMethods, setPaymentMethods] = useState([]);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("");
@@ -55,20 +52,6 @@ export default function CheckoutPage() {
   }, []);
 
   useEffect(() => {
-    const fetchConfig = async () => {
-      try {
-        const res = await fetch("/api/delivery-config");
-        const data = await res.json();
-        setDeliveryConfig(data);
-      } catch (err) {
-        console.error("❌ Error al obtener configuración de delivery", err);
-      }
-    };
-
-    fetchConfig();
-  }, []);
-
-  useEffect(() => {
     const fetchZones = async () => {
       try {
         const res = await fetch("/api/zones");
@@ -88,84 +71,34 @@ export default function CheckoutPage() {
   }, []);
 
 const calcularEnvio = async (customCustomer = customer) => {
-  if (!customCustomer.lat || !customCustomer.lng || !deliveryConfig) return;
+  if (!customCustomer.lat || !customCustomer.lng || !zones.length) return;
 
   const point = turf.point([customCustomer.lng, customCustomer.lat]);
 
-    const zona = zones.find((z) => {
-      if (!z.enabled) return false;
-      try {
-        const geometry = JSON.parse(z.geometry);
-        return turf.booleanPointInPolygon(point, geometry);
-      } catch {
-        return false;
-      }
-    });
-
-    if (zona) {
-      setSelectedKitchenId(zona.cocinaId);
-
-      if (zona.freeShipping) {
-        setShippingCost(0);
-        setError(null);
-      } else {
-        const branches = await fetchBranches();
-        const branch = branches.find((b) => b.id === zona.cocinaId);
-        if (!branch) {
-          setError("No se pudo determinar la sucursal.");
-          return;
-        }
-
-        const distanciaKm = turf.distance(
-          point,
-          turf.point([branch.lng, branch.lat]),
-          {
-            units: "kilometers",
-          }
-        );
-
-        const costo =
-          distanciaKm <= 10
-            ? zona.cost
-            : zona.cost +
-              Math.ceil((distanciaKm - 10) * (zona.pricePerKm || 0));
-
-        setShippingCost(costo);
-        setError(`Costo de envío: $${costo}`);
-      }
-
-      return;
-    }
-
-    // 🟥 Si no está en ninguna zona, calcular sucursal más cercana y tarifa genérica
+  // 🔍 Buscar zona que contenga el punto
+  const zona = zones.find((z) => {
+    if (!z.enabled) return false;
     try {
-      const branches = await fetchBranches();
-      if (!branches.length) {
-        setError("No hay sucursales disponibles para calcular envío");
-        return;
-      }
-
-      const distances = branches.map((b) => ({
-        id: b.id,
-        dist: turf.distance(point, turf.point([b.lng, b.lat]), {
-          units: "kilometers",
-        }),
-      }));
-
-      const branchMasCercana = distances.sort((a, b) => a.dist - b.dist)[0];
-      setSelectedKitchenId(branchMasCercana.id);
-
-      const costo = Math.ceil(
-        deliveryConfig.baseDeliveryCost +
-          branchMasCercana.dist * deliveryConfig.pricePerKm
-      );
-
-      setShippingCost(costo);
-      setError(`Fuera de zona. Costo de envío: $${costo}`);
-    } catch (err) {
-      setError("Hubo un problema calculando el envío.");
+      const geometry = JSON.parse(z.geometry);
+      return turf.booleanPointInPolygon(point, geometry);
+    } catch (e) {
+      console.warn("Geometría inválida en zona", z.name, e);
+      return false;
     }
-  };
+  });
+
+  if (zona) {
+    // ✅ Si está dentro de una zona, usar esa sucursal y costo fijo
+    setSelectedKitchenId(zona.branchId || zona.cocinaId); // por compatibilidad
+    setShippingCost(Number(zona.cost || 0));
+    setError(null);
+  } else {
+    // ❌ Fuera de zona
+    setSelectedKitchenId(null);
+    setShippingCost(0);
+    setError("Lo sentimos, estás fuera de nuestras zonas de entrega");
+  }
+};
 
   const subtotal = cart.reduce(
     (sum, item) => sum + item.attributes.price * item.quantity,
@@ -359,7 +292,18 @@ const handleSubmit = async () => {
             </p>
           )}
 
-          {error && <p className="text-red-600 text-sm mt-2">{error}</p>}
+{error && (
+  <p className="mt-4 text-center text-red-600 text-sm">
+    {error.includes("zona") ? (
+      <>
+        😔 Lo sentimos, no llegamos a tu ubicación todavía.<br />
+        Probá con otra dirección cercana.
+      </>
+    ) : (
+      error
+    )}
+  </p>
+)}
           {success && (
             <p className="text-green-600 text-sm mt-2">
               ¡Pedido confirmado con éxito!
