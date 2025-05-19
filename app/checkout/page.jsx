@@ -29,6 +29,16 @@ export default function CheckoutPage() {
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("");
   const [distanciaSucursal, setDistanciaSucursal] = useState(null);
 
+
+  const [tieneCupon, setTieneCupon] = useState(false);
+const [cuponInput, setCuponInput] = useState("");
+const [cuponValido, setCuponValido] = useState(null);
+const [cuponError, setCuponError] = useState(null);
+const [cuponDescuento, setCuponDescuento] = useState(0);
+const [cuponData, setCuponData] = useState(null);
+
+
+
   const fetchBranches = async () => {
     const res = await fetch("/api/branches");
     const data = await res.json();
@@ -100,11 +110,18 @@ const calcularEnvio = async (customCustomer = customer) => {
   }
 };
 
+
+
+
+
   const subtotal = cart.reduce(
     (sum, item) => sum + item.attributes.price * item.quantity,
     0
   );
-  const total = subtotal + shippingCost;
+
+const descuentoAplicado = (subtotal * cuponDescuento) / 100;
+const total = subtotal + shippingCost - descuentoAplicado;
+
 
 const handleSubmit = async () => {
   setLoading(true);
@@ -119,21 +136,24 @@ const handleSubmit = async () => {
 
   const ref = `${customer.phone}-${Date.now()}`;
 
-  const orderPayload = {
-    customer,
-    cart: cart.map((item) => ({
-      id: item.id,
-      quantity: item.quantity,
-      price: item.attributes.price,
-      discountPrice: item.discountPrice || item.attributes.price,
-    })),
-    shippingCost,
-    kitchenId: selectedKitchenId,
-    paymentMethod: selectedPaymentMethod,
-    paid: false,
-    notes: pedidoNotas || "",
-    ref,
-  };
+const orderPayload = {
+  customer,
+  cart: cart.map((item) => ({
+    id: item.id,
+    quantity: item.quantity,
+    price: item.attributes.price,
+    discountPrice: item.discountPrice || item.attributes.price,
+  })),
+  shippingCost,
+  kitchenId: selectedKitchenId,
+  paymentMethod: selectedPaymentMethod,
+  paid: false,
+  notes: pedidoNotas || "",
+  ref,
+  coupon: cuponData?.code || null,
+  couponDiscount: cuponDescuento,
+};
+
 
   try {
     // Crear orden en Firestore con paid: false
@@ -171,6 +191,43 @@ const handleSubmit = async () => {
     console.error("❌ Error al confirmar pedido:", err);
     setError("Error al confirmar pedido. Intentalo nuevamente.");
     setLoading(false);
+  }
+};
+
+
+const validarCupon = async () => {
+  setCuponError(null);
+  setCuponValido(null);
+
+  try {
+    const res = await fetch(`/api/coupons?code=${cuponInput}`);
+    if (!res.ok) throw new Error("Cupón no encontrado");
+    const cupon = await res.json();
+
+    const hoy = new Date();
+    const fechaInicio = cupon.startDate ? new Date(cupon.startDate) : null;
+    const fechaFin = cupon.endDate ? new Date(cupon.endDate) : null;
+
+    if (fechaInicio && hoy < fechaInicio) {
+      throw new Error("El cupón aún no está activo.");
+    }
+
+    if (fechaFin && !cupon.noExpiry && hoy > fechaFin) {
+      throw new Error("El cupón ha expirado.");
+    }
+
+    if (cupon.phoneRequired && cupon.phone !== customer.phone) {
+      throw new Error("Este cupón es exclusivo para otro número.");
+    }
+
+    setCuponDescuento(Number(cupon.discount || 0));
+    setCuponData(cupon);
+    setCuponValido(true);
+  } catch (err) {
+    setCuponDescuento(0);
+    setCuponValido(false);
+    setCuponData(null);
+    setCuponError(err.message || "Cupón inválido");
   }
 };
 
@@ -309,6 +366,46 @@ const handleSubmit = async () => {
               ¡Pedido confirmado con éxito!
             </p>
           )}
+
+<div className="mt-4">
+  <label className="flex items-center space-x-2 text-sm">
+    <input
+      type="checkbox"
+      checked={tieneCupon}
+      onChange={(e) => setTieneCupon(e.target.checked)}
+    />
+    <span>Tengo un cupón</span>
+  </label>
+
+  {tieneCupon && (
+    <div className="mt-2 space-y-2">
+      <input
+        type="text"
+        placeholder="Código de cupón"
+        value={cuponInput}
+        onChange={(e) => setCuponInput(e.target.value.toLowerCase())}
+        className="w-full border px-4 py-2 rounded-md"
+      />
+      <button
+        onClick={validarCupon}
+        type="button"
+        className="w-full bg-blue-600 text-white py-2 rounded-md text-sm"
+      >
+        Validar cupón
+      </button>
+
+      {cuponValido && (
+        <p className="text-green-600 text-sm">✅ Cupón válido</p>
+      )}
+      {cuponError && (
+        <p className="text-red-600 text-sm">{cuponError}</p>
+      )}
+    </div>
+  )}
+</div>
+
+
+
           <textarea
             placeholder="Observaciones de dirección (dpto, casa, piso, etc.)"
             value={customer.observaciones || ""}
