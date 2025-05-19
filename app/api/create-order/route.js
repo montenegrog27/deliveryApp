@@ -49,7 +49,7 @@ export async function POST(req) {
     const trackingId = `tracking_${externalRef}`; // ✅ Creamos el tracking ID
 
     const orderData = {
-      branch: kitchenId === "1" ? "central" : "godoyCruz",
+      branch: kitchenId,
       cashier: "cliente-web",
       delivery: true,
       items: cart,
