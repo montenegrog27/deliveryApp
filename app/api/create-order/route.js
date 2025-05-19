@@ -44,13 +44,33 @@ export async function POST(req) {
 );
 
 
-    const discountAmount =
-      totalBase * ((couponDiscount + manualDiscount) / 100);
+
+const manualDiscountFixed = Number(manualDiscount || 0);
+const couponDiscountFixed = Number(couponDiscount || 0);
+
+const discountAmount =
+  totalBase * ((couponDiscountFixed + manualDiscountFixed) / 100);
+
+
+    // const discountAmount =
+    //   totalBase * ((couponDiscount + manualDiscount) / 100);
 
     const total = Math.max(
       totalBase - discountAmount + (shippingCost || 0),
       0
     );
+
+
+console.log({
+  totalBase,
+  manualDiscountFixed,
+  couponDiscountFixed,
+  discountAmount,
+  shippingCost,
+  total,
+});
+
+
 
     const trackingId = `tracking_${externalRef}`; // ✅ Creamos el tracking ID
 
