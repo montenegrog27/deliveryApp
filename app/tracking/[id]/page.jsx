@@ -58,7 +58,7 @@ export default function TrackingPage() {
         </Map>
       ) : (
         <div className="text-center mt-10 text-gray-500">
-          Esperando ubicación del repartidor...
+          Esperando ubicación del repartidor..
         </div>
       )}
     </div>
