@@ -33,10 +33,16 @@ export async function POST(req) {
       await saveCustomer(customer);
     }
 
+    // const totalBase = cart.reduce(
+    //   (sum, it) => sum + (it.discountPrice || it.price) * it.quantity,
+    //   0
+    // );
+
     const totalBase = cart.reduce(
-      (sum, it) => sum + (it.discountPrice || it.price) * it.quantity,
-      0
-    );
+  (sum, it) => sum + Number(it.discountPrice || it.price) * Number(it.quantity),
+  0
+);
+
 
     const discountAmount =
       totalBase * ((couponDiscount + manualDiscount) / 100);
