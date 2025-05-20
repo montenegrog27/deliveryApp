@@ -63,50 +63,55 @@ export default function HomePage() {
               return (
                 <section key={cat.id} id={`cat-${cat.id}`} className="space-y-6">
                   <h3 className="text-3xl font-bold text-[#E00000]">{cat.name}</h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-                    {availableItems.map((item) => (
-                      <div
-                        key={item.id}
-                        className="bg-white rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl border border-neutral-200 transition-all"
-                      >
-                        {item.attributes.image ? (
-                          <img
-                            src={item.attributes.image}
-                            alt={item.attributes.name}
-                            className="w-full h-64 object-cover object-center"
-                          />
-                        ) : (
-                          <div className="w-full h-64 bg-neutral-100 flex items-center justify-center text-sm text-neutral-400">
-                            Sin imagen
-                          </div>
-                        )}
+<div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+  {availableItems.map((item) => (
+    <div
+      key={item.id}
+      className="flex bg-white rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl border border-neutral-200 transition-all"
+    >
+      {/* Imagen */}
+      <div className="w-1/3 min-w-[120px] h-[120px] sm:h-[160px] md:h-[200px] overflow-hidden">
+        {item.attributes.image ? (
+          <img
+            src={item.attributes.image}
+            alt={item.attributes.name}
+            className="w-full h-full object-cover object-center"
+          />
+        ) : (
+          <div className="w-full h-full bg-neutral-100 flex items-center justify-center text-sm text-neutral-400">
+            Sin imagen
+          </div>
+        )}
+      </div>
 
-                        <div className="p-6 flex flex-col gap-4">
-                          <div>
-                            <h4 className="text-xl font-extrabold text-[#1A1A1A]">
-                              {item.attributes.name}
-                            </h4>
-                            {item.attributes.description && (
-                              <p className="text-sm text-gray-600 mt-1 leading-relaxed">
-                                {item.attributes.description}
-                              </p>
-                            )}
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-[#E00000] font-bold text-lg">
-                              ${item.attributes.discountPrice || item.attributes.price}
-                            </span>
-                            <button
-                              onClick={() => addItem(item)}
-                              className="bg-[#E00000] hover:bg-red-700 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-all"
-                            >
-                              Agregar
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+      {/* Texto y botón */}
+      <div className="flex flex-col justify-between p-4 flex-1">
+        <div>
+          <h4 className="text-lg sm:text-xl font-extrabold text-[#1A1A1A]">
+            {item.attributes.name}
+          </h4>
+          {item.attributes.description && (
+            <p className="text-sm text-gray-600 mt-1 leading-relaxed">
+              {item.attributes.description}
+            </p>
+          )}
+        </div>
+        <div className="flex items-center justify-between mt-4">
+          <span className="text-[#E00000] font-bold text-lg">
+            ${item.attributes.discountPrice || item.attributes.price}
+          </span>
+          <button
+            onClick={() => addItem(item)}
+            className="bg-[#E00000] hover:bg-red-700 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-all"
+          >
+            Agregar
+          </button>
+        </div>
+      </div>
+    </div>
+  ))}
+</div>
+
                 </section>
               );
             })
