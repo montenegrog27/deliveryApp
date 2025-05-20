@@ -233,7 +233,7 @@ const validarCupon = async () => {
 
 
   return (
-    <div className="min-h-screen px-6 py-10 max-w-3xl mx-auto font-inter">
+<div className="min-h-screen bg-[#FFF9F5] px-4 py-6 max-w-2xl mx-auto text-[#1A1A1A] font-inter space-y-8">
       <h1 className="text-3xl font-bold mb-8">🧾 Confirmá tu pedido</h1>
 
       {cart.length === 0 ? (
@@ -241,57 +241,46 @@ const validarCupon = async () => {
       ) : (
         <>
           <div className="space-y-4 mb-8">
-            {cart.map((item) => (
-              <div
-                key={item.id}
-                className="flex justify-between items-center border p-3 rounded-lg"
-              >
-                <div>
-                  <div className="font-semibold">{item.attributes.name}</div>
-                  <div className="text-sm text-gray-600">
-                    x{item.quantity} • ${item.attributes.price}
-                  </div>
-                </div>
-                <div className="font-bold text-right">
-                  ${item.attributes.price * item.quantity}
-                </div>
-              </div>
-            ))}
-            <textarea
-              placeholder="Observaciones del pedido"
-              value={pedidoNotas}
-              onChange={(e) => setPedidoNotas(e.target.value)}
-              className="w-full border px-4 py-2 rounded-md text-sm"
-              rows={2}
-            />
+{cart.map((item) => (
+  <div key={item.id} className="flex justify-between items-start">
+    <div className="text-sm leading-tight">
+      <p className="font-bold">{item.attributes.name}</p>
+      <p className="text-neutral-600 text-xs">
+        x{item.quantity} • ${item.attributes.price}
+      </p>
+    </div>
+    <div className="font-bold text-sm">
+      ${item.attributes.price * item.quantity}
+    </div>
+  </div>
+))}
 
-            <div className="text-right text-sm text-gray-500">
-              Envío: ${shippingCost}
-            </div>
-            <div className="text-right font-semibold text-lg">
-              Total: ${total}
-            </div>
+<textarea
+  placeholder="Observaciones del pedido"
+  value={pedidoNotas}
+  onChange={(e) => setPedidoNotas(e.target.value)}
+  className="w-full bg-white border border-neutral-300 px-4 py-2 text-sm rounded-md"
+/>
+
+<p className="text-right text-sm text-neutral-600">Envío: ${shippingCost}</p>
+<p className="text-right font-bold text-lg">Total: ${total}</p>
+
           </div>
 
           <div className="space-y-4">
-            <input
-              type="text"
-              placeholder="Nombre completo"
-              value={customer.name}
-              onChange={(e) =>
-                setCustomer((c) => ({ ...c, name: e.target.value }))
-              }
-              className="w-full border px-4 py-2 rounded-md"
-            />
-            <input
-              type="tel"
-              placeholder="Teléfono"
-              value={customer.phone}
-              onChange={(e) =>
-                setCustomer((c) => ({ ...c, phone: e.target.value }))
-              }
-              className="w-full border px-4 py-2 rounded-md"
-            />
+<input
+  type="text"
+  placeholder="Nombre completo"
+  className="w-full bg-white border border-neutral-300 px-4 py-2 rounded-md text-sm"
+/>
+
+<input
+  type="tel"
+  placeholder="Teléfono"
+  className="w-full bg-white border border-neutral-300 px-4 py-2 rounded-md text-sm"
+/>
+
+
 
 <AddressInput
   onSelect={(loc) => {
@@ -419,25 +408,26 @@ const validarCupon = async () => {
           <label className="block text-sm font-medium text-gray-700 mt-4">
             Método de pago
           </label>
-          <select
-            value={selectedPaymentMethod}
-            onChange={(e) => setSelectedPaymentMethod(e.target.value)}
-            className="w-full border px-4 py-2 rounded-md"
-          >
-            {paymentMethods.map((m) => (
-              <option key={m.id} value={m.name}>
-                {m.name}
-              </option>
-            ))}
-          </select>
+<select
+  value={selectedPaymentMethod}
+  onChange={(e) => setSelectedPaymentMethod(e.target.value)}
+  className="w-full border border-neutral-300 bg-white px-4 py-2 rounded-md text-sm"
+>
+  {paymentMethods.map((m) => (
+    <option key={m.id} value={m.name}>
+      {m.name}
+    </option>
+  ))}
+</select>
 
-          <button
-            onClick={handleSubmit}
-            disabled={loading || cart.length === 0}
-            className="mt-6 w-full bg-[#E00000] text-white py-2 rounded-xl font-semibold disabled:bg-gray-400"
-          >
-            {loading ? "Enviando pedido..." : "Confirmar y enviar"}
-          </button>
+<button
+  onClick={handleSubmit}
+  disabled={loading || cart.length === 0}
+  className="w-full bg-[#E00000] hover:bg-[#C40000] text-white py-3 rounded-full font-bold mt-4 disabled:bg-gray-300 transition"
+>
+  {loading ? "Enviando pedido..." : "Confirmar y enviar"}
+</button>
+
         </>
       )}
     </div>
