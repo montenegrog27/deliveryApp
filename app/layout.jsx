@@ -39,8 +39,8 @@ const inter = Inter({
 });
 
 export const metadata = {
-  title: "Hamburguesería",
-  description: "El mejor lugar para tus burgers 🍔",
+  title: "Mordisco",
+  description: "Hamburgueseria",
 };
 
 export default function RootLayout({ children }) {
