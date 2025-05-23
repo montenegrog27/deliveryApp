@@ -2,8 +2,8 @@
 import { motion } from "framer-motion";
 import localFont from "next/font/local";
 
-const bricolage = localFont({ src: "../app/font/BricolageGrotesque-ExtraBold.ttf" });
-const bricolageLight = localFont({ src: "../app/font/BricolageGrotesque-ExtraLight.ttf" });
+const bricolage = localFont({ src: "../public/font/BricolageGrotesque-ExtraBold.ttf" });
+const bricolageLight = localFont({ src: "../public/font/BricolageGrotesque-ExtraLight.ttf" });
 
 export default function Modal({ onClose }) {
   return (

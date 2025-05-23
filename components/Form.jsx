@@ -1,13 +1,13 @@
 "use client";
 import { useState } from "react";
-import { db } from "../firebase/firebaseConfig";
+import { db } from "@/lib/firebase";
 import { collection, addDoc } from "firebase/firestore";
 import { motion } from "framer-motion";
 import localFont from "next/font/local";
 
 // Tipografías
-const bricolage = localFont({ src: "../app/font/BricolageGrotesque-ExtraBold.ttf" });
-const bricolageLight = localFont({ src: "../app/font/BricolageGrotesque-ExtraLight.ttf" });
+const bricolage = localFont({ src: "../public/font/BricolageGrotesque-ExtraBold.ttf" });
+const bricolageLight = localFont({ src: "../public/font/BricolageGrotesque-ExtraLight.ttf" });
 
 export default function Form({ onSuccess }) {
   const [form, setForm] = useState({ nombre: "", telefono: "" });
