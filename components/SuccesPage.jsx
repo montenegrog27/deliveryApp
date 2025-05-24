@@ -40,27 +40,9 @@ export default function SuccessPage() {
           });
 
           const data = await res.json();
-if (data.exists) {
-  const trackingId = data.trackingId || null;
-  setTrackingId(trackingId);
-
-  // ✅ Enviar WhatsApp
-  if (pedido?.customer?.phone) {
-    try {
-      await fetch("/api/send-whatsapp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          phone: pedido.customer.phone,
-          trackingId, // este se usa en el body del mensaje y los botones
-        }),
-      });
-    } catch (err) {
-      console.error("❌ Error al enviar WhatsApp:", err);
-    }
-  }
-}
-
+          if (data.exists) {
+            setTrackingId(data.trackingId || null);
+          }
 
           localStorage.setItem(`orderCreated_${ref}`, "true");
           localStorage.removeItem(pendingKey);
