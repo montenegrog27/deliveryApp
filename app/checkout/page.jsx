@@ -202,7 +202,6 @@ export default function CheckoutPage() {
           trackingId: ref,
           customerName: customer.name,
           templateName: "confirmar_pedido",
-          orderSummary: formatOrderSummary(cart),
           branchName: "Santa Fe 1583",
         }),
       });
@@ -220,7 +219,8 @@ export default function CheckoutPage() {
       setLoading(false);
     }
   };
-  
+
+
   const validarCupon = async () => {
     setCuponError(null);
     setCuponValido(null);

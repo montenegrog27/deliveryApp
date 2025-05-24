@@ -33,7 +33,7 @@ export async function POST(req) {
           to,
           type: "template",
           template: {
-            name: "confirmar_pedido",
+            name: "confirmacion_pedido",
             language: { code: "es_AR" },
             components: [
               {
