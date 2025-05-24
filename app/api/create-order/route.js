@@ -61,14 +61,6 @@ const discountAmount =
     );
 
 
-console.log({
-  totalBase,
-  manualDiscountFixed,
-  couponDiscountFixed,
-  discountAmount,
-  shippingCost,
-  total,
-});
 
 
 

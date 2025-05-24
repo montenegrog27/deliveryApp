@@ -8,7 +8,6 @@ export async function GET() {
     id: doc.id,
     ...doc.data(),
   }));
-  console.log(zones);
 
   return NextResponse.json(zones);
 }

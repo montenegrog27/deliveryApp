@@ -25,10 +25,7 @@ export default function AddressInput({ onSelect, setDireccionConfirmada }) {
 
       const data = await res.json();
 
-      console.log(
-        "📦 Mapbox features:",
-        data.features.map((f) => f.place_name)
-      );
+
 
       const filtered = data.features.filter((f) =>
         f.context?.some(

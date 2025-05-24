@@ -7,6 +7,7 @@ import Modal from "@/components/Modal"; // lo separamos también
 import Counter from "@/components/Counter";
 import localFont from "next/font/local";
 
+
 // Tipografías
 const bricolage = localFont({ src: "../../public/font/BricolageGrotesque-ExtraBold.ttf" });
 const bricolageLight = localFont({ src: "../../public/font/BricolageGrotesque-ExtraLight.ttf" });
