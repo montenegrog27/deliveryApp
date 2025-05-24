@@ -3,8 +3,14 @@ import { NextResponse } from "next/server";
 export async function POST(req) {
   try {
     const body = await req.json();
-    const { phone, trackingId, customerName } = body;
-    if (!phone || !trackingId) {
+    const {
+      phone,
+      trackingId,
+      customerName,
+      branchName,
+    } = body;
+
+    if (!phone || !trackingId || !customerName || !branchName) {
       return NextResponse.json(
         { error: "Faltan datos requeridos" },
         { status: 400 }
@@ -12,7 +18,7 @@ export async function POST(req) {
     }
 
     const to = phone.replace(/\D/g, ""); // Limpiar caracteres no numéricos
-    console.log("toooooooooooo",to)
+    const trackingUrl = `https://mordisco.app/tracking/${trackingId}`;
 
     const res = await fetch(
       `https://graph.facebook.com/v19.0/${process.env.WHATSAPP_PHONE_NUMBER_ID}/messages`,
@@ -27,38 +33,31 @@ export async function POST(req) {
           to,
           type: "template",
           template: {
-            name: process.env.WHATSAPP_TEMPLATE_NAME,
+            name: "confirmar_pedido",
             language: { code: "es_AR" },
             components: [
               {
                 type: "body",
                 parameters: [
-                  {
-                    type: "text",
-                    text: customerName || "cliente",
-                  },
+                  { type: "text", text: customerName },
+                  { type: "text", text: branchName },
+                  { type: "text", text: trackingUrl },
                 ],
               },
               {
                 type: "button",
-                sub_type: "url",
+                sub_type: "quick_reply",
                 index: "0",
                 parameters: [
-                  {
-                    type: "text",
-                    text: trackingId,
-                  },
+                  { type: "payload", payload: `confirmar:${trackingId}` },
                 ],
               },
               {
                 type: "button",
-                sub_type: "url",
+                sub_type: "quick_reply",
                 index: "1",
                 parameters: [
-                  {
-                    type: "text",
-                    text: trackingId,
-                  },
+                  { type: "payload", payload: `cancelar:${trackingId}` },
                 ],
               },
             ],

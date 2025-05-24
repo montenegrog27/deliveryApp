@@ -5,6 +5,17 @@ import AddressInput from "@/components/AddressInput";
 import * as turf from "@turf/turf";
 import { useRouter } from "next/navigation";
 
+function formatOrderSummary(cart) {
+  const lines = cart.map(
+    (item) => `${item.quantity} ${item.attributes.name}`
+  );
+  const total = cart.reduce(
+    (sum, item) => sum + item.attributes.price * item.quantity,
+    0
+  );
+  return lines.join("\n") + `\nTotal: $${total}`;
+}
+
 export default function CheckoutPage() {
   const router = useRouter();
   const { cart, clearCart } = useCart();
@@ -82,7 +93,6 @@ export default function CheckoutPage() {
 
     const point = turf.point([customCustomer.lng, customCustomer.lat]);
 
-    // 🔍 Buscar zona que contenga el punto
     const zona = zones.find((z) => {
       if (!z.enabled) return false;
       try {
@@ -95,12 +105,10 @@ export default function CheckoutPage() {
     });
 
     if (zona) {
-      // ✅ Si está dentro de una zona, usar esa sucursal y costo fijo
-      setSelectedKitchenId(zona.branchId || zona.cocinaId); // por compatibilidad
+      setSelectedKitchenId(zona.branchId || zona.cocinaId);
       setShippingCost(Number(zona.cost || 0));
       setError(null);
     } else {
-      // ❌ Fuera de zona
       setSelectedKitchenId(null);
       setShippingCost(0);
       setError("Lo sentimos, estás fuera de nuestras zonas de entrega");
@@ -161,7 +169,6 @@ export default function CheckoutPage() {
     };
 
     try {
-      // Crear orden en Firestore con paid: false
       const res = await fetch("/api/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -170,10 +177,8 @@ export default function CheckoutPage() {
 
       if (!res.ok) throw new Error(await res.text());
 
-      // Guardar localmente por si vuelve desde MP
       localStorage.setItem("pendingOrder_" + ref, JSON.stringify(orderPayload));
 
-      // Si paga con MercadoPago, generar preferencia y redirigir
       if (selectedPaymentMethod.toLowerCase().includes("mercado")) {
         const mpRes = await fetch("/api/mercadopago/create-preference", {
           method: "POST",
@@ -189,14 +194,16 @@ export default function CheckoutPage() {
         return;
       }
 
-      // ✅ Enviar WhatsApp antes de redirigir
       await fetch("/api/send-whatsapp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          phone: formattedPhone, // ✅ ya lleva el +54
+          phone: formattedPhone,
           trackingId: ref,
-          customerName: customer.name || "cliente",
+          customerName: customer.name,
+          templateName: "confirmar_pedido",
+          orderSummary: formatOrderSummary(cart),
+          branchName: "Santa Fe 1583",
         }),
       });
 
@@ -213,7 +220,7 @@ export default function CheckoutPage() {
       setLoading(false);
     }
   };
-
+  
   const validarCupon = async () => {
     setCuponError(null);
     setCuponValido(null);
