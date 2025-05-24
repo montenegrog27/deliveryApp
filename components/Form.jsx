@@ -11,6 +11,7 @@ const bricolageLight = localFont({ src: "../public/font/BricolageGrotesque-Extra
 
 export default function Form({ onSuccess }) {
   const [form, setForm] = useState({ nombre: "", telefono: "" });
+const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -22,33 +23,41 @@ export default function Form({ onSuccess }) {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+ const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    if (!/^\d{10}$/.test(form.telefono)) {
-      alert("Ingresá exactamente 10 dígitos (sin 0 ni 15).");
-      return;
-    }
+  if (isSubmitting) return;
+  setIsSubmitting(true);
 
-    if (/^15/.test(form.telefono.slice(4))) {
-      alert("No incluyas el prefijo 15. Solo el código de área y el número.");
-      return;
-    }
+  if (!/^\d{10}$/.test(form.telefono)) {
+    alert("Ingresá exactamente 10 dígitos (sin 0 ni 15).");
+    setIsSubmitting(false);
+    return;
+  }
 
-    const data = {
-      nombre: form.nombre,
-      telefono: `+54${form.telefono}`,
-      timestamp: new Date().toISOString(),
-    };
+  if (/^15/.test(form.telefono.slice(4))) {
+    alert("No incluyas el prefijo 15. Solo el código de área y el número.");
+    setIsSubmitting(false);
+    return;
+  }
 
-    try {
-      await addDoc(collection(db, "leads"), data);
-      onSuccess();
-      setForm({ nombre: "", telefono: "" });
-    } catch (err) {
-      console.error(err);
-    }
+  const data = {
+    nombre: form.nombre.trim(),
+    telefono: `+54${form.telefono}`,
+    timestamp: new Date().toISOString(),
   };
+
+  try {
+    await addDoc(collection(db, "leads"), data);
+    onSuccess();
+    setForm({ nombre: "", telefono: "" });
+  } catch (err) {
+    console.error(err);
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
 
   return (
     <motion.form
@@ -88,14 +97,18 @@ export default function Form({ onSuccess }) {
         <p className="text-xs text-red-300 mt-1 ml-1">Ingresá 10 dígitos (sin 0 ni 15)</p>
       </div>
 
-      <motion.button
-        type="submit"
-        className="text-base w-full py-3 rounded-lg bg-red-200 text-red-600 font-bold hover:scale-105 transition-transform"
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.97 }}
-      >
-        ¡Quiero participar!
-      </motion.button>
+<motion.button
+  type="submit"
+  disabled={isSubmitting}
+  className={`text-base w-full py-3 rounded-lg font-bold transition-transform
+    ${isSubmitting ? "bg-gray-300 text-gray-600 cursor-not-allowed" : "bg-red-200 text-red-600 hover:scale-105"}
+  `}
+  whileHover={!isSubmitting ? { scale: 1.05 } : {}}
+  whileTap={!isSubmitting ? { scale: 0.97 } : {}}
+>
+  {isSubmitting ? "Enviando..." : "¡Quiero participar!"}
+</motion.button>
+
     </motion.form>
   );
 }
