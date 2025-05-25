@@ -180,7 +180,6 @@ export async function POST(req) {
         phone,
         name: order?.customer?.name || null,
         trackingId: order?.trackingId || null,
-        messages: [], // solo para crear el doc la primera vez
         updatedAt: serverTimestamp(),
       },
       { merge: true }
