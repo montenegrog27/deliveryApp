@@ -144,7 +144,7 @@ export default function CheckoutPage() {
       return;
     }
 
-    const formattedPhone = `54${customer.phone}`;
+    const formattedPhone = `549${customer.phone}`;
     const ref = `${formattedPhone}-${Date.now()}`;
 
     const orderPayload = {
