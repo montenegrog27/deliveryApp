@@ -28,32 +28,40 @@ export async function POST(req) {
   }
 
   // Botón
-  if (type === "button") {
-    const payload = message?.button?.payload;
-    const [action, trackingId] = payload.split(":");
+ if (type === "button") {
+  const payload = message?.button?.payload;
+  const [action, trackingId] = payload.split(":");
 
-    if (!trackingId) return new Response("No trackingId", { status: 200 });
+  console.log("🟢 Botón presionado:", { action, trackingId });
 
-    const q = query(collection(db, "orders"), where("trackingId", "==", trackingId));
-    const snap = await getDocs(q);
+  if (!trackingId) return new Response("No trackingId", { status: 200 });
 
-    if (snap.empty) return new Response("Pedido no encontrado", { status: 200 });
+  const q = query(collection(db, "orders"), where("trackingId", "==", trackingId));
+  const snap = await getDocs(q);
 
-    const orderRef = snap.docs[0].ref;
-
-    if (action === "confirmar") {
-      await updateDoc(orderRef, {
-        clientConfirm: true,
-        clientConfirmAt: serverTimestamp(),
-      });
-    } else if (action === "cancelar") {
-      await updateDoc(orderRef, {
-        clientConfirm: false,
-        clientCancelAt: serverTimestamp(),
-        status: "cancelled",
-      });
-    }
+  if (snap.empty) {
+    console.warn("⚠️ No se encontró la orden con trackingId:", trackingId);
+    return new Response("Pedido no encontrado", { status: 200 });
   }
+
+  const orderRef = snap.docs[0].ref;
+
+  if (action === "confirmar") {
+    console.log("✍️ Confirmando pedido en:", orderRef.path);
+    await updateDoc(orderRef, {
+      clientConfirm: true,
+      clientConfirmAt: serverTimestamp(),
+    });
+  } else if (action === "cancelar") {
+    console.log("✍️ Cancelando pedido en:", orderRef.path);
+    await updateDoc(orderRef, {
+      clientConfirm: false,
+      clientCancelAt: serverTimestamp(),
+      status: "cancelled",
+    });
+  }
+}
+
 
   // Mensaje de texto
   if (type === "text") {
