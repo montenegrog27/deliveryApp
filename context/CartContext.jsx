@@ -1,5 +1,6 @@
 "use client";
 import { createContext, useContext, useEffect, useState } from "react";
+import { v4 as uuidv4 } from "uuid"; // si usás uuid
 
 const CartContext = createContext();
 
@@ -16,12 +17,14 @@ export function CartProvider({ children }) {
     sessionStorage.setItem("mordisco-cart", JSON.stringify(cart));
   }, [cart]);
 
+
 const addItem = (item) => {
   setCart((prev) => {
-    const exists = prev.find((i) =>
-      i.id === item.id &&
-      JSON.stringify(i.attributes.extras) === JSON.stringify(item.attributes.extras) &&
-      (i.attributes.note || "") === (item.attributes.note || "")
+    const exists = prev.find(
+      (i) =>
+        i.id === item.id &&
+        JSON.stringify(i.attributes.extras) === JSON.stringify(item.attributes.extras) &&
+        (i.attributes.note || "") === (item.attributes.note || "")
     );
 
     if (exists) {
@@ -30,9 +33,7 @@ const addItem = (item) => {
       );
     }
 
-    // Generar uid único
-    const uid = crypto.randomUUID();
-    return [...prev, { ...item, uid, quantity: 1 }];
+    return [...prev, { ...item, quantity: 1, uid: uuidv4() }];
   });
 };
 

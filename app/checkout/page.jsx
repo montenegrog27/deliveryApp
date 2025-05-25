@@ -26,7 +26,6 @@ export default function CheckoutPage() {
     lng: null,
   });
   const [direccionConfirmada, setDireccionConfirmada] = useState(false);
-  const [pedidoNotas, setPedidoNotas] = useState("");
   const [zones, setZones] = useState([]);
   const [shippingCost, setShippingCost] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -160,7 +159,6 @@ export default function CheckoutPage() {
       kitchenId: selectedKitchenId,
       paymentMethod: selectedPaymentMethod,
       paid: false,
-      notes: pedidoNotas || "",
       ref,
       coupon: cuponData?.code || null,
       couponDiscount: cuponDescuento,
@@ -304,7 +302,7 @@ const validarCupon = async () => {
         <>
           <div className="space-y-4 mb-8">
             {cart.map((item) => (
-              <div key={item.id} className="flex justify-between items-start">
+              <div key={item.uid} className="flex justify-between items-start">
                 <div className="text-sm leading-tight">
                   <p className="font-bold">{item.attributes.name}</p>
                   <p className="text-neutral-600 text-xs">
@@ -316,13 +314,6 @@ const validarCupon = async () => {
                 </div>
               </div>
             ))}
-
-            <textarea
-              placeholder="Observaciones del pedido"
-              value={pedidoNotas}
-              onChange={(e) => setPedidoNotas(e.target.value)}
-              className="w-full bg-white border border-neutral-300 px-4 py-2 text-sm rounded-md"
-            />
 
             <p className="text-right text-sm text-neutral-600">
               Envío: ${shippingCost}

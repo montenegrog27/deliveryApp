@@ -40,6 +40,13 @@ export default function HomePage() {
     setTimeout(() => setBump(false), 300);
   };
 
+  const finalPrice = selectedItem
+  ? (selectedItem.attributes.discountPrice || selectedItem.attributes.price) +
+    (extras.cheese ? 500 : 0) +
+    (extras.coke ? 1500 : 0)
+  : 0;
+
+
   return (
     <div className="min-h-screen bg-[#FFF9F5] font-inter text-[#1A1A1A]">
       {/* HEADER */}
