@@ -70,12 +70,22 @@ export default function HomePage() {
       </header>
 
       {/* CONTENIDO */}
-      <main className="max-w-3xl mx-auto px-4 py-8 space-y-16">
-        {loading ? (
-          <p className="text-center text-gray-500 mt-12">
-            Cargando productos...
-          </p>
-        ) : (
+<main className="max-w-3xl mx-auto px-4 py-8 space-y-16">
+  {loading ? (
+    <div className="flex flex-col items-center justify-center mt-50">
+      <motion.img
+        src="https://res.cloudinary.com/dsbrnqc5z/image/upload/v1744757019/Recurso_40_zti0fq.svg"
+        alt="MORDISCO"
+        className="h-36 w-auto"
+        animate={{ rotate: 360 }}
+        transition={{
+          repeat: Infinity,
+          ease: "linear",
+          duration: 2, // velocidad (2 segundos por vuelta)
+        }}
+      />
+    </div>
+  ) : (
           menu
             .slice()
             .sort((a, b) => (a.inOrder ?? 0) - (b.inOrder ?? 0))
