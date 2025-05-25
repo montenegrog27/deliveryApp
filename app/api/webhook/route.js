@@ -124,7 +124,9 @@ export async function POST(req) {
 
     if (!trackingId) return new Response("No trackingId", { status: 200 });
 
-    const fullTrackingId = `tracking_${trackingId}`;
+const fullTrackingId = trackingId.startsWith("tracking_")
+  ? trackingId
+  : `tracking_${trackingId}`;
     console.log("🟡 Buscando trackingId:", fullTrackingId);
 
     const q = query(
