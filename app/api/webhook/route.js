@@ -1,4 +1,3 @@
-
 // import { db } from "@/lib/firebase";
 // import {
 //   collection,
@@ -92,7 +91,6 @@
 //   return new Response("EVENT_RECEIVED", { status: 200 });
 // }
 
-
 // pages/api/webhook.js o donde esté tu endpoint
 
 import { db } from "@/lib/firebase";
@@ -136,7 +134,10 @@ export async function POST(req) {
     const snap = await getDocs(q);
 
     if (snap.empty) {
-      console.warn("⚠️ No se encontró la orden con trackingId:", fullTrackingId);
+      console.warn(
+        "⚠️ No se encontró la orden con trackingId:",
+        fullTrackingId
+      );
       return new Response("Pedido no encontrado", { status: 200 });
     }
 
@@ -179,17 +180,17 @@ export async function POST(req) {
         phone,
         name: order?.customer?.name || null,
         trackingId: order?.trackingId || null,
-        messages: [],
+        messages: [], // solo para crear el doc la primera vez
         updatedAt: serverTimestamp(),
       },
       { merge: true }
-    );
+    ); // ← ⚠️ importante
 
-    // Agregar nuevo mensaje
     await updateDoc(chatRef, {
       messages: arrayUnion({
         message: message.text.body,
         direction: "incoming",
+        tipo: "texto",
         timestamp: new Date(),
       }),
       updatedAt: serverTimestamp(),
