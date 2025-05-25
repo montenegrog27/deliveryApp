@@ -74,7 +74,7 @@ export default function AddressInput({ onSelect, setDireccionConfirmada }) {
           handleInput(e.target.value);
           setDireccionConfirmada(false); // pierde validez hasta que vuelva a seleccionar
         }}
-        className="w-full border rounded-lg px-4 py-2 text-sm"
+        className="w-full border rounded-lg px-4 py-2 text-base"
       />
 
       {loading && (

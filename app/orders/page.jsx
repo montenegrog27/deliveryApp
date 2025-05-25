@@ -173,7 +173,7 @@ export default function HomePage() {
                   Observaciones
                 </label>
                 <textarea
-                  className="w-full border rounded p-2 text-sm"
+                  className="w-full border rounded p-2 text-base"
                   placeholder="Ej: sin lechuga, cortar al medio..."
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
