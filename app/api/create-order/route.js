@@ -87,7 +87,6 @@ export async function POST(req) {
       cashier: "cliente-web",
       delivery: true,
       items: cart,
-      notes,
       paymentMethodId: paymentMethod || "cash",
       paid: paid || false,
       status: "preparing",

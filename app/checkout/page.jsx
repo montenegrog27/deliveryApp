@@ -294,7 +294,7 @@ const validarCupon = async () => {
 
   return (
     <div className="min-h-screen bg-[#FFF9F5] px-4 py-6 max-w-2xl mx-auto text-[#1A1A1A] font-inter space-y-8">
-      <h1 className="text-3xl font-bold mb-8">🧾 Confirmá tu pedido</h1>
+      <h1 className="text-3xl font-bold mb-8"> Confirmá tu pedido</h1>
 
       {cart.length === 0 ? (
         <p className="text-gray-500">El carrito está vacío</p>
@@ -310,7 +310,7 @@ const validarCupon = async () => {
                   </p>
                 </div>
                 <div className="font-bold text-sm">
-                  ${item.attributes.price * item.quantity}
+                  `${item.attributes.price * item.quantity}`
                 </div>
               </div>
             ))}
@@ -325,7 +325,7 @@ const validarCupon = async () => {
             <input
               type="text"
               placeholder="Nombre completo"
-              className="w-full bg-white border border-neutral-300 px-4 py-2 rounded-md text-sm"
+              className="w-full border border-neutral-300 px-4 py-2 rounded-md text-base"
               value={customer.name}
               onChange={(e) =>
                 setCustomer((prev) => ({ ...prev, name: e.target.value }))
@@ -338,7 +338,7 @@ const validarCupon = async () => {
               <input
                 type="tel"
                 placeholder="Ej: 3794123456"
-                className="pl-12 w-full bg-white border border-neutral-300 px-4 py-2 rounded-md text-sm"
+                className="pl-12 w-full border border-neutral-300 px-4 py-2 rounded-md text-base"
                 value={customer.phone}
                 onChange={(e) => {
                   // Eliminá cualquier carácter que no sea número
@@ -438,7 +438,7 @@ const validarCupon = async () => {
                   placeholder="Código de cupón"
                   value={cuponInput}
                   onChange={(e) => setCuponInput(e.target.value.toLowerCase())}
-                  className="w-full border px-4 py-2 rounded-md"
+                  className="w-full border-neutral-300 px-4 py-2 rounded-md text-base"
                 />
                 <button
                   onClick={validarCupon}
@@ -464,7 +464,7 @@ const validarCupon = async () => {
             onChange={(e) =>
               setCustomer((c) => ({ ...c, observaciones: e.target.value }))
             }
-            className="w-full border px-4 py-2 rounded-md text-sm"
+            className="w-full border border-neutral-300 px-4 py-2 rounded-md text-sm"
             rows={2}
           />
 

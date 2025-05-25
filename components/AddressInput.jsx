@@ -25,8 +25,6 @@ export default function AddressInput({ onSelect, setDireccionConfirmada }) {
 
       const data = await res.json();
 
-
-
       const filtered = data.features.filter((f) =>
         f.context?.some(
           (c) =>
@@ -74,7 +72,7 @@ export default function AddressInput({ onSelect, setDireccionConfirmada }) {
           handleInput(e.target.value);
           setDireccionConfirmada(false); // pierde validez hasta que vuelva a seleccionar
         }}
-        className="w-full border rounded-lg px-4 py-2 text-base"
+        className="w-full border border-neutral-300 rounded-lg px-4 py-2 text-base"
       />
 
       {loading && (
@@ -88,11 +86,11 @@ export default function AddressInput({ onSelect, setDireccionConfirmada }) {
       )}
 
       {results.length > 0 && (
-        <ul className="absolute bg-white border rounded-lg mt-1 shadow w-full z-10">
+        <ul className="absolute  border-neutral-300 rounded-lg mt-1 shadow w-full z-10">
           {results.map((r) => (
             <li
               key={r.id}
-              className="px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
+              className="px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer border border-neutral-200 bg-[#FFF9F2]"
               onClick={() => handleSelect(r)}
             >
               {r.place_name}

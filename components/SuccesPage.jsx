@@ -30,7 +30,6 @@ export default function SuccessPage() {
 
       const pagoConMP = pedido?.paymentMethod?.toLowerCase().includes("mercado");
 
-      // ✅ Si ya estaba creado o es un método manual, solo buscamos el tracking
       if (alreadyCreated === "true" || !pagoConMP) {
         try {
           const res = await fetch("/api/order-exists", {
@@ -50,12 +49,11 @@ export default function SuccessPage() {
           return;
         } catch (err) {
           console.error("⚠️ Error consultando trackingId:", err);
-          setStatus("ok"); // igual lo dejamos pasar para no cortar la experiencia
+          setStatus("ok");
           return;
         }
       }
 
-      // ✅ Si es MercadoPago y no estaba creado aún, marcamos como pagado
       try {
         const res = await fetch("/api/mark-paid", {
           method: "POST",
@@ -80,33 +78,58 @@ export default function SuccessPage() {
     confirmarPago();
   }, [ref]);
 
+  useEffect(() => {
+    if (status === "ok") {
+      const timeout = setTimeout(() => {
+        router.push("/orders");
+      }, 5000);
+      return () => clearTimeout(timeout);
+    }
+  }, [status, router]);
+
   return (
-    <div className="p-8 text-center">
-      {status === "guardando" && <p>Guardando pedido...</p>}
+    <div className="min-h-screen flex items-center justify-center px-6 bg-[#FFF9F5] text-center">
+      <div className="bg-white rounded-xl shadow-xl p-8 max-w-md w-full space-y-4 text-[#1A1A1A]">
+        {status === "guardando" && (
+          <div className="text-sm text-gray-500 animate-pulse">
+            Guardando pedido...
+          </div>
+        )}
 
-      {status === "ok" && (
-        <>
-          <h1 className="text-2xl font-bold text-green-600 mb-2">¡Pedido confirmado!</h1>
-          <p className="mb-4">Tu pedido fue registrado con éxito.</p>
-          {trackingId ? (
-            <a
-              href={`/tracking/${trackingId}`}
-              className="inline-block mt-4 px-6 py-2 bg-blue-600 text-white font-medium rounded-lg shadow hover:bg-blue-700 transition"
-            >
-              Ver seguimiento en tiempo real
-            </a>
-          ) : (
-            <p className="text-gray-500 mt-4">Estamos preparando tu pedido.</p>
-          )}
-        </>
-      )}
+        {status === "ok" && (
+          <>
+            <h1 className="text-2xl font-bold text-green-600">¡Pedido confirmado!</h1>
+            <p>Tu pedido fue registrado con éxito.</p>
+            <p className="text-sm text-gray-600">
+              Te contactaremos por WhatsApp para confirmarlo.
+            </p>
 
-      {status === "error" && (
-        <>
-          <h1 className="text-2xl font-bold text-red-600">Error</h1>
-          <p>No se pudo guardar el pedido. Contactanos por WhatsApp.</p>
-        </>
-      )}
+            {trackingId ? (
+              <a
+                href={`/tracking/${trackingId}`}
+                className="inline-block mt-4 px-5 py-2 text-sm font-semibold bg-[#E00000] text-white rounded-full hover:bg-[#C40000] transition"
+              >
+                Ver seguimiento en tiempo real
+              </a>
+            ) : (
+              <p className="text-sm text-gray-500">Estamos preparando tu pedido.</p>
+            )}
+
+            <p className="text-xs text-neutral-500 mt-4">
+              Serás redirigido automáticamente en 5 segundos...
+            </p>
+          </>
+        )}
+
+        {status === "error" && (
+          <>
+            <h1 className="text-2xl font-bold text-red-600">Error</h1>
+            <p className="text-gray-600">
+              No se pudo guardar el pedido. Por favor, contactanos por WhatsApp.
+            </p>
+          </>
+        )}
+      </div>
     </div>
   );
 }

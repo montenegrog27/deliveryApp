@@ -31,7 +31,7 @@ export default function CartSidebar() {
         <div className="flex flex-col h-full p-4">
           {/* Encabezado */}
           <div className="flex justify-between items-center mb-4 border-b border-neutral-200 pb-2">
-            <h2 className="text-lg font-bold text-[#1A1A1A]">🛒 Tu pedido</h2>
+            <h2 className="text-lg font-bold text-[#1A1A1A]">Tu pedido</h2>
             <button
               onClick={closeCart}
               className="text-sm text-[#E00000] font-semibold hover:underline"
@@ -167,7 +167,7 @@ export default function CartSidebar() {
               }}
               className="w-full bg-[#E00000] hover:bg-[#C40000] text-white py-2 rounded-full font-bold text-sm transition disabled:bg-gray-400"
             >
-              Confirmar pedido
+              Continuar
             </button>
           </div>
         </div>
