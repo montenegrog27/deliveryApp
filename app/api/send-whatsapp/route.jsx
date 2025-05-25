@@ -1,4 +1,14 @@
+// app/api/send-whatsapp/route.jsx
+
 import { NextResponse } from "next/server";
+import { db } from "@/lib/firebase";
+import {
+  doc,
+  setDoc,
+  updateDoc,
+  arrayUnion,
+  serverTimestamp,
+} from "firebase/firestore";
 
 export async function POST(req) {
   try {
@@ -54,8 +64,7 @@ export async function POST(req) {
       },
     };
 
-    console.log("📦 Payload que se enviará a WhatsApp:", JSON.stringify(payload, null, 2));
-
+    // ⏩ Enviar mensaje por WhatsApp API
     const res = await fetch(
       `https://graph.facebook.com/v19.0/${process.env.WHATSAPP_PHONE_NUMBER_ID}/messages`,
       {
@@ -79,6 +88,30 @@ export async function POST(req) {
     }
 
     console.log("✅ Mensaje de WhatsApp enviado correctamente:", data);
+
+    const chatRef = doc(db, "whatsapp_chats", trackingId);
+
+    await setDoc(
+      chatRef,
+      {
+        phone,
+        name: customerName,
+        trackingId,
+        messages: [],
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true }
+    );
+
+    await updateDoc(chatRef, {
+      messages: arrayUnion({
+        message: `Se envió mensaje de confirmación del pedido a ${customerName} desde sucursal ${branchName}.`,
+        direction: "outgoing",
+        tipo: "plantilla", // ✅ nuevo campo
+        timestamp: new Date(),
+      }),
+      updatedAt: serverTimestamp(),
+    });
 
     return NextResponse.json({ ok: true, data });
   } catch (err) {
