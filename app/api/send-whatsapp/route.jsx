@@ -1,5 +1,3 @@
-// app/api/send-whatsapp/route.jsx
-
 import { NextResponse } from "next/server";
 import { db } from "@/lib/firebase";
 import {
@@ -13,17 +11,22 @@ import {
 export async function POST(req) {
   try {
     const body = await req.json();
-    const { phone, trackingId, customerName, branchName } = body;
+    const { phone, trackingId: rawId, customerName, branchName } = body;
 
     console.log("📩 POST /api/send-whatsapp recibido con:", body);
 
-    if (!phone || !trackingId || !customerName || !branchName) {
+    if (!phone || !rawId || !customerName || !branchName) {
       console.warn("❗ Faltan datos requeridos");
       return NextResponse.json(
         { error: "Faltan datos requeridos" },
         { status: 400 }
       );
     }
+
+    // ✅ Asegurar prefijo tracking_
+    const trackingId = rawId.startsWith("tracking_")
+      ? rawId
+      : `tracking_${rawId}`;
 
     const to = phone.replace(/\D/g, "");
     const trackingUrl = `https://mordisco.app/tracking/${trackingId}`;
@@ -64,7 +67,7 @@ export async function POST(req) {
       },
     };
 
-    // ⏩ Enviar mensaje a WhatsApp Cloud API
+    // ⏩ Enviar mensaje por WhatsApp Cloud API
     const res = await fetch(
       `https://graph.facebook.com/v19.0/${process.env.WHATSAPP_PHONE_NUMBER_ID}/messages`,
       {
@@ -92,15 +95,17 @@ export async function POST(req) {
     // ✅ Guardar mensaje en whatsapp_chats
     const chatRef = doc(db, "whatsapp_chats", trackingId);
 
-    // Si no existe, crear datos base (sin array de mensajes)
-    await setDoc(chatRef, {
-      phone,
-      name: customerName,
-      trackingId,
-      updatedAt: serverTimestamp(),
-    }, { merge: true });
+    await setDoc(
+      chatRef,
+      {
+        phone,
+        name: customerName,
+        trackingId,
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true }
+    );
 
-    // Agregar mensaje al array sin sobrescribir
     await updateDoc(chatRef, {
       messages: arrayUnion({
         message: `Se envió mensaje de confirmación del pedido a ${customerName} desde sucursal ${branchName}.`,
