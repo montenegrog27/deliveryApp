@@ -218,60 +218,81 @@ export default function CheckoutPage() {
     }
   };
 
-  const validarCupon = async () => {
-    setCuponError(null);
-    setCuponValido(null);
+const validarCupon = async () => {
+  setCuponError(null);
+  setCuponValido(null);
 
-    try {
-      const res = await fetch(`/api/coupons?code=${cuponInput}`);
-      if (!res.ok) throw new Error("Cupón no encontrado");
-      const cupon = await res.json();
+  try {
+    if (!customer.phone) {
+      throw new Error("Ingresá tu número antes de validar el cupón.");
+    }
 
-      // Lógica de uso del cupón
-      const usosCliente =
-        cupon.usedBy?.filter((u) => u.phone === customer.phone) || [];
-      const hoy = new Date();
+    const res = await fetch(`/api/coupons?code=${cuponInput}`);
+    if (!res.ok) throw new Error("Cupón no encontrado");
+    const cupon = await res.json();
 
-      if (cupon.usageLimit === "once" && usosCliente.length > 0) {
-        throw new Error("Este cupón ya fue usado.");
-      }
+    const hoy = new Date();
+    const usosCliente =
+      cupon.usedBy?.filter((u) => u.phone === `549${customer.phone}`) || [];
 
-      if (cupon.usageLimit === "once_per_week") {
-        const usoReciente = usosCliente.some((u) => {
+    // 🔐 Validar teléfono
+    if (cupon.phoneRequired && cupon.phone !== `549${customer.phone}`) {
+      throw new Error("Este cupón es exclusivo para otro número.");
+    }
+
+    // ⏳ Validar fechas
+    const fechaInicio = cupon.startDate ? new Date(cupon.startDate) : null;
+    const fechaFin = cupon.endDate ? new Date(cupon.endDate) : null;
+
+    if (fechaInicio && hoy < fechaInicio) {
+      throw new Error("El cupón aún no está activo.");
+    }
+
+    if (!cupon.noExpiry && fechaFin && hoy > fechaFin) {
+      throw new Error("El cupón ha expirado.");
+    }
+
+    // 🔁 Validar uso según tipo
+    switch (cupon.usageLimit) {
+      case "once":
+        if (usosCliente.length > 0) {
+          throw new Error("Este cupón ya fue usado.");
+        }
+        break;
+
+      case "once_per_week":
+        const usadoEstaSemana = usosCliente.some((u) => {
           const fechaUso = new Date(u.date);
-          const diferencia = (hoy - fechaUso) / (1000 * 60 * 60 * 24);
-          return diferencia < 7;
+          const diasDesdeUso = (hoy - fechaUso) / (1000 * 60 * 60 * 24);
+          return diasDesdeUso < 7;
         });
-        if (usoReciente) {
+        if (usadoEstaSemana) {
           throw new Error("Este cupón ya fue usado esta semana.");
         }
-      }
+        break;
 
-      const fechaInicio = cupon.startDate ? new Date(cupon.startDate) : null;
-      const fechaFin = cupon.endDate ? new Date(cupon.endDate) : null;
+      case "date_limit":
+        // Ya validado con fechaFin arriba
+        break;
 
-      if (fechaInicio && hoy < fechaInicio) {
-        throw new Error("El cupón aún no está activo.");
-      }
-
-      if (fechaFin && !cupon.noExpiry && hoy > fechaFin) {
-        throw new Error("El cupón ha expirado.");
-      }
-
-      if (cupon.phoneRequired && cupon.phone !== customer.phone) {
-        throw new Error("Este cupón es exclusivo para otro número.");
-      }
-
-      setCuponDescuento(Number(cupon.discount || 0));
-      setCuponData(cupon);
-      setCuponValido(true);
-    } catch (err) {
-      setCuponDescuento(0);
-      setCuponValido(false);
-      setCuponData(null);
-      setCuponError(err.message || "Cupón inválido");
+      case "no_limit":
+      default:
+        // Sin restricciones
+        break;
     }
-  };
+
+    // ✅ Si pasó todas las validaciones
+    setCuponDescuento(Number(cupon.discount || 0));
+    setCuponData(cupon);
+    setCuponValido(true);
+  } catch (err) {
+    setCuponDescuento(0);
+    setCuponData(null);
+    setCuponValido(false);
+    setCuponError(err.message || "Cupón inválido");
+  }
+};
+
 
   return (
     <div className="min-h-screen bg-[#FFF9F5] px-4 py-6 max-w-2xl mx-auto text-[#1A1A1A] font-inter space-y-8">
