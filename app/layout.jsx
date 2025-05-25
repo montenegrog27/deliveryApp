@@ -35,19 +35,17 @@ const inter = Inter({
   weight: ["400", "600", "700", "800"],
 });
 
+
 export const metadata = {
   title: "Mordisco",
-  description: "Hamburgueseria",
+  description: "Hamburguesería",
+  viewport: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no",
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="es">
       <Head>
-        <meta
-          name="viewport"
-          content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
-        />
         {/* Noscript para navegadores sin JS */}
         <noscript>
           <img
