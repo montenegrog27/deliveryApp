@@ -6,7 +6,8 @@ import { useState } from "react";
 
 export default function CartSidebar() {
   const [itemToRemove, setItemToRemove] = useState(null);
-  const { cart, removeItem, addItem, decreaseItem, isOpen, closeCart } = useCart();
+  const { cart, removeItem, addItem, decreaseItem, isOpen, closeCart } =
+    useCart();
   const router = useRouter();
 
   const total = cart.reduce(
@@ -41,14 +42,20 @@ export default function CartSidebar() {
 
           {/* Lista de productos */}
           <div className="flex-1 overflow-y-auto space-y-5">
-            {cart.length === 0 ? (
-              <p className="text-neutral-500 text-sm">El carrito está vacío</p>
-            ) : (
-cart.map((item) => {
-  const itemKey = item.uid;
-   
-                return (
-                  <div key={itemKey} className="flex gap-3 items-center">
+            <AnimatePresence>
+              {cart.length === 0 ? (
+                <p className="text-neutral-500 text-sm">El carrito está vacío</p>
+              ) : (
+                cart.map((item) => (
+                  <motion.div
+                    key={item.uid}
+                    layout
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                    transition={{ duration: 0.25 }}
+                    className="flex gap-3 items-center"
+                  >
                     {/* Imagen */}
                     <div className="w-[90px] h-[72px] rounded-lg overflow-hidden bg-neutral-100">
                       {item.attributes.image ? (
@@ -132,18 +139,18 @@ cart.map((item) => {
                       </div>
 
                       {/* Botón Quitar */}
-<button
-  onClick={() => setItemToRemove(item.uid)}
+                      <button
+                        onClick={() => setItemToRemove(item.uid)}
                         className="text-sm text-red-600 hover:underline ml-2"
                         title="Quitar"
                       >
                         ✕
                       </button>
                     </div>
-                  </div>
-                );
-              })
-            )}
+                  </motion.div>
+                ))
+              )}
+            </AnimatePresence>
           </div>
 
           {/* Total y confirmación */}
@@ -193,12 +200,11 @@ cart.map((item) => {
                 >
                   No
                 </button>
-<button
-  onClick={() => {
-    removeItem(itemToRemove);
-    setItemToRemove(null);
-  }}
-
+                <button
+                  onClick={() => {
+                    removeItem(itemToRemove);
+                    setItemToRemove(null);
+                  }}
                   className="bg-[#E00000] hover:bg-[#C40000] text-white px-4 py-2 rounded-full font-semibold text-sm"
                 >
                   Sí
