@@ -98,22 +98,11 @@ export default function SuccessPage() {
 
         {status === "ok" && (
           <>
-            <h1 className="text-2xl font-bold text-green-600">¡Pedido confirmado!</h1>
-            <p>Tu pedido fue registrado con éxito.</p>
+            <h1 className="text-2xl font-bold text-green-600">¡Pedido registrado!</h1>
             <p className="text-sm text-gray-600">
               Te contactaremos por WhatsApp para confirmarlo.
             </p>
 
-            {trackingId ? (
-              <a
-                href={`/tracking/${trackingId}`}
-                className="inline-block mt-4 px-5 py-2 text-sm font-semibold bg-[#E00000] text-white rounded-full hover:bg-[#C40000] transition"
-              >
-                Ver seguimiento en tiempo real
-              </a>
-            ) : (
-              <p className="text-sm text-gray-500">Estamos preparando tu pedido.</p>
-            )}
 
             <p className="text-xs text-neutral-500 mt-4">
               Serás redirigido automáticamente en 5 segundos...
