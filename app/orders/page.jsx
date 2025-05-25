@@ -2,6 +2,7 @@
 import { useCart } from "@/context/CartContext";
 import CartSidebar from "@/components/CartSidebar";
 import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function HomePage() {
   const { addItem, toggleCart, cart } = useCart();
@@ -133,110 +134,111 @@ export default function HomePage() {
       </main>
 
       <CartSidebar />
-      {selectedItem &&
-        (() => {
-          const basePrice =
-            selectedItem.attributes.discountPrice ||
-            selectedItem.attributes.price;
-          const extraTotal =
-            (extras.cheese ? 500 : 0) + (extras.coke ? 1500 : 0);
-          const finalPrice = basePrice + extraTotal;
+      <AnimatePresence>
+        {selectedItem && (
+          <motion.div
+            key="add-modal"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center px-4"
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="bg-white rounded-xl w-full max-w-md p-6 shadow-xl space-y-4 text-left"
+            >
+              <h3 className="text-xl font-bold text-[#1A1A1A]">
+                {selectedItem.attributes.name}
+              </h3>
 
-          return (
-            <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center px-4">
-              <div className="bg-white rounded-xl w-full max-w-md p-6 shadow-xl space-y-4 text-left">
-                <h3 className="text-xl font-bold text-[#1A1A1A]">
-                  {selectedItem.attributes.name}
-                </h3>
+              {selectedItem.attributes.description && (
+                <p className="text-sm text-neutral-600">
+                  {selectedItem.attributes.description}
+                </p>
+              )}
 
-                {selectedItem.attributes.description && (
-                  <p className="text-sm text-neutral-600">
-                    {selectedItem.attributes.description}
-                  </p>
-                )}
+              {/* Observaciones */}
+              <div>
+                <label className="block text-sm font-medium mb-1 text-[#1A1A1A]">
+                  Observaciones
+                </label>
+                <textarea
+                  className="w-full border rounded p-2 text-sm"
+                  placeholder="Ej: sin lechuga, cortar al medio..."
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                />
+              </div>
 
-                {/* Observaciones */}
-                <div>
-                  <label className="block text-sm font-medium mb-1 text-[#1A1A1A]">
-                    Observaciones
-                  </label>
-                  <textarea
-                    className="w-full border rounded p-2 text-sm"
-                    placeholder="Ej: sin lechuga, cortar al medio..."
-                    value={note}
-                    onChange={(e) => setNote(e.target.value)}
-                  />
-                </div>
-
-                {/* Extras */}
-                <div>
-                  <label className="block text-sm font-medium mb-2 text-[#1A1A1A]">
-                    Extras
-                  </label>
-                  <div className="space-y-2">
-                    <label className="flex items-center justify-between text-sm">
-                      <span>🧀 Extra queso (+$500)</span>
-                      <input
-                        type="checkbox"
-                        checked={extras.cheese}
-                        onChange={() =>
-                          setExtras((prev) => ({
-                            ...prev,
-                            cheese: !prev.cheese,
-                          }))
-                        }
-                      />
-                    </label>
-                    <label className="flex items-center justify-between text-sm">
-                      <span>🥤 Coca-Cola (+$1500)</span>
-                      <input
-                        type="checkbox"
-                        checked={extras.coke}
-                        onChange={() =>
-                          setExtras((prev) => ({ ...prev, coke: !prev.coke }))
-                        }
-                      />
-                    </label>
-                  </div>
-                </div>
-
-                {/* Total */}
-                <div className="text-right text-sm font-semibold text-[#1A1A1A]">
-                  Total: ${finalPrice}
-                </div>
-
-                {/* Botones */}
+              {/* Extras */}
+              <div>
+                <label className="block text-sm font-medium mb-2 text-[#1A1A1A]">
+                  Extras
+                </label>
                 <div className="space-y-2">
-                  <button
-                    onClick={() => {
-                      addItem({
-                        ...selectedItem,
-                        attributes: {
-                          ...selectedItem.attributes,
-                          price: finalPrice,
-                          note,
-                          extras,
-                        },
-                      });
-                      setSelectedItem(null);
-                      setNote("");
-                      setExtras({ cheese: false, coke: false });
-                    }}
-                    className="w-full bg-[#E00000] hover:bg-[#C40000] text-white py-2 rounded-full font-bold text-sm"
-                  >
-                    Agregar al pedido - ${finalPrice}
-                  </button>
-                  <button
-                    onClick={() => setSelectedItem(null)}
-                    className="w-full text-sm text-neutral-500 text-center"
-                  >
-                    Cancelar
-                  </button>
+                  <label className="flex items-center justify-between text-sm">
+                    <span>🧀 Extra queso (+$500)</span>
+                    <input
+                      type="checkbox"
+                      checked={extras.cheese}
+                      onChange={() =>
+                        setExtras((prev) => ({ ...prev, cheese: !prev.cheese }))
+                      }
+                    />
+                  </label>
+                  <label className="flex items-center justify-between text-sm">
+                    <span>🥤 Coca-Cola (+$1500)</span>
+                    <input
+                      type="checkbox"
+                      checked={extras.coke}
+                      onChange={() =>
+                        setExtras((prev) => ({ ...prev, coke: !prev.coke }))
+                      }
+                    />
+                  </label>
                 </div>
               </div>
-            </div>
-          );
-        })()}
+
+              {/* Total */}
+              <div className="text-right text-sm font-semibold text-[#1A1A1A]">
+                Total: ${finalPrice}
+              </div>
+
+              {/* Botones */}
+              <div className="space-y-2">
+                <button
+                  onClick={() => {
+                    addItem({
+                      ...selectedItem,
+                      attributes: {
+                        ...selectedItem.attributes,
+                        price: finalPrice,
+                        note,
+                        extras,
+                      },
+                    });
+                    setSelectedItem(null);
+                    setNote("");
+                    setExtras({ cheese: false, coke: false });
+                  }}
+                  className="w-full bg-[#E00000] hover:bg-[#C40000] text-white py-2 rounded-full font-bold text-sm"
+                >
+                  Agregar al pedido - ${finalPrice}
+                </button>
+                <button
+                  onClick={() => setSelectedItem(null)}
+                  className="w-full text-sm text-neutral-500 text-center"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
