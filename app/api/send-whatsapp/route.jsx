@@ -64,7 +64,7 @@ export async function POST(req) {
       },
     };
 
-    // ⏩ Enviar mensaje por WhatsApp API
+    // ⏩ Enviar mensaje a WhatsApp Cloud API
     const res = await fetch(
       `https://graph.facebook.com/v19.0/${process.env.WHATSAPP_PHONE_NUMBER_ID}/messages`,
       {
@@ -89,25 +89,23 @@ export async function POST(req) {
 
     console.log("✅ Mensaje de WhatsApp enviado correctamente:", data);
 
+    // ✅ Guardar mensaje en whatsapp_chats
     const chatRef = doc(db, "whatsapp_chats", trackingId);
 
-    await setDoc(
-      chatRef,
-      {
-        phone,
-        name: customerName,
-        trackingId,
-        messages: [],
-        updatedAt: serverTimestamp(),
-      },
-      { merge: true }
-    );
+    // Si no existe, crear datos base (sin array de mensajes)
+    await setDoc(chatRef, {
+      phone,
+      name: customerName,
+      trackingId,
+      updatedAt: serverTimestamp(),
+    }, { merge: true });
 
+    // Agregar mensaje al array sin sobrescribir
     await updateDoc(chatRef, {
       messages: arrayUnion({
         message: `Se envió mensaje de confirmación del pedido a ${customerName} desde sucursal ${branchName}.`,
         direction: "outgoing",
-        tipo: "plantilla", // ✅ nuevo campo
+        tipo: "plantilla",
         timestamp: new Date(),
       }),
       updatedAt: serverTimestamp(),
