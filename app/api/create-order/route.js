@@ -26,18 +26,47 @@ export async function POST(req) {
       manualDiscount,
       paymentMethod,
       paid,
-      ref: externalRef, // ✅ Traemos la referencia externa del body
+      ref: externalRef,
     } = body;
 
     if (customer.phone) {
       await saveCustomer(customer);
     }
 
-    // const totalBase = cart.reduce(
-    //   (sum, it) => sum + (it.discountPrice || it.price) * it.quantity,
-    //   0
-    // );
+    // 🔒 Validar cupón si se envió
+    if (coupon && customer.phone) {
+      const q = query(collection(db, "coupons"), where("code", "==", coupon));
+      const snap = await getDocs(q);
 
+      if (!snap.empty) {
+        const docRef = snap.docs[0].ref;
+        const docData = snap.docs[0].data();
+        const usedBy = Array.isArray(docData.usedBy) ? docData.usedBy : [];
+
+        const alreadyUsed = usedBy.some((u) => {
+          if (u.phone !== customer.phone) return false;
+
+          if (docData.usageLimit === "once") return true;
+
+          if (docData.usageLimit === "once_per_week") {
+            const usedDate = new Date(u.date);
+            const diff = Date.now() - usedDate.getTime();
+            return diff < 7 * 24 * 60 * 60 * 1000; // menos de una semana
+          }
+
+          return false;
+        });
+
+        if (alreadyUsed) {
+          return NextResponse.json(
+            { error: "Este cupón ya fue usado por este número." },
+            { status: 400 }
+          );
+        }
+      }
+    }
+
+    // Calcular totales
     const totalBase = cart.reduce(
       (sum, it) =>
         sum + Number(it.discountPrice || it.price) * Number(it.quantity),
@@ -46,16 +75,12 @@ export async function POST(req) {
 
     const manualDiscountFixed = Number(manualDiscount || 0);
     const couponDiscountFixed = Number(couponDiscount || 0);
-
     const discountAmount =
       totalBase * ((couponDiscountFixed + manualDiscountFixed) / 100);
 
-    // const discountAmount =
-    //   totalBase * ((couponDiscount + manualDiscount) / 100);
-
     const total = Math.max(totalBase - discountAmount + (shippingCost || 0), 0);
 
-    const trackingId = `tracking_${externalRef}`; // ✅ Creamos el tracking ID
+    const trackingId = `tracking_${externalRef}`;
 
     const orderData = {
       branch: kitchenId,
@@ -72,20 +97,19 @@ export async function POST(req) {
       discountAmount: discountAmount || 0,
       shippingCost,
       customer,
-      trackingId, // ✅ Guardamos el tracking ID
-      externalRef, // ✅ Guardamos la ref externa para evitar duplicados
+      trackingId,
+      externalRef,
     };
 
     const ref = await createOrderWithNumber(orderData);
 
-    // ✅ Registrar uso del cupón (si aplica)
+    // 📝 Guardar uso del cupón
     if (coupon && customer.phone) {
       const q = query(collection(db, "coupons"), where("code", "==", coupon));
       const snap = await getDocs(q);
       if (!snap.empty) {
         const docRef = snap.docs[0].ref;
         const currentData = snap.docs[0].data();
-
         const usedBy = Array.isArray(currentData.usedBy)
           ? [...currentData.usedBy]
           : [];
