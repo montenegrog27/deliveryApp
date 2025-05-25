@@ -16,19 +16,41 @@ export function CartProvider({ children }) {
     sessionStorage.setItem("mordisco-cart", JSON.stringify(cart));
   }, [cart]);
 
-  const addItem = (item) => {
-    setCart((prev) => {
-      const exists = prev.find((i) => i.id === item.id);
-      if (exists) {
-        return prev.map((i) =>
-          i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
-        );
-      }
-      return [...prev, { ...item, quantity: 1 }];
-    });
-  };
+const addItem = (item) => {
+  setCart((prev) => {
+    const exists = prev.find((i) =>
+      i.id === item.id &&
+      JSON.stringify(i.attributes.extras) === JSON.stringify(item.attributes.extras) &&
+      (i.attributes.note || "") === (item.attributes.note || "")
+    );
 
-  const removeItem = (id) => setCart((prev) => prev.filter((i) => i.id !== id));
+    if (exists) {
+      return prev.map((i) =>
+        i === exists ? { ...i, quantity: i.quantity + 1 } : i
+      );
+    }
+
+    // Generar uid único
+    const uid = crypto.randomUUID();
+    return [...prev, { ...item, uid, quantity: 1 }];
+  });
+};
+
+
+
+const decreaseItem = (id) => {
+  setCart((prev) =>
+    prev.map((i) =>
+      i.id === id
+        ? { ...i, quantity: Math.max(1, i.quantity - 1) }
+        : i
+    )
+  );
+};
+
+
+const removeItem = (uid) =>
+  setCart((prev) => prev.filter((i) => i.uid !== uid));
   const clearCart = () => setCart([]);
 
   return (
@@ -36,6 +58,7 @@ export function CartProvider({ children }) {
       value={{
         cart,
         addItem,
+        decreaseItem, // 👈 agregado
         removeItem,
         clearCart,
         isOpen,

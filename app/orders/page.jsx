@@ -8,6 +8,12 @@ export default function HomePage() {
   const [menu, setMenu] = useState([]);
   const [loading, setLoading] = useState(true);
   const [bump, setBump] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [note, setNote] = useState("");
+  const [extras, setExtras] = useState({
+    cheese: false,
+    coke: false,
+  });
 
   useEffect(() => {
     const fetchMenu = async () => {
@@ -58,7 +64,9 @@ export default function HomePage() {
       {/* CONTENIDO */}
       <main className="max-w-3xl mx-auto px-4 py-8 space-y-16">
         {loading ? (
-          <p className="text-center text-gray-500 mt-12">Cargando productos...</p>
+          <p className="text-center text-gray-500 mt-12">
+            Cargando productos...
+          </p>
         ) : (
           menu
             .slice()
@@ -70,7 +78,9 @@ export default function HomePage() {
 
               return (
                 <section key={cat.id} className="space-y-6">
-                  <h2 className="text-2xl font-bold text-[#E00000]">{cat.name}</h2>
+                  <h2 className="text-2xl font-bold text-[#E00000]">
+                    {cat.name}
+                  </h2>
                   <ul className="space-y-4">
                     {availableItems.map((item) => (
                       <li key={item.id} className="flex gap-4 items-center">
@@ -101,13 +111,13 @@ export default function HomePage() {
                           )}
                           <div className="flex items-center justify-between mt-2">
                             <span className="text-[#E00000] font-bold text-sm">
-                              ${item.attributes.discountPrice || item.attributes.price}
+                              $
+                              {item.attributes.discountPrice ||
+                                item.attributes.price}
                             </span>
                             <button
-                              onClick={() => handleAdd(item)}
-                              className={`text-sm font-semibold text-white bg-[#E00000] hover:bg-[#C40000] px-4 py-1.5 rounded-full transition-all duration-200 ${
-                                bump ? "animate-bounce-sm" : ""
-                              }`}
+                              onClick={() => setSelectedItem(item)}
+                              className="text-sm font-semibold text-white bg-[#E00000] hover:bg-[#C40000] px-4 py-1.5 rounded-full transition-all duration-200"
                             >
                               Agregar
                             </button>
@@ -123,6 +133,110 @@ export default function HomePage() {
       </main>
 
       <CartSidebar />
+      {selectedItem &&
+        (() => {
+          const basePrice =
+            selectedItem.attributes.discountPrice ||
+            selectedItem.attributes.price;
+          const extraTotal =
+            (extras.cheese ? 500 : 0) + (extras.coke ? 1500 : 0);
+          const finalPrice = basePrice + extraTotal;
+
+          return (
+            <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center px-4">
+              <div className="bg-white rounded-xl w-full max-w-md p-6 shadow-xl space-y-4 text-left">
+                <h3 className="text-xl font-bold text-[#1A1A1A]">
+                  {selectedItem.attributes.name}
+                </h3>
+
+                {selectedItem.attributes.description && (
+                  <p className="text-sm text-neutral-600">
+                    {selectedItem.attributes.description}
+                  </p>
+                )}
+
+                {/* Observaciones */}
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-[#1A1A1A]">
+                    Observaciones
+                  </label>
+                  <textarea
+                    className="w-full border rounded p-2 text-sm"
+                    placeholder="Ej: sin lechuga, cortar al medio..."
+                    value={note}
+                    onChange={(e) => setNote(e.target.value)}
+                  />
+                </div>
+
+                {/* Extras */}
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-[#1A1A1A]">
+                    Extras
+                  </label>
+                  <div className="space-y-2">
+                    <label className="flex items-center justify-between text-sm">
+                      <span>🧀 Extra queso (+$500)</span>
+                      <input
+                        type="checkbox"
+                        checked={extras.cheese}
+                        onChange={() =>
+                          setExtras((prev) => ({
+                            ...prev,
+                            cheese: !prev.cheese,
+                          }))
+                        }
+                      />
+                    </label>
+                    <label className="flex items-center justify-between text-sm">
+                      <span>🥤 Coca-Cola (+$1500)</span>
+                      <input
+                        type="checkbox"
+                        checked={extras.coke}
+                        onChange={() =>
+                          setExtras((prev) => ({ ...prev, coke: !prev.coke }))
+                        }
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                {/* Total */}
+                <div className="text-right text-sm font-semibold text-[#1A1A1A]">
+                  Total: ${finalPrice}
+                </div>
+
+                {/* Botones */}
+                <div className="space-y-2">
+                  <button
+                    onClick={() => {
+                      addItem({
+                        ...selectedItem,
+                        attributes: {
+                          ...selectedItem.attributes,
+                          price: finalPrice,
+                          note,
+                          extras,
+                        },
+                      });
+                      setSelectedItem(null);
+                      setNote("");
+                      setExtras({ cheese: false, coke: false });
+                    }}
+                    className="w-full bg-[#E00000] hover:bg-[#C40000] text-white py-2 rounded-full font-bold text-sm"
+                  >
+                    Agregar al pedido - ${finalPrice}
+                  </button>
+                  <button
+                    onClick={() => setSelectedItem(null)}
+                    className="w-full text-sm text-neutral-500 text-center"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
     </div>
   );
 }
