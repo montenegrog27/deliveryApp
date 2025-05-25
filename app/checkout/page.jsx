@@ -6,9 +6,7 @@ import * as turf from "@turf/turf";
 import { useRouter } from "next/navigation";
 
 function formatOrderSummary(cart) {
-  const lines = cart.map(
-    (item) => `${item.quantity} ${item.attributes.name}`
-  );
+  const lines = cart.map((item) => `${item.quantity} ${item.attributes.name}`);
   const total = cart.reduce(
     (sum, item) => sum + item.attributes.price * item.quantity,
     0
@@ -220,7 +218,6 @@ export default function CheckoutPage() {
     }
   };
 
-
   const validarCupon = async () => {
     setCuponError(null);
     setCuponValido(null);
@@ -230,7 +227,26 @@ export default function CheckoutPage() {
       if (!res.ok) throw new Error("Cupón no encontrado");
       const cupon = await res.json();
 
+      // Lógica de uso del cupón
+      const usosCliente =
+        cupon.usedBy?.filter((u) => u.phone === customer.phone) || [];
       const hoy = new Date();
+
+      if (cupon.usageLimit === "once" && usosCliente.length > 0) {
+        throw new Error("Este cupón ya fue usado.");
+      }
+
+      if (cupon.usageLimit === "once_per_week") {
+        const usoReciente = usosCliente.some((u) => {
+          const fechaUso = new Date(u.date);
+          const diferencia = (hoy - fechaUso) / (1000 * 60 * 60 * 24);
+          return diferencia < 7;
+        });
+        if (usoReciente) {
+          throw new Error("Este cupón ya fue usado esta semana.");
+        }
+      }
+
       const fechaInicio = cupon.startDate ? new Date(cupon.startDate) : null;
       const fechaFin = cupon.endDate ? new Date(cupon.endDate) : null;
 

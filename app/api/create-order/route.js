@@ -39,30 +39,21 @@ export async function POST(req) {
     // );
 
     const totalBase = cart.reduce(
-  (sum, it) => sum + Number(it.discountPrice || it.price) * Number(it.quantity),
-  0
-);
+      (sum, it) =>
+        sum + Number(it.discountPrice || it.price) * Number(it.quantity),
+      0
+    );
 
+    const manualDiscountFixed = Number(manualDiscount || 0);
+    const couponDiscountFixed = Number(couponDiscount || 0);
 
-
-const manualDiscountFixed = Number(manualDiscount || 0);
-const couponDiscountFixed = Number(couponDiscount || 0);
-
-const discountAmount =
-  totalBase * ((couponDiscountFixed + manualDiscountFixed) / 100);
-
+    const discountAmount =
+      totalBase * ((couponDiscountFixed + manualDiscountFixed) / 100);
 
     // const discountAmount =
     //   totalBase * ((couponDiscount + manualDiscount) / 100);
 
-    const total = Math.max(
-      totalBase - discountAmount + (shippingCost || 0),
-      0
-    );
-
-
-
-
+    const total = Math.max(totalBase - discountAmount + (shippingCost || 0), 0);
 
     const trackingId = `tracking_${externalRef}`; // ✅ Creamos el tracking ID
 
@@ -81,11 +72,32 @@ const discountAmount =
       discountAmount: discountAmount || 0,
       shippingCost,
       customer,
-      trackingId,     // ✅ Guardamos el tracking ID
-      externalRef,    // ✅ Guardamos la ref externa para evitar duplicados
+      trackingId, // ✅ Guardamos el tracking ID
+      externalRef, // ✅ Guardamos la ref externa para evitar duplicados
     };
 
     const ref = await createOrderWithNumber(orderData);
+
+    // ✅ Registrar uso del cupón (si aplica)
+    if (coupon && customer.phone) {
+      const q = query(collection(db, "coupons"), where("code", "==", coupon));
+      const snap = await getDocs(q);
+      if (!snap.empty) {
+        const docRef = snap.docs[0].ref;
+        const currentData = snap.docs[0].data();
+
+        const usedBy = Array.isArray(currentData.usedBy)
+          ? [...currentData.usedBy]
+          : [];
+
+        usedBy.push({
+          phone: customer.phone,
+          date: new Date().toISOString(),
+        });
+
+        await updateDoc(docRef, { usedBy });
+      }
+    }
 
     // 🔻 Descontar stock
     for (const item of cart) {
