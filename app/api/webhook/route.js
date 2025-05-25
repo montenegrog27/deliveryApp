@@ -145,12 +145,41 @@ const fullTrackingId = trackingId.startsWith("tracking_")
 
     const orderRef = snap.docs[0].ref;
 
-    if (action === "confirmar") {
-      await updateDoc(orderRef, {
-        clientConfirm: true,
-        clientConfirmAt: serverTimestamp(),
-      });
-      console.log("✅ Pedido confirmado por el cliente.");
+if (action === "confirmar") {
+  await updateDoc(orderRef, {
+    clientConfirm: true,
+    clientConfirmAt: serverTimestamp(),
+  });
+  console.log("✅ Pedido confirmado por el cliente.");
+
+  const order = snap.docs[0].data();
+  const customerPhone = order.customer?.phone?.replace(/\D/g, "");
+  const customerName = order.customer?.name || "cliente";
+  const trackingId = order.trackingId;
+
+  const textMessage =
+    "✅ Pedido confirmado, muchas gracias por elegirnos!\nTe avisaremos cuando el cadete esté yendo, y también cuando esté fuera de tu domicilio.\n¡Gracias!";
+
+  try {
+    await fetch("https://graph.facebook.com/v19.0/" + process.env.WHATSAPP_PHONE_NUMBER_ID + "/messages", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.WHATSAPP_API_TOKEN}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        messaging_product: "whatsapp",
+        to: customerPhone,
+        type: "text",
+        text: { body: textMessage },
+      }),
+    });
+
+    console.log("📤 Mensaje de confirmación enviado por WhatsApp");
+  } catch (err) {
+    console.error("❌ Error al enviar mensaje de confirmación:", err);
+  }
+
     } else if (action === "cancelar") {
       await updateDoc(orderRef, {
         clientConfirm: false,
