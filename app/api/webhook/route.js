@@ -40,7 +40,10 @@ export async function POST(req) {
     const snap = await getDocs(q);
 
     if (snap.empty) {
-      console.warn("⚠️ No se encontró la orden con trackingId:", fullTrackingId);
+      console.warn(
+        "⚠️ No se encontró la orden con trackingId:",
+        fullTrackingId
+      );
       return new Response("Pedido no encontrado", { status: 200 });
     }
 
@@ -55,13 +58,19 @@ export async function POST(req) {
     if (action === "confirmar") {
       if (order.status === "cancelled") {
         console.log("⚠️ Ya está cancelado, no se puede confirmar.");
-        await sendText(customerPhone, "⚠️ Lo sentimos, ya hemos cancelado tu pedido.");
+        await sendText(
+          customerPhone,
+          "⚠️ Lo sentimos, ya hemos cancelado tu pedido."
+        );
         return new Response("Ya cancelado", { status: 200 });
       }
 
       if (order.clientConfirm === true) {
         console.log("⚠️ Ya fue confirmado.");
-        await sendText(customerPhone, "⚠️ Ya hemos confirmado tu pedido anteriormente.");
+        await sendText(
+          customerPhone,
+          "⚠️ Ya hemos confirmado tu pedido anteriormente."
+        );
         return new Response("Ya confirmado", { status: 200 });
       }
 
@@ -83,13 +92,19 @@ export async function POST(req) {
     if (action === "cancelar") {
       if (order.clientConfirm === true) {
         console.log("⚠️ Ya fue confirmado, no se puede cancelar.");
-        await sendText(customerPhone, "⚠️ No podemos cancelarlo, ya lo confirmaste.");
+        await sendText(
+          customerPhone,
+          "⚠️ No podemos cancelarlo, ya lo confirmaste."
+        );
         return new Response("Ya confirmado", { status: 200 });
       }
 
       if (order.status === "cancelled") {
         console.log("⚠️ Ya fue cancelado.");
-        await sendText(customerPhone, "⚠️ Ya cancelamos tu pedido anteriormente.");
+        await sendText(
+          customerPhone,
+          "⚠️ Ya cancelamos tu pedido anteriormente."
+        );
         return new Response("Ya cancelado", { status: 200 });
       }
 
@@ -142,6 +157,19 @@ export async function POST(req) {
       }),
       updatedAt: serverTimestamp(),
     });
+
+    // 🔔 Notificar por WebSocket que hay un nuevo mensaje de WhatsApp
+    try {
+      await fetch(
+        "https://mordisco-ws-production.up.railway.app/notify-whatsapp",
+        {
+          method: "POST",
+        }
+      );
+      console.log("📣 Notificación enviada al WebSocket");
+    } catch (error) {
+      console.error("❌ Error notificando al WebSocket:", error);
+    }
 
     console.log("📩 Mensaje guardado en whatsapp_chats:", trackingId);
   }
