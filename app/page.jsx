@@ -3,11 +3,16 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-[#fff9f5] flex flex-col items-center justify-center px-6 py-12 text-neutral-800 text-center font-sans">
       {/* Logo o Nombre destacado */}
-      <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight mb-3 text-red-600">
-        Mordisco
+      <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight mb-3  text-[#fff9f5] ">
+        Mordisco burgers
       </h1>
+          <img
+          src="https://res.cloudinary.com/dsbrnqc5z/image/upload/v1744755147/Versi%C3%B3n_principal_xer7zs.svg"
+          alt="MORDISCO"
+          className="h-8"
+        />
       <p className="text-lg text-neutral-600 font-medium mb-6">
-        Hamburguesas en Corrientes, Argentina 🍔
+        Corrientes Capital, Argentina 🍔
       </p>
 
       {/* Mensaje principal */}
