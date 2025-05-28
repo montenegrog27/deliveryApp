@@ -39,7 +39,7 @@ export default function Home() {
         <div>
           <h3 className="font-semibold text-neutral-800 mb-1">📞 Contacto</h3>
           <p>WhatsApp: +54 9 379 405-5152</p>
-          <p>Email: unmordiscopls@gmail.com</p>
+          <p>Email: consultas@mordiscoburgers.com.ar</p>
         </div>
 
         <div>
@@ -51,6 +51,14 @@ export default function Home() {
             className="text-blue-600 underline"
           >
             instagram.com/mordisco.arg
+          </a>
+                    <a
+            href="https://www.facebook.com/profile.php?id=61575119946351"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 underline"
+          >
+            facboo.com/mordisco
           </a>
         </div>
       </div>
