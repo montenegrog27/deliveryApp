@@ -128,7 +128,6 @@
 
 
 
-
 import { NextResponse } from "next/server";
 import { db } from "@/lib/firebase";
 import {
@@ -214,22 +213,22 @@ export async function POST(req) {
       );
     }
 
-    // ✅ Guardar por número
+    // 🔁 Guardar mensaje y pedido en whatsapp_chats/{phone}
     const chatRef = doc(db, "whatsapp_chats", to);
     const chatSnap = await getDoc(chatRef);
+    const timestamp = new Date();
 
     const nuevoMensaje = {
       message: `Se envió mensaje de confirmación del pedido a ${customerName} desde sucursal ${branchName}.`,
       direction: "outgoing",
       tipo: "plantilla",
-      timestamp: new Date(),
+      timestamp,
     };
 
     let orders = [];
 
     if (chatSnap.exists()) {
-      const data = chatSnap.data();
-      orders = data.orders || [];
+      orders = chatSnap.data().orders || [];
 
       const index = orders.findIndex((o) => o.trackingId === trackingId);
       if (index !== -1) {
@@ -238,7 +237,7 @@ export async function POST(req) {
         orders.push({
           trackingId,
           orderId: trackingId,
-          createdAt: new Date(),
+          createdAt: timestamp,
           status: "pending",
           orderMode: "takeaway",
           messages: [nuevoMensaje],
@@ -248,14 +247,14 @@ export async function POST(req) {
       orders.push({
         trackingId,
         orderId: trackingId,
-        createdAt: new Date(),
+        createdAt: timestamp,
         status: "pending",
         orderMode: "takeaway",
         messages: [nuevoMensaje],
       });
     }
 
-    // ⚠️ Si hay más de uno activo, enviar aclaración
+    // 🧠 Si hay más de uno activo, enviar aclaración
     const activos = orders.filter((o) => o.status !== "delivered");
     if (activos.length > 1) {
       const aclaracion = activos
@@ -287,7 +286,7 @@ export async function POST(req) {
       { merge: true }
     );
 
-    // 🔔 WebSocket (opcional)
+    // 🌐 WebSocket para notificar al inbox
     try {
       await fetch("https://websocket-production-d210.up.railway.app/notify-whatsapp", {
         method: "POST",
