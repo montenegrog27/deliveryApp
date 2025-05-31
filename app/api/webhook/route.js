@@ -249,7 +249,8 @@ async function upsertMessage({ phone, name, trackingId, order, message }) {
   const chatRef = doc(db, "whatsapp_chats", phone);
   const chatSnap = await getDoc(chatRef);
   const timestamp = new Date();
-  const nuevoMensaje = { ...message, timestamp };
+  // const nuevoMensaje = { ...message, timestamp };
+const nuevoMensaje = { ...message, timestamp, read: false };
 
   let orders = [];
 
