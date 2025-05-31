@@ -386,16 +386,33 @@ export async function POST(req) {
   }
 
   // 🟩 MENSAJE DE TEXTO NORMAL
+  // 🟩 MENSAJE DE TEXTO NORMAL
   if (type === "text") {
+    const phoneNormalized = phone.replace(/\D/g, "");
+
+    console.log("📩 Mensaje entrante de:", phone);
+    console.log("📞 Número normalizado:", phoneNormalized);
+
     const q = query(
       collection(db, "orders"),
-      where("customer.phone", "==", phone),
+      where("customer.phone", "==", phoneNormalized),
       where("status", "!=", "delivered")
     );
     const snap = await getDocs(q);
+    console.log("🔍 Órdenes encontradas:", snap.size);
 
-    const order = !snap.empty ? snap.docs[0].data() : null;
-    const trackingId = order?.trackingId || `tracking_unknown_${Date.now()}`;
+    let order = null;
+    let trackingId = `tracking_unknown_${phoneNormalized}_${Date.now()}`;
+    let customerName = null;
+
+    if (!snap.empty) {
+      const doc = snap.docs[0];
+      order = doc.data();
+      trackingId = order.trackingId;
+      customerName = order.customer?.name || null;
+    } else {
+      console.warn("⚠️ No se encontró una orden activa para este número:", phoneNormalized);
+    }
 
     const incomingMessage = {
       direction: "incoming",
@@ -404,13 +421,14 @@ export async function POST(req) {
     };
 
     await upsertMessage({
-      phone,
-      name: order?.customer?.name || null,
+      phone: phoneNormalized,
+      name: customerName,
       trackingId,
       order,
       message: incomingMessage,
     });
   }
+
 
   return new Response("EVENT_RECEIVED", { status: 200 });
 }

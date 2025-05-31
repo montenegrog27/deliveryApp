@@ -150,6 +150,7 @@ export async function POST(req) {
     }
 
     const to = phone.replace(/\D/g, "");
+    console.log("to",to)
     const trackingId = rawId.startsWith("tracking_")
       ? rawId
       : `tracking_${rawId}`;
