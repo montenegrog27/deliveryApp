@@ -149,18 +149,18 @@
 //   );
 // }
 
-
 "use client";
 import { useState } from "react";
-import { Marker, Map } from "react-map-gl/mapbox";
+import Map, { Marker } from "react-map-gl";
 
 export default function AddressInput({ onSelect, setDireccionConfirmada }) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [showMap, setShowMap] = useState(false);
   const [selectedCandidate, setSelectedCandidate] = useState(null);
-  const [selectedPoint, setSelectedPoint] = useState(null);
+  const [mapModalOpen, setMapModalOpen] = useState(false);
+  const [mapSelectedPoint, setMapSelectedPoint] = useState(null);
+  const [mapCandidate, setMapCandidate] = useState(null);
 
   const handleInput = async (value) => {
     setQuery(value);
@@ -179,7 +179,6 @@ export default function AddressInput({ onSelect, setDireccionConfirmada }) {
           process.env.NEXT_PUBLIC_MAPBOX_TOKEN
         }&autocomplete=true&country=AR&bbox=-58.87,-27.51,-58.775,-27.43&limit=5`
       );
-
       const data = await res.json();
 
       const filtered = data.features.filter((f) =>
@@ -199,30 +198,17 @@ export default function AddressInput({ onSelect, setDireccionConfirmada }) {
   };
 
   const confirmSelection = (place) => {
-    const hasStreetNumber = place.context?.some(
-      (ctx) => ctx.id.startsWith("address") || ctx.id.startsWith("place")
-    );
-    const isValid = !!place.address || hasStreetNumber;
-
-    setQuery(place.place_name);
+    setQuery(place.address);
     setResults([]);
     setSelectedCandidate(null);
-
-    onSelect({
-      address: place.place_name,
-      lat: place.center[1],
-      lng: place.center[0],
-      isValidAddress: isValid,
-    });
-
+    onSelect(place);
     if (setDireccionConfirmada) setDireccionConfirmada(true);
   };
 
   const handleMapClick = async (e) => {
     const lng = e.lngLat.lng;
     const lat = e.lngLat.lat;
-
-    setSelectedPoint({ lat, lng });
+    setMapSelectedPoint({ lat, lng });
 
     try {
       const res = await fetch(
@@ -231,7 +217,7 @@ export default function AddressInput({ onSelect, setDireccionConfirmada }) {
       const data = await res.json();
       const place = data.features?.[0];
 
-      setSelectedCandidate({
+      setMapCandidate({
         address: place?.place_name || "Ubicación seleccionada en el mapa",
         lat,
         lng,
@@ -242,14 +228,12 @@ export default function AddressInput({ onSelect, setDireccionConfirmada }) {
     }
   };
 
-  const handleConfirmCandidate = () => {
-    if (!selectedCandidate) return;
-    onSelect(selectedCandidate);
-    setQuery(selectedCandidate.address);
-    setResults([]);
-    setShowMap(false);
-    setSelectedCandidate(null);
-    if (setDireccionConfirmada) setDireccionConfirmada(true);
+  const confirmMapCandidate = () => {
+    if (!mapCandidate) return;
+    confirmSelection(mapCandidate);
+    setMapModalOpen(false);
+    setMapCandidate(null);
+    setMapSelectedPoint(null);
   };
 
   return (
@@ -276,11 +260,11 @@ export default function AddressInput({ onSelect, setDireccionConfirmada }) {
       )}
 
       {results.length > 0 && (
-        <ul className="absolute border-neutral-300 rounded-lg mt-1 shadow w-full z-10">
+        <ul className="absolute border-neutral-300 rounded-lg mt-1 shadow w-full z-10 bg-white">
           {results.map((r) => (
             <li
               key={r.id}
-              className="px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer border border-neutral-200 bg-[#FFF9F2]"
+              className="px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer border-b"
               onClick={() =>
                 setSelectedCandidate({
                   address: r.place_name,
@@ -294,9 +278,9 @@ export default function AddressInput({ onSelect, setDireccionConfirmada }) {
             </li>
           ))}
           <li
-            className="px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer border border-neutral-200 bg-[#FFF9F2] text-blue-600"
+            className="px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer text-blue-600"
             onClick={() => {
-              setShowMap(true);
+              setMapModalOpen(true);
               setResults([]);
               setSelectedCandidate(null);
             }}
@@ -311,7 +295,7 @@ export default function AddressInput({ onSelect, setDireccionConfirmada }) {
           <p>Dirección seleccionada:</p>
           <p className="font-semibold">{selectedCandidate.address}</p>
           <button
-            onClick={handleConfirmCandidate}
+            onClick={() => confirmSelection(selectedCandidate)}
             className="bg-blue-600 text-white px-4 py-1 rounded text-sm"
           >
             Aceptar
@@ -319,31 +303,59 @@ export default function AddressInput({ onSelect, setDireccionConfirmada }) {
         </div>
       )}
 
-      {showMap && (
-        <div className="mt-4">
-          <Map
-            initialViewState={{
-              longitude: -58.83,
-              latitude: -27.47,
-              zoom: 13,
-            }}
-            style={{ width: "100%", height: 300 }}
-            mapStyle="mapbox://styles/mapbox/light-v10"
-            mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
-            onClick={handleMapClick}
-          >
-            {selectedPoint && (
-              <Marker
-                longitude={selectedPoint.lng}
-                latitude={selectedPoint.lat}
+      {/* MODAL CON MAPA */}
+      {mapModalOpen && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center">
+          <div className="bg-white rounded-xl overflow-hidden w-full max-w-2xl max-h-[90vh] relative">
+            <button
+              onClick={() => setMapModalOpen(false)}
+              className="absolute top-3 right-4 text-gray-600 text-xl"
+            >
+              ✕
+            </button>
+            <div className="h-[400px] w-full">
+              <Map
+                initialViewState={{
+                  longitude: -58.83,
+                  latitude: -27.47,
+                  zoom: 13,
+                }}
+                mapStyle="mapbox://styles/mapbox/light-v10"
+                mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
+                onClick={handleMapClick}
               >
-                <div className="text-red-500 text-2xl">📍</div>
-              </Marker>
-            )}
-          </Map>
-          <p className="text-xs text-gray-500 mt-2">
-            Tocá el mapa para seleccionar tu ubicación exacta.
-          </p>
+                {mapSelectedPoint && (
+                  <Marker
+                    longitude={mapSelectedPoint.lng}
+                    latitude={mapSelectedPoint.lat}
+                  >
+                    <div className="text-red-500 text-2xl">📍</div>
+                  </Marker>
+                )}
+              </Map>
+            </div>
+            <div className="p-4">
+              {mapCandidate ? (
+                <>
+                  <p className="text-sm text-gray-700 mb-2">
+                    Dirección seleccionada:
+                    <br />
+                    <strong>{mapCandidate.address}</strong>
+                  </p>
+                  <button
+                    onClick={confirmMapCandidate}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-md w-full"
+                  >
+                    Aceptar
+                  </button>
+                </>
+              ) : (
+                <p className="text-sm text-gray-500 text-center">
+                  Tocá sobre el mapa para seleccionar una ubicación
+                </p>
+              )}
+            </div>
+          </div>
         </div>
       )}
     </div>
