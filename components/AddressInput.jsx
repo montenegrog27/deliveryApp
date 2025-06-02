@@ -161,6 +161,10 @@ export default function AddressInput({ onSelect, setDireccionConfirmada }) {
   const [mapModalOpen, setMapModalOpen] = useState(false);
   const [mapSelectedPoint, setMapSelectedPoint] = useState(null);
   const [mapCandidate, setMapCandidate] = useState(null);
+const [mapCenter, setMapCenter] = useState({
+  lat: -27.47,
+  lng: -58.83,
+});
 
   const handleInput = async (value) => {
     setQuery(value);
@@ -315,29 +319,38 @@ export default function AddressInput({ onSelect, setDireccionConfirmada }) {
             </button>
             <div className="h-[400px] w-full">
 <Map
-  key={mapModalOpen ? "map-visible" : "map-hidden"} // 👈 fuerza remount
   initialViewState={{
-    longitude: mapSelectedPoint?.lng || -58.83,
-    latitude: mapSelectedPoint?.lat || -27.47,
+    longitude: mapCenter.lng,
+    latitude: mapCenter.lat,
     zoom: 13,
   }}
   mapStyle="mapbox://styles/mapbox/light-v10"
   mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
-  onClick={handleMapClick}
+  onMoveEnd={(e) => {
+    const center = e.viewState;
+    setMapCenter({ lat: center.latitude, lng: center.longitude });
+
+    // reverse geocoding al mover
+    fetch(
+      `https://api.mapbox.com/geocoding/v5/mapbox.places/${center.longitude},${center.latitude}.json?access_token=${process.env.NEXT_PUBLIC_MAPBOX_TOKEN}`
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        const place = data.features?.[0];
+        setMapCandidate({
+          address: place?.place_name || "Ubicación seleccionada en el mapa",
+          lat: center.latitude,
+          lng: center.longitude,
+          isValidAddress: true,
+        });
+      });
+  }}
 >
-{mapSelectedPoint?.lng && mapSelectedPoint?.lat && (
-  <Marker
-    longitude={mapSelectedPoint.lng}
-    latitude={mapSelectedPoint.lat}
-    anchor="bottom"
-  >
-    <img
-      src="/pin.png"
-      alt="Ubicación"
-      className="w-10 h-10 object-contain pointer-events-none border border-black bg-white rounded-full"
-    />
-  </Marker>
-)}
+
+{/* Pin centrado, no usa Marker */}
+<div className="absolute top-1/2 left-1/2 z-10 -translate-x-1/2 -translate-y-full pointer-events-none">
+  <img src="/pin.png" alt="Pin" className="w-10 h-10" />
+</div>
 
               </Map>
             </div>
