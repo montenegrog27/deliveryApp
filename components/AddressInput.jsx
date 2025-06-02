@@ -151,14 +151,20 @@
 
 "use client";
 import { useState } from "react";
-import { Marker, Map } from "react-map-gl/mapbox";
 
-export default function AddressInput({ onSelect, setDireccionConfirmada, onChooseFromMap }) {
-    const [query, setQuery] = useState("");
+export default function AddressInput({
+  onSelect,
+  setDireccionConfirmada,
+  onChooseFromMap,
+}) {
+  const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [selectedCandidate, setSelectedCandidate] = useState(null);
+  const [inputValue, setInputValue] = useState(value || "");
 
+  useEffect(() => {
+    setInputValue(value || "");
+  }, [value]);
 
   const handleInput = async (value) => {
     setQuery(value);
@@ -168,7 +174,6 @@ export default function AddressInput({ onSelect, setDireccionConfirmada, onChoos
       return;
     }
 
-    setLoading(true);
     try {
       const res = await fetch(
         `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
@@ -190,8 +195,6 @@ export default function AddressInput({ onSelect, setDireccionConfirmada, onChoos
       setResults(filtered);
     } catch (err) {
       console.error("❌ Error buscando dirección:", err);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -202,7 +205,6 @@ export default function AddressInput({ onSelect, setDireccionConfirmada, onChoos
     onSelect(place);
     if (setDireccionConfirmada) setDireccionConfirmada(true);
   };
-
 
   return (
     <div className="relative">
@@ -217,15 +219,13 @@ export default function AddressInput({ onSelect, setDireccionConfirmada, onChoos
         className="w-full border border-neutral-300 rounded-lg px-4 py-2 text-base"
       />
 
-      {loading && (
-        <div className="absolute top-1 right-2 animate-pulse">
-          <img
-            src="https://res.cloudinary.com/dsbrnqc5z/image/upload/v1744817613/Avatar_inicial_tbpnzy.svg"
-            alt="Cargando..."
-            className="w-6 h-6"
-          />
-        </div>
-      )}
+      <input
+        type="text"
+        value={inputValue}
+        onChange={(e) => setInputValue(e.target.value)}
+        placeholder="Ingresá tu dirección..."
+        className="w-full border border-neutral-300 rounded-lg px-4 py-2 text-base"
+      />
 
       {results.length > 0 && (
         <ul className="absolute border-neutral-300 rounded-lg mt-1 shadow w-full z-10 bg-white">

@@ -354,6 +354,7 @@ export default function CheckoutPage() {
             </div>
 
             <AddressInput
+              value={customer.address}
               onSelect={(loc) => {
                 if (!loc || !loc.lat || !loc.lng) return;
 
@@ -367,12 +368,12 @@ export default function CheckoutPage() {
 
                 setCustomer(updatedCustomer);
                 setDireccionConfirmada(true);
-
                 calcularEnvio(updatedCustomer);
               }}
-              onChooseFromMap={() => setShowMapModal(true)} // nuevo
-              setDireccionConfirmada={setDireccionConfirmada} // ✅ Asegurate de agregar esta línea
+              onChooseFromMap={() => setShowMapModal(true)}
+              setDireccionConfirmada={setDireccionConfirmada}
             />
+
             {showMapModal && (
               <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center">
                 <div className="bg-white rounded-xl overflow-hidden w-full max-w-2xl max-h-[90vh] relative">
