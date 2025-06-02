@@ -370,7 +370,6 @@ export default function CheckoutPage() {
 
                 calcularEnvio(updatedCustomer);
               }}
-              
               onChooseFromMap={() => setShowMapModal(true)} // nuevo
               setDireccionConfirmada={setDireccionConfirmada} // ✅ Asegurate de agregar esta línea
             />
@@ -383,47 +382,45 @@ export default function CheckoutPage() {
                   >
                     ✕
                   </button>
-                  <div className="h-[400px] w-full relative">
-                    {/* PIN EN CENTRO */}
-                    <div className="absolute top-1/2 left-1/2 z-10 -translate-x-1/2 -translate-y-full pointer-events-none">
-                      <img
-                        src="/pin.png"
-                        alt="Ubicación"
-                        className="w-10 h-10"
+                  <div className="relative w-full px-4 pb-4 pt-2">
+                    <div className="h-[400px] w-full rounded-lg overflow-hidden relative">
+                      {/* Pin centrado */}
+                      <div className="absolute top-1/2 left-1/2 z-10 -translate-x-1/2 -translate-y-full pointer-events-none">
+                        <img src="/pin.png" alt="Pin" className="w-10 h-10" />
+                      </div>
+
+                      <Map
+                        initialViewState={{
+                          longitude: mapCenter.lng,
+                          latitude: mapCenter.lat,
+                          zoom: 13,
+                        }}
+                        mapStyle="mapbox://styles/mapbox/light-v10"
+                        mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
+                        onMoveEnd={(e) => {
+                          const center = e.viewState;
+                          const lat = center.latitude;
+                          const lng = center.longitude;
+                          setMapCenter({ lat, lng });
+
+                          fetch(
+                            `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${process.env.NEXT_PUBLIC_MAPBOX_TOKEN}`
+                          )
+                            .then((res) => res.json())
+                            .then((data) => {
+                              const place = data.features?.[0];
+                              setMapCandidate({
+                                address:
+                                  place?.place_name ||
+                                  "Ubicación seleccionada en el mapa",
+                                lat,
+                                lng,
+                                isValidAddress: true,
+                              });
+                            });
+                        }}
                       />
                     </div>
-                    <Map
-                      initialViewState={{
-                        longitude: mapCenter.lng,
-                        latitude: mapCenter.lat,
-                        zoom: 13,
-                      }}
-                      mapStyle="mapbox://styles/mapbox/light-v10"
-                      mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
-                      onMoveEnd={(e) => {
-                        const center = e.viewState;
-                        const lat = center.latitude;
-                        const lng = center.longitude;
-                        setMapCenter({ lat, lng });
-
-                        // reverse geocoding
-                        fetch(
-                          `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${process.env.NEXT_PUBLIC_MAPBOX_TOKEN}`
-                        )
-                          .then((res) => res.json())
-                          .then((data) => {
-                            const place = data.features?.[0];
-                            setMapCandidate({
-                              address:
-                                place?.place_name ||
-                                "Ubicación seleccionada en el mapa",
-                              lat,
-                              lng,
-                              isValidAddress: true,
-                            });
-                          });
-                      }}
-                    />
                   </div>
 
                   <div className="p-4">
