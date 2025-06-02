@@ -149,10 +149,6 @@
 //   );
 // }
 
-
-
-
-
 "use client";
 import { useState } from "react";
 import { Marker, Map } from "react-map-gl/mapbox";
@@ -318,16 +314,17 @@ export default function AddressInput({ onSelect, setDireccionConfirmada }) {
               ✕
             </button>
             <div className="h-[400px] w-full">
-              <Map
-                initialViewState={{
-                  longitude: -58.83,
-                  latitude: -27.47,
-                  zoom: 13,
-                }}
-                mapStyle="mapbox://styles/mapbox/light-v10"
-                mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
-                onClick={handleMapClick}
-              >
+<Map
+  key={mapModalOpen ? "map-visible" : "map-hidden"} // 👈 fuerza remount
+  initialViewState={{
+    longitude: mapSelectedPoint?.lng || -58.83,
+    latitude: mapSelectedPoint?.lat || -27.47,
+    zoom: 13,
+  }}
+  mapStyle="mapbox://styles/mapbox/light-v10"
+  mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
+  onClick={handleMapClick}
+>
 {mapSelectedPoint?.lng && mapSelectedPoint?.lat && (
   <Marker
     longitude={mapSelectedPoint.lng}
@@ -337,7 +334,7 @@ export default function AddressInput({ onSelect, setDireccionConfirmada }) {
     <img
       src="/pin.png"
       alt="Ubicación"
-      className="w-8 h-8 object-contain pointer-events-none"
+      className="w-10 h-10 object-contain pointer-events-none border border-black bg-white rounded-full"
     />
   </Marker>
 )}
