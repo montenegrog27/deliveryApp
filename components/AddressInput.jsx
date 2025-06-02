@@ -153,8 +153,8 @@
 import { useState } from "react";
 import { Marker, Map } from "react-map-gl/mapbox";
 
-export default function AddressInput({ onSelect, setDireccionConfirmada }) {
-  const [query, setQuery] = useState("");
+export default function AddressInput({ onSelect, setDireccionConfirmada, onChooseFromMap }) {
+    const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedCandidate, setSelectedCandidate] = useState(null);
