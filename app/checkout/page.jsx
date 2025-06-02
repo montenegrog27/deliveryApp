@@ -5,17 +5,34 @@ import AddressInput from "@/components/AddressInput";
 import * as turf from "@turf/turf";
 import { useRouter } from "next/navigation";
 import { Map } from "react-map-gl/mapbox";
+import dynamic from "next/dynamic";
+import { useRef } from "react";
 
-function formatOrderSummary(cart) {
-  const lines = cart.map((item) => `${item.quantity} ${item.attributes.name}`);
-  const total = cart.reduce(
-    (sum, item) => sum + item.attributes.price * item.quantity,
-    0
-  );
-  return lines.join("\n") + `\nTotal: $${total}`;
-}
+// Map importado solo del lado cliente, con fallback de carga
+const Map = dynamic(
+  () => import("react-map-gl/mapbox").then((mod) => mod.Map),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-[400px] w-full flex items-center justify-center bg-gray-100">
+        <p className="text-sm text-gray-500">Cargando mapa...</p>
+      </div>
+    ),
+  }
+);
+
+// function formatOrderSummary(cart) {
+//   const lines = cart.map((item) => `${item.quantity} ${item.attributes.name}`);
+//   const total = cart.reduce(
+//     (sum, item) => sum + item.attributes.price * item.quantity,
+//     0
+//   );
+//   return lines.join("\n") + `\nTotal: $${total}`;
+// }
 
 export default function CheckoutPage() {
+  const debounceTimeout = useRef(null);
+
   const router = useRouter();
   const { cart, clearCart } = useCart();
 
@@ -49,12 +66,6 @@ export default function CheckoutPage() {
   const [showMapModal, setShowMapModal] = useState(false);
   const [mapCenter, setMapCenter] = useState({ lat: -27.47, lng: -58.83 });
   const [mapCandidate, setMapCandidate] = useState(null);
-
-  const fetchBranches = async () => {
-    const res = await fetch("/api/branches");
-    const data = await res.json();
-    return data;
-  };
 
   useEffect(() => {
     const fetchPaymentMethods = async () => {
@@ -387,10 +398,14 @@ export default function CheckoutPage() {
                     <div className="h-[400px] w-full rounded-lg overflow-hidden relative">
                       {/* Pin centrado */}
                       <div className="absolute top-1/2 left-1/2 z-10 -translate-x-1/2 -translate-y-full pointer-events-none">
-                        <img src="/pin.png" alt="Pin" className="w-10 h-10" />
+                        <img
+                          src="/pin.webp"
+                          alt="Pin"
+                          className="w-10 h-10 pointer-events-none"
+                        />
                       </div>
 
-                      <Map
+                      {/* <Map
                         initialViewState={{
                           longitude: mapCenter.lng,
                           latitude: mapCenter.lat,
@@ -419,6 +434,47 @@ export default function CheckoutPage() {
                                 isValidAddress: true,
                               });
                             });
+                        }}
+                      /> */}
+
+                      <Map
+                        initialViewState={{
+                          longitude: mapCenter.lng,
+                          latitude: mapCenter.lat,
+                          zoom: 13,
+                        }}
+                        mapStyle="mapbox://styles/mapbox/light-v10"
+                        mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
+                        onMoveEnd={(e) => {
+                          const center = e.viewState;
+                          const lat = center.latitude;
+                          const lng = center.longitude;
+                          setMapCenter({ lat, lng });
+
+                          clearTimeout(debounceTimeout.current);
+                          debounceTimeout.current = setTimeout(() => {
+                            fetch(
+                              `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${process.env.NEXT_PUBLIC_MAPBOX_TOKEN}`
+                            )
+                              .then((res) => res.json())
+                              .then((data) => {
+                                const place = data.features?.[0];
+                                setMapCandidate({
+                                  address:
+                                    place?.place_name ||
+                                    "Ubicación seleccionada en el mapa",
+                                  lat,
+                                  lng,
+                                  isValidAddress: true,
+                                });
+                              })
+                              .catch((err) => {
+                                console.error(
+                                  "❌ Error al hacer geocoding:",
+                                  err
+                                );
+                              });
+                          }, 600); // Espera 600ms antes de hacer fetch
                         }}
                       />
                     </div>
