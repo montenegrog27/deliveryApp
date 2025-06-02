@@ -148,11 +148,11 @@
 //     </div>
 //   );
 // }
-
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function AddressInput({
+  value, // ✅ Recibe el valor desde el componente padre
   onSelect,
   setDireccionConfirmada,
   onChooseFromMap,
@@ -160,16 +160,16 @@ export default function AddressInput({
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
   const [selectedCandidate, setSelectedCandidate] = useState(null);
-  const [inputValue, setInputValue] = useState(value || "");
 
+  // ✅ Si el padre actualiza la dirección, actualizá también el input
   useEffect(() => {
-    setInputValue(value || "");
+    setQuery(value || "");
   }, [value]);
 
-  const handleInput = async (value) => {
-    setQuery(value);
+  const handleInput = async (val) => {
+    setQuery(val);
     setSelectedCandidate(null);
-    if (value.length < 3) {
+    if (val.length < 3) {
       setResults([]);
       return;
     }
@@ -177,10 +177,8 @@ export default function AddressInput({
     try {
       const res = await fetch(
         `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
-          value
-        )}.json?access_token=${
-          process.env.NEXT_PUBLIC_MAPBOX_TOKEN
-        }&autocomplete=true&country=AR&bbox=-58.87,-27.51,-58.775,-27.43&limit=5`
+          val
+        )}.json?access_token=${process.env.NEXT_PUBLIC_MAPBOX_TOKEN}&autocomplete=true&country=AR&bbox=-58.87,-27.51,-58.775,-27.43&limit=5`
       );
       const data = await res.json();
 
@@ -219,16 +217,8 @@ export default function AddressInput({
         className="w-full border border-neutral-300 rounded-lg px-4 py-2 text-base"
       />
 
-      <input
-        type="text"
-        value={inputValue}
-        onChange={(e) => setInputValue(e.target.value)}
-        placeholder="Ingresá tu dirección..."
-        className="w-full border border-neutral-300 rounded-lg px-4 py-2 text-base"
-      />
-
       {results.length > 0 && (
-        <ul className="absolute border-neutral-300 rounded-lg mt-1 shadow w-full z-10 bg-white">
+        <ul className="absolute border border-neutral-300 rounded-lg mt-1 shadow w-full z-10 bg-white">
           {results.map((r) => (
             <li
               key={r.id}
@@ -248,7 +238,7 @@ export default function AddressInput({
           <li
             className="px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer text-blue-600"
             onClick={() => {
-              onChooseFromMap?.(); // ← esto ahora lo maneja CheckoutPage
+              onChooseFromMap?.();
               setResults([]);
               setSelectedCandidate(null);
             }}
