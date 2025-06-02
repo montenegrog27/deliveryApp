@@ -243,7 +243,7 @@ export default function HomePage() {
                   }}
                   className="w-full bg-[#E00000] hover:bg-[#C40000] text-white py-2 rounded-full font-bold text-sm"
                 >
-                  Agregar al pedido - ${finalPrice}
+                  Agregar al pedido
                 </button>
                 <button
                   onClick={() => setSelectedItem(null)}

@@ -399,7 +399,7 @@ export default function CheckoutPage() {
                       {/* Pin centrado */}
                       <div className="absolute top-1/2 left-1/2 z-10 -translate-x-1/2 -translate-y-full pointer-events-none">
                         <img
-                          src="/pin.webp"
+                          src="/pin2.png"
                           alt="Pin"
   className="w-10 h-10 animate-bounce-soft"                        />
                       </div>
