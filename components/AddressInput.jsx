@@ -327,12 +327,16 @@ export default function AddressInput({ onSelect, setDireccionConfirmada }) {
                 onClick={handleMapClick}
               >
                 {mapSelectedPoint && (
-                  <Marker
-                    longitude={mapSelectedPoint.lng}
-                    latitude={mapSelectedPoint.lat}
-                  >
-                    <div className="text-red-500 text-2xl">📍</div>
-                  </Marker>
+                  // <Marker
+                  //   longitude={mapSelectedPoint.lng}
+                  //   latitude={mapSelectedPoint.lat}
+                  // >
+                  //   <div className="text-red-500 text-2xl">📍</div>
+                  // </Marker>
+                  <Marker longitude={mapSelectedPoint.lng} latitude={mapSelectedPoint.lat} anchor="bottom">
+                        <img src="@/public/pin.png" alt="Ubicación" className="w-8 h-8" />
+  {/* <div className="text-red-500 text-2xl">📍</div> */}
+</Marker>
                 )}
               </Map>
             </div>

@@ -10,3 +10,8 @@
     100% { transform: scale(1); }
   }
 }
+
+.mapboxgl-ctrl-bottom-left,
+.mapboxgl-ctrl-bottom-right {
+  display: none !important;
+}
