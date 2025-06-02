@@ -149,9 +149,11 @@
 //   );
 // }
 
+
 "use client";
 import { useState } from "react";
-import Map, { Marker } from "react-map-gl";
+import { Marker, Map } from "react-map-gl/mapbox";
+
 
 export default function AddressInput({ onSelect, setDireccionConfirmada }) {
   const [query, setQuery] = useState("");
