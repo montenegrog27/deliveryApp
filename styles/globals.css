@@ -14,4 +14,7 @@
 .mapboxgl-ctrl-bottom-left,
 .mapboxgl-ctrl-bottom-right {
   display: none !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
 }
