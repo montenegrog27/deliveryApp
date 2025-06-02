@@ -149,11 +149,9 @@
 //   );
 // }
 
-
 "use client";
 import { useState } from "react";
 import { Marker, Map } from "react-map-gl/mapbox";
-
 
 export default function AddressInput({ onSelect, setDireccionConfirmada }) {
   const [query, setQuery] = useState("");
@@ -333,10 +331,17 @@ export default function AddressInput({ onSelect, setDireccionConfirmada }) {
                   // >
                   //   <div className="text-red-500 text-2xl">📍</div>
                   // </Marker>
-                  <Marker longitude={mapSelectedPoint.lng} latitude={mapSelectedPoint.lat} anchor="bottom">
-                        <img src="@/public/pin.png" alt="Ubicación" className="w-8 h-8" />
-  {/* <div className="text-red-500 text-2xl">📍</div> */}
-</Marker>
+                  <Marker
+                    longitude={mapSelectedPoint.lng}
+                    latitude={mapSelectedPoint.lat}
+                    anchor="bottom"
+                  >
+                    <img
+                      src="/pin.png"
+                      alt="Ubicación"
+                      className="w-8 h-8 object-contain"
+                    />
+                  </Marker>
                 )}
               </Map>
             </div>
