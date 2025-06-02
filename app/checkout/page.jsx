@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import AddressInput from "@/components/AddressInput";
 import * as turf from "@turf/turf";
 import { useRouter } from "next/navigation";
+import { Map } from "react-map-gl/mapbox";
 
 function formatOrderSummary(cart) {
   const lines = cart.map((item) => `${item.quantity} ${item.attributes.name}`);
