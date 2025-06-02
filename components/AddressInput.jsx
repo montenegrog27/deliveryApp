@@ -158,13 +158,7 @@ export default function AddressInput({ onSelect, setDireccionConfirmada }) {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedCandidate, setSelectedCandidate] = useState(null);
-  const [mapModalOpen, setMapModalOpen] = useState(false);
-  const [mapSelectedPoint, setMapSelectedPoint] = useState(null);
-  const [mapCandidate, setMapCandidate] = useState(null);
-const [mapCenter, setMapCenter] = useState({
-  lat: -27.47,
-  lng: -58.83,
-});
+
 
   const handleInput = async (value) => {
     setQuery(value);
@@ -209,36 +203,6 @@ const [mapCenter, setMapCenter] = useState({
     if (setDireccionConfirmada) setDireccionConfirmada(true);
   };
 
-  const handleMapClick = async (e) => {
-    const lng = e.lngLat.lng;
-    const lat = e.lngLat.lat;
-    setMapSelectedPoint({ lat, lng });
-
-    try {
-      const res = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${process.env.NEXT_PUBLIC_MAPBOX_TOKEN}`
-      );
-      const data = await res.json();
-      const place = data.features?.[0];
-
-      setMapCandidate({
-        address: place?.place_name || "Ubicación seleccionada en el mapa",
-        lat,
-        lng,
-        isValidAddress: true,
-      });
-    } catch (err) {
-      console.error("❌ Error con reverse geocoding:", err);
-    }
-  };
-
-  const confirmMapCandidate = () => {
-    if (!mapCandidate) return;
-    confirmSelection(mapCandidate);
-    setMapModalOpen(false);
-    setMapCandidate(null);
-    setMapSelectedPoint(null);
-  };
 
   return (
     <div className="relative">
@@ -284,7 +248,7 @@ const [mapCenter, setMapCenter] = useState({
           <li
             className="px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer text-blue-600"
             onClick={() => {
-              setMapModalOpen(true);
+              onChooseFromMap?.(); // ← esto ahora lo maneja CheckoutPage
               setResults([]);
               setSelectedCandidate(null);
             }}
@@ -304,78 +268,6 @@ const [mapCenter, setMapCenter] = useState({
           >
             Aceptar
           </button>
-        </div>
-      )}
-
-      {/* MODAL CON MAPA */}
-      {mapModalOpen && (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center">
-          <div className="bg-white rounded-xl overflow-hidden w-full max-w-2xl max-h-[90vh] relative">
-            <button
-              onClick={() => setMapModalOpen(false)}
-              className="absolute top-3 right-4 text-gray-600 text-xl"
-            >
-              ✕
-            </button>
-            <div className="h-[400px] w-full">
-<Map
-  initialViewState={{
-    longitude: mapCenter.lng,
-    latitude: mapCenter.lat,
-    zoom: 13,
-  }}
-  mapStyle="mapbox://styles/mapbox/light-v10"
-  mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
-  onMoveEnd={(e) => {
-    const center = e.viewState;
-    setMapCenter({ lat: center.latitude, lng: center.longitude });
-
-    // reverse geocoding al mover
-    fetch(
-      `https://api.mapbox.com/geocoding/v5/mapbox.places/${center.longitude},${center.latitude}.json?access_token=${process.env.NEXT_PUBLIC_MAPBOX_TOKEN}`
-    )
-      .then((res) => res.json())
-      .then((data) => {
-        const place = data.features?.[0];
-        setMapCandidate({
-          address: place?.place_name || "Ubicación seleccionada en el mapa",
-          lat: center.latitude,
-          lng: center.longitude,
-          isValidAddress: true,
-        });
-      });
-  }}
->
-
-{/* Pin centrado, no usa Marker */}
-<div className="absolute top-1/2 left-1/2 z-10 -translate-x-1/2 -translate-y-full pointer-events-none">
-  <img src="/pin.png" alt="Pin" className="w-10 h-10" />
-</div>
-
-              </Map>
-            </div>
-            <div className="p-4">
-              {mapCandidate ? (
-                <>
-                  <p className="text-sm text-gray-700 mb-2">
-                    Dirección seleccionada:
-                    <br />
-                    <strong>{mapCandidate.address}</strong>
-                  </p>
-                  <button
-                    onClick={confirmMapCandidate}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-md w-full"
-                  >
-                    Aceptar
-                  </button>
-                </>
-              ) : (
-                <p className="text-sm text-gray-500 text-center">
-                  Tocá sobre el mapa para seleccionar una ubicación
-                </p>
-              )}
-            </div>
-          </div>
         </div>
       )}
     </div>

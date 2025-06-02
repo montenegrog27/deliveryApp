@@ -45,6 +45,10 @@ export default function CheckoutPage() {
   const [cuponError, setCuponError] = useState(null);
   const [cuponDescuento, setCuponDescuento] = useState(0);
   const [cuponData, setCuponData] = useState(null);
+const [showMapModal, setShowMapModal] = useState(false);
+const [mapCenter, setMapCenter] = useState({ lat: -27.47, lng: -58.83 });
+const [mapCandidate, setMapCandidate] = useState(null);
+
 
   const fetchBranches = async () => {
     const res = await fetch("/api/branches");
@@ -365,9 +369,98 @@ export default function CheckoutPage() {
                 setDireccionConfirmada(true);
 
                 calcularEnvio(updatedCustomer);
+
               }}
+                onChooseFromMap={() => setShowMapModal(true)} // nuevo
+
               setDireccionConfirmada={setDireccionConfirmada} // ✅ Asegurate de agregar esta línea
             />
+            {showMapModal && (
+  <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center">
+    <div className="bg-white rounded-xl overflow-hidden w-full max-w-2xl max-h-[90vh] relative">
+      <button
+        onClick={() => setShowMapModal(false)}
+        className="absolute top-3 right-4 text-gray-600 text-xl z-10"
+      >
+        ✕
+      </button>
+      <div className="h-[400px] w-full relative">
+        {/* PIN EN CENTRO */}
+        <div className="absolute top-1/2 left-1/2 z-10 -translate-x-1/2 -translate-y-full pointer-events-none">
+          <img src="/pin.png" alt="Ubicación" className="w-10 h-10" />
+        </div>
+
+        <Map
+          initialViewState={{
+            longitude: mapCenter.lng,
+            latitude: mapCenter.lat,
+            zoom: 13,
+          }}
+          mapStyle="mapbox://styles/mapbox/light-v10"
+          mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
+          onMoveEnd={(e) => {
+            const center = e.viewState;
+            const lat = center.latitude;
+            const lng = center.longitude;
+            setMapCenter({ lat, lng });
+
+            // reverse geocoding
+            fetch(
+              `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${process.env.NEXT_PUBLIC_MAPBOX_TOKEN}`
+            )
+              .then((res) => res.json())
+              .then((data) => {
+                const place = data.features?.[0];
+                setMapCandidate({
+                  address:
+                    place?.place_name || "Ubicación seleccionada en el mapa",
+                  lat,
+                  lng,
+                  isValidAddress: true,
+                });
+              });
+          }}
+        />
+      </div>
+
+      <div className="p-4">
+        {mapCandidate ? (
+          <>
+            <p className="text-sm text-gray-700 mb-2">
+              Dirección seleccionada:
+              <br />
+              <strong>{mapCandidate.address}</strong>
+            </p>
+            <button
+              onClick={() => {
+                const loc = mapCandidate;
+                const updatedCustomer = {
+                  ...customer,
+                  address: loc.address,
+                  lat: loc.lat,
+                  lng: loc.lng,
+                  isValidAddress: loc.isValidAddress,
+                };
+                setCustomer(updatedCustomer);
+                setDireccionConfirmada(true);
+                setShowMapModal(false);
+                calcularEnvio(updatedCustomer);
+              }}
+              className="bg-blue-600 text-white px-4 py-2 rounded-md w-full"
+            >
+              Aceptar
+            </button>
+          </>
+        ) : (
+          <p className="text-sm text-gray-500 text-center">
+            Mové el mapa para elegir la ubicación
+          </p>
+        )}
+      </div>
+    </div>
+  </div>
+)}
+
             <div className="flex gap-4 mt-2">
               <input
                 type="text"
