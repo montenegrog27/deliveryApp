@@ -178,7 +178,9 @@ export default function AddressInput({
       const res = await fetch(
         `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
           val
-        )}.json?access_token=${process.env.NEXT_PUBLIC_MAPBOX_TOKEN}&autocomplete=true&country=AR&bbox=-58.87,-27.51,-58.775,-27.43&limit=5`
+        )}.json?access_token=${
+          process.env.NEXT_PUBLIC_MAPBOX_TOKEN
+        }&autocomplete=true&country=AR&bbox=-58.87,-27.51,-58.775,-27.43&limit=5`
       );
       const data = await res.json();
 
@@ -206,7 +208,7 @@ export default function AddressInput({
 
   return (
     <div className="relative">
-      <input
+      {/* <input
         type="text"
         placeholder="Ingresá tu dirección"
         value={query}
@@ -215,7 +217,34 @@ export default function AddressInput({
           setDireccionConfirmada(false);
         }}
         className="w-full border border-neutral-300 rounded-lg px-4 py-2 text-base"
-      />
+      /> */}
+
+      <div className="relative">
+        <input
+          type="text"
+          placeholder="Ingresá tu dirección"
+          value={query}
+          onChange={(e) => {
+            handleInput(e.target.value);
+            setDireccionConfirmada(false);
+          }}
+          className="w-full border border-neutral-300 rounded-lg px-4 py-2 text-base pr-10"
+        />
+
+        {query.length > 0 && (
+          <button
+            onClick={() => {
+              setQuery("");
+              setResults([]);
+              setSelectedCandidate(null);
+              setDireccionConfirmada(false);
+            }}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-black"
+          >
+            ✕
+          </button>
+        )}
+      </div>
 
       {results.length > 0 && (
         <ul className="absolute border border-neutral-300 rounded-lg mt-1 shadow w-full z-10 bg-white">

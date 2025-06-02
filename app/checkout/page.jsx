@@ -401,8 +401,7 @@ export default function CheckoutPage() {
                         <img
                           src="/pin.webp"
                           alt="Pin"
-                          className="w-10 h-10 pointer-events-none"
-                        />
+  className="w-10 h-10 animate-bounce-soft"                        />
                       </div>
 
                       {/* <Map
