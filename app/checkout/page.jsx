@@ -486,7 +486,7 @@ export default function CheckoutPage() {
                               <img
                                 src="/pinn(3).png"
                                 alt="Pin"
-                                className="w-6 h-6 "
+                                className="w-8 h-8 "
                               />
                             </Marker>
                           );
