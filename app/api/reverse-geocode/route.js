@@ -11,7 +11,7 @@ export async function GET(req) {
   }
 
   const apiKey = process.env.GOOGLE_MAPS_API_KEY;
-
+//fewf
   try {
     const res = await fetch(
       `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}`
