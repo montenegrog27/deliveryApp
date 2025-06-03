@@ -149,13 +149,14 @@
 
 "use client";
 import { useState } from "react";
-
 export default function AddressInput({
-  value, // ✅ dirección actual controlada desde el padre
+  value,
   onSelect,
+  onInputChange, // ← NUEVO
   setDireccionConfirmada,
   onChooseFromMap,
 }) {
+
   const [results, setResults] = useState([]);
   const [selectedCandidate, setSelectedCandidate] = useState(null);
 
@@ -203,9 +204,10 @@ export default function AddressInput({
           type="text"
           placeholder="Ingresá tu dirección"
           value={value} // ✅ controlado 100%
-          onChange={(e) => {
-            handleInput(e.target.value);
-          }}
+onChange={(e) => {
+  handleInput(e.target.value);
+  onInputChange?.(e.target.value); // <- avisa al padre del cambio
+}}
           className="w-full border border-neutral-300 rounded-lg px-4 py-2 text-base pr-10"
         />
 

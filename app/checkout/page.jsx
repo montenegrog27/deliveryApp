@@ -363,26 +363,28 @@ export default function CheckoutPage() {
               />
             </div>
 
-            <AddressInput
-              value={customer.address}
-              onSelect={(loc) => {
-                if (!loc || !loc.lat || !loc.lng) return;
+<AddressInput
+  value={customer.address}
+  onInputChange={(val) =>
+    setCustomer((prev) => ({ ...prev, address: val }))
+  }
+  onSelect={(loc) => {
+    if (!loc || !loc.lat || !loc.lng) return;
+    const updatedCustomer = {
+      ...customer,
+      address: loc.address,
+      lat: loc.lat,
+      lng: loc.lng,
+      isValidAddress: loc.isValidAddress,
+    };
+    setCustomer(updatedCustomer);
+    setDireccionConfirmada(true);
+    calcularEnvio(updatedCustomer);
+  }}
+  onChooseFromMap={() => setShowMapModal(true)}
+  setDireccionConfirmada={setDireccionConfirmada}
+/>
 
-                const updatedCustomer = {
-                  ...customer,
-                  address: loc.address,
-                  lat: loc.lat,
-                  lng: loc.lng,
-                  isValidAddress: loc.isValidAddress,
-                };
-
-                setCustomer(updatedCustomer);
-                setDireccionConfirmada(true);
-                calcularEnvio(updatedCustomer);
-              }}
-              onChooseFromMap={() => setShowMapModal(true)}
-              setDireccionConfirmada={setDireccionConfirmada}
-            />
 
             {showMapModal && (
               <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center">
@@ -411,39 +413,43 @@ export default function CheckoutPage() {
                         }}
                         mapStyle="mapbox://styles/mapbox/light-v10"
                         mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
-onMoveEnd={(e) => {
-  const center = e.viewState;
-  const lat = center.latitude;
-  const lng = center.longitude;
-  setMapCenter({ lat, lng });
+                        onMoveEnd={(e) => {
+                          const center = e.viewState;
+                          const lat = center.latitude;
+                          const lng = center.longitude;
+                          setMapCenter({ lat, lng });
 
-  clearTimeout(debounceTimeout.current);
-  debounceTimeout.current = setTimeout(() => {
-fetch(`/api/reverse-geocode?lat=${lat}&lng=${lng}`)
-  .then(async (res) => {
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "Error desconocido");
+                          clearTimeout(debounceTimeout.current);
+                          debounceTimeout.current = setTimeout(() => {
+                            fetch(`/api/reverse-geocode?lat=${lat}&lng=${lng}`)
+                              .then(async (res) => {
+                                const data = await res.json();
+                                if (!res.ok)
+                                  throw new Error(
+                                    data.error || "Error desconocido"
+                                  );
 
-    setMapCandidate({
-      address: data.address,
-      lat,
-      lng,
-      isValidAddress: true,
-    });
-  })
-  .catch((err) => {
-    console.error("❌ Error en reverse geocoding:", err.message);
-    setMapCandidate(null);
-    setError(
-      err.message.includes("Corrientes")
-        ? "Por ahora solo entregamos en Corrientes Capital. Probá con otra ubicación dentro de la ciudad."
-        : "No pudimos obtener una dirección válida. Intentá mover el mapa."
-    );
-  });
-
-  }, 600); // espera 600ms luego de mover el mapa
-}}
-
+                                setMapCandidate({
+                                  address: data.address,
+                                  lat,
+                                  lng,
+                                  isValidAddress: true,
+                                });
+                              })
+                              .catch((err) => {
+                                console.error(
+                                  "❌ Error en reverse geocoding:",
+                                  err.message
+                                );
+                                setMapCandidate(null);
+                                setError(
+                                  err.message.includes("Corrientes")
+                                    ? "Por ahora solo entregamos en Corrientes Capital. Probá con otra ubicación dentro de la ciudad."
+                                    : "No pudimos obtener una dirección válida. Intentá mover el mapa."
+                                );
+                              });
+                          }, 600); // espera 600ms luego de mover el mapa
+                        }}
                       />
                     </div>
                   </div>
@@ -457,8 +463,10 @@ fetch(`/api/reverse-geocode?lat=${lat}&lng=${lng}`)
                           <strong>{mapCandidate.address}</strong>
                         </p>
                         {error && (
-  <p className="text-center text-red-600 text-sm mb-2">{error}</p>
-)}
+                          <p className="text-center text-red-600 text-sm mb-2">
+                            {error}
+                          </p>
+                        )}
 
                         <button
                           onClick={() => {
