@@ -1,11 +1,15 @@
-// /pages/api/settings/delivery.js
+// app/api/settings/delivery/route.js
 import { getDeliveryConfig } from "@/lib/firebase";
 
-export default async function handler(req, res) {
+export async function GET() {
   try {
     const config = await getDeliveryConfig();
-    res.status(200).json(config);
+    return Response.json(config);
   } catch (err) {
-    res.status(500).json({ error: "No se pudo obtener la config" });
+    console.error("❌ Error al obtener configuración de delivery:", err);
+    return new Response(
+      JSON.stringify({ error: "No se pudo obtener la configuración" }),
+      { status: 500 }
+    );
   }
 }
