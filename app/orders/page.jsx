@@ -8,13 +8,11 @@ export default function HomePage() {
   const { addItem, toggleCart, cart } = useCart();
   const [menu, setMenu] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [bump, setBump] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [note, setNote] = useState("");
-  const [extras, setExtras] = useState({
-    cheese: false,
-    coke: false,
-  });
+  const [selectedDrinkId, setSelectedDrinkId] = useState("");
+  const [includeFries, setIncludeFries] = useState(false);
+  const [showDrinkDropdown, setShowDrinkDropdown] = useState(false);
 
   useEffect(() => {
     const fetchMenu = async () => {
@@ -32,20 +30,16 @@ export default function HomePage() {
     fetchMenu();
   }, []);
 
+  const drinksCategory = menu.find((cat) => cat.name === "Bebidas");
+  const friesProduct = menu.find((cat) => cat.name === "Papas fritas")?.items?.[0];
+  const selectedDrink = drinksCategory?.items.find((item) => item.id === selectedDrinkId) || null;
+
+  const finalPrice =
+    (selectedItem?.attributes.discountPrice || selectedItem?.attributes.price || 0) +
+    (selectedDrink?.attributes?.price || 0) +
+    (includeFries ? (friesProduct?.attributes?.price || 0) : 0);
+
   const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
-
-  const handleAdd = (item) => {
-    addItem(item);
-    setBump(true);
-    setTimeout(() => setBump(false), 300);
-  };
-
-  const finalPrice = selectedItem
-  ? (selectedItem.attributes.discountPrice || selectedItem.attributes.price) +
-    (extras.cheese ? 500 : 0) +
-    (extras.coke ? 1500 : 0)
-  : 0;
-
 
   return (
     <div className="min-h-screen bg-[#FFF9F5] font-inter text-[#1A1A1A]">
@@ -70,22 +64,22 @@ export default function HomePage() {
       </header>
 
       {/* CONTENIDO */}
-<main className="max-w-3xl mx-auto px-4 py-8 space-y-16">
-  {loading ? (
-    <div className="flex flex-col items-center justify-center mt-50">
-      <motion.img
-        src="https://res.cloudinary.com/dsbrnqc5z/image/upload/v1744757019/Recurso_40_zti0fq.svg"
-        alt="MORDISCO"
-        className="h-36 w-auto"
-        animate={{ rotate: 360 }}
-        transition={{
-          repeat: Infinity,
-          ease: "linear",
-          duration: 2, // velocidad (2 segundos por vuelta)
-        }}
-      />
-    </div>
-  ) : (
+      <main className="max-w-3xl mx-auto px-4 py-8 space-y-16">
+        {loading ? (
+          <div className="flex flex-col items-center justify-center mt-50">
+            <motion.img
+              src="https://res.cloudinary.com/dsbrnqc5z/image/upload/v1744757019/Recurso_40_zti0fq.svg"
+              alt="MORDISCO"
+              className="h-36 w-auto"
+              animate={{ rotate: 360 }}
+              transition={{
+                repeat: Infinity,
+                ease: "linear",
+                duration: 2,
+              }}
+            />
+          </div>
+        ) : (
           menu
             .slice()
             .sort((a, b) => (a.inOrder ?? 0) - (b.inOrder ?? 0))
@@ -96,14 +90,11 @@ export default function HomePage() {
 
               return (
                 <section key={cat.id} className="space-y-6">
-                  <h2 className="text-2xl font-bold text-[#E00000]">
-                    {cat.name}
-                  </h2>
+                  <h2 className="text-2xl font-bold text-[#E00000]">{cat.name}</h2>
                   <ul className="space-y-4">
                     {availableItems.map((item) => (
                       <li key={item.id} className="flex gap-4 items-center">
-                        {/* Imagen a la izquierda */}
-                        <div className="w-[96px] h-[96px] flex-shrink-0 overflow-hidden rounded-lg bg-neutral-100">
+                        <div className="w-[96px] h-[96px] rounded-lg overflow-hidden bg-neutral-100">
                           {item.attributes.image ? (
                             <img
                               src={item.attributes.image}
@@ -111,31 +102,27 @@ export default function HomePage() {
                               className="w-full h-full object-cover"
                             />
                           ) : (
-                            <div className="w-full h-full flex items-center justify-center text-sm text-neutral-400">
+                            <div className="flex items-center justify-center h-full text-sm text-neutral-400">
                               Sin imagen
                             </div>
                           )}
                         </div>
-
-                        {/* Info en el centro */}
-                        <div className="flex flex-col flex-1 min-w-0">
+                        <div className="flex-1 flex flex-col min-w-0">
                           <h3 className="text-base font-bold text-[#1A1A1A] truncate">
                             {item.attributes.name}
                           </h3>
                           {item.attributes.description && (
-                            <p className="text-sm text-neutral-600 leading-tight line-clamp-2">
+                            <p className="text-sm text-neutral-600 line-clamp-2">
                               {item.attributes.description}
                             </p>
                           )}
                           <div className="flex items-center justify-between mt-2">
                             <span className="text-[#E00000] font-bold text-sm">
-                              $
-                              {item.attributes.discountPrice ||
-                                item.attributes.price}
+                              ${item.attributes.discountPrice || item.attributes.price}
                             </span>
                             <button
                               onClick={() => setSelectedItem(item)}
-                              className="text-sm font-semibold text-white bg-[#E00000] hover:bg-[#C40000] px-4 py-1.5 rounded-full transition-all duration-200"
+                              className="text-sm font-semibold text-white bg-[#E00000] hover:bg-[#C40000] px-4 py-1.5 rounded-full transition-all"
                             >
                               Agregar
                             </button>
@@ -151,6 +138,8 @@ export default function HomePage() {
       </main>
 
       <CartSidebar />
+
+      {/* MODAL DE EXTRAS */}
       <AnimatePresence>
         {selectedItem && (
           <motion.div
@@ -191,32 +180,46 @@ export default function HomePage() {
               </div>
 
               {/* Extras */}
-              <div>
-                <label className="block text-sm font-medium mb-2 text-[#1A1A1A]">
-                  Extras
+              <div className="space-y-4">
+                <label className="flex items-center justify-between text-sm">
+                  <span>🥤 Agregar bebida</span>
+                  <input
+                    type="checkbox"
+                    checked={showDrinkDropdown}
+                    onChange={(e) => {
+                      setShowDrinkDropdown(e.target.checked);
+                      if (!e.target.checked) setSelectedDrinkId("");
+                    }}
+                  />
                 </label>
-                <div className="space-y-2">
+
+                {showDrinkDropdown && (
+                  <select
+                    value={selectedDrinkId}
+                    onChange={(e) => setSelectedDrinkId(e.target.value)}
+                    className="w-full border rounded p-2 text-base"
+                  >
+                    <option value="">-- Seleccionar bebida --</option>
+                    {drinksCategory?.items.map((drink) => (
+                      <option key={drink.id} value={drink.id}>
+                        {drink.attributes.name} (${drink.attributes.price})
+                      </option>
+                    ))}
+                  </select>
+                )}
+
+                {friesProduct && (
                   <label className="flex items-center justify-between text-sm">
-                    <span>🧀 Extra queso (+$500)</span>
+                    <span>
+                      🍟 {friesProduct.attributes.name} (+${friesProduct.attributes.price})
+                    </span>
                     <input
                       type="checkbox"
-                      checked={extras.cheese}
-                      onChange={() =>
-                        setExtras((prev) => ({ ...prev, cheese: !prev.cheese }))
-                      }
+                      checked={includeFries}
+                      onChange={() => setIncludeFries((prev) => !prev)}
                     />
                   </label>
-                  <label className="flex items-center justify-between text-sm">
-                    <span>🥤 Coca-Cola (+$1500)</span>
-                    <input
-                      type="checkbox"
-                      checked={extras.coke}
-                      onChange={() =>
-                        setExtras((prev) => ({ ...prev, coke: !prev.coke }))
-                      }
-                    />
-                  </label>
-                </div>
+                )}
               </div>
 
               {/* Total */}
@@ -228,6 +231,16 @@ export default function HomePage() {
               <div className="space-y-2">
                 <button
                   onClick={() => {
+                    const extras = {
+                      drink: selectedDrink
+                        ? {
+                            id: selectedDrink.id,
+                            name: selectedDrink.attributes.name,
+                            price: selectedDrink.attributes.price,
+                          }
+                        : null,
+                      fries: includeFries,
+                    };
                     addItem({
                       ...selectedItem,
                       attributes: {
@@ -239,14 +252,22 @@ export default function HomePage() {
                     });
                     setSelectedItem(null);
                     setNote("");
-                    setExtras({ cheese: false, coke: false });
+                    setSelectedDrinkId("");
+                    setIncludeFries(false);
+                    setShowDrinkDropdown(false);
                   }}
                   className="w-full bg-[#E00000] hover:bg-[#C40000] text-white py-2 rounded-full font-bold text-sm"
                 >
                   Agregar al pedido
                 </button>
                 <button
-                  onClick={() => setSelectedItem(null)}
+                  onClick={() => {
+                    setSelectedItem(null);
+                    setNote("");
+                    setSelectedDrinkId("");
+                    setIncludeFries(false);
+                    setShowDrinkDropdown(false);
+                  }}
                   className="w-full text-sm text-neutral-500 text-center"
                 >
                   Cancelar

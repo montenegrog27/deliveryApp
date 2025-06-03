@@ -44,7 +44,9 @@ export default function CartSidebar() {
           <div className="flex-1 overflow-y-auto space-y-5">
             <AnimatePresence>
               {cart.length === 0 ? (
-                <p className="text-neutral-500 text-sm">El carrito está vacío</p>
+                <p className="text-neutral-500 text-sm">
+                  El carrito está vacío
+                </p>
               ) : (
                 cart.map((item) => (
                   <motion.div
@@ -80,18 +82,19 @@ export default function CartSidebar() {
 
                         {/* Extras */}
                         {item.attributes.extras && (
-                          <div className="text-xs text-neutral-500 mt-0.5 leading-tight">
-                            {Object.entries(item.attributes.extras)
-                              .filter(([_, v]) => v)
-                              .map(([key]) => {
-                                const label =
-                                  key === "cheese"
-                                    ? "🧀 Extra queso"
-                                    : key === "coke"
-                                    ? "🥤 Coca-Cola"
-                                    : key;
-                                return <div key={key}>• {label}</div>;
-                              })}
+                          <div className="text-xs text-neutral-500 mt-0.5 leading-tight space-y-0.5">
+                            {/* Bebida */}
+                            {item.attributes.extras.drink &&
+                              item.attributes.extras.drink.name && (
+                                <div>
+                                  • 🥤 {item.attributes.extras.drink.name}
+                                </div>
+                              )}
+
+                            {/* Papas fritas */}
+                            {item.attributes.extras.fries && (
+                              <div>• 🍟 Papas fritas</div>
+                            )}
                           </div>
                         )}
 
