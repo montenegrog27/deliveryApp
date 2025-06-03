@@ -1,6 +1,3 @@
-
-
-
 "use client";
 import { useState } from "react";
 
@@ -11,7 +8,6 @@ export default function AddressInput({
   setDireccionConfirmada,
   onChooseFromMap,
 }) {
-
   const [results, setResults] = useState([]);
   const [selectedCandidate, setSelectedCandidate] = useState(null);
 
@@ -26,7 +22,8 @@ export default function AddressInput({
       const res = await fetch(
         `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
           val
-        )}.json?access_token=${process.env.NEXT_PUBLIC_MAPBOX_TOKEN
+        )}.json?access_token=${
+          process.env.NEXT_PUBLIC_MAPBOX_TOKEN
         }&autocomplete=true&country=AR&bbox=-58.87,-27.51,-58.775,-27.43&limit=5`
       );
       const data = await res.json();
@@ -59,20 +56,26 @@ export default function AddressInput({
           type="text"
           placeholder="Ingresá tu dirección"
           value={value} // ✅ controlado 100%
-onChange={(e) => {
-  handleInput(e.target.value);
-  onInputChange?.(e.target.value); // <- avisa al padre del cambio
-}}
+          onChange={(e) => {
+            handleInput(e.target.value);
+            onInputChange?.(e.target.value); // <- avisa al padre del cambio
+          }}
           className="w-full border border-neutral-300 rounded-lg px-4 py-2 text-base pr-10"
         />
 
         {value?.length > 0 && (
           <button
             onClick={() => {
-              onSelect({ address: "", lat: null, lng: null, isValidAddress: false });
+              onSelect({
+                address: "",
+                lat: null,
+                lng: null,
+                isValidAddress: false,
+              });
               setResults([]);
               setSelectedCandidate(null);
               setDireccionConfirmada?.(false);
+              onInputChange?.(""); // 👈 esto borra el input
             }}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-black"
           >
@@ -127,4 +130,3 @@ onChange={(e) => {
     </div>
   );
 }
-
