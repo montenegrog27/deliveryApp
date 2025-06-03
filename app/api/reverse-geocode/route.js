@@ -4,12 +4,13 @@ export async function GET(req) {
   const lng = searchParams.get("lng");
 
   if (!lat || !lng) {
-    return new Response(JSON.stringify({ error: "Faltan lat/lng" }), {
-      status: 400,
-    });
+    return new Response(
+      JSON.stringify({ error: "Faltan lat/lng" }),
+      { status: 400 }
+    );
   }
 
-  const apiKey = process.env.GOOGLE_MAPS_API_KEY; // sin NEXT_PUBLIC
+  const apiKey = process.env.GOOGLE_MAPS_API_KEY;
 
   try {
     const res = await fetch(
@@ -17,15 +18,8 @@ export async function GET(req) {
     );
     const data = await res.json();
 
-    if (!data.results || data.results.length === 0) {
-      return new Response(
-        JSON.stringify({ error: "No se encontraron resultados" }),
-        { status: 404 }
-      );
-    }
-    const result = data.results[0];
-
-    if (!result || !result.formatted_address) {
+    const result = data.results?.[0];
+    if (!result) {
       return new Response(
         JSON.stringify({ error: "No se encontraron resultados" }),
         { status: 404 }
@@ -47,9 +41,8 @@ export async function GET(req) {
     }
 
     return new Response(
-      JSON.stringify({
-        address: result.formatted_address,
-      })
+      JSON.stringify({ address: result.formatted_address }),
+      { status: 200 }
     );
   } catch (err) {
     console.error("Error en reverse-geocode:", err);
