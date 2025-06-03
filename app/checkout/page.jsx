@@ -65,23 +65,21 @@ export default function CheckoutPage() {
   const [showMapModal, setShowMapModal] = useState(false);
   const [mapCenter, setMapCenter] = useState({ lat: -27.47, lng: -58.83 });
   const [mapCandidate, setMapCandidate] = useState(null);
-const [branches, setBranches] = useState([]);
-
+  const [branches, setBranches] = useState([]);
 
   useEffect(() => {
-  const fetchBranches = async () => {
-    try {
-      const res = await fetch("/api/settings/branches");
-      const data = await res.json();
-      setBranches(data.branches);
-    } catch (err) {
-      console.error("Error al traer sucursales:", err);
-    }
-  };
+    const fetchBranches = async () => {
+      try {
+        const res = await fetch("/api/settings/branches");
+        const data = await res.json();
+        setBranches(data.branches);
+      } catch (err) {
+        console.error("Error al traer sucursales:", err);
+      }
+    };
 
-  fetchBranches();
-}, []);
-
+    fetchBranches();
+  }, []);
 
   useEffect(() => {
     const fetchPaymentMethods = async () => {
@@ -99,59 +97,60 @@ const [branches, setBranches] = useState([]);
     fetchPaymentMethods();
   }, []);
 
-
-const calcularEnvio = async (customCustomer = customer) => {
-  if (!customCustomer.lat || !customCustomer.lng || branches.length === 0) return;
-
-  try {
-    const configRes = await fetch("/api/settings/delivery");
-    const { baseDeliveryCost, pricePerKm, maxDistanceKm, freeShippingRadius } =
-      await configRes.json();
-
-    const puntoCliente = point([customCustomer.lng, customCustomer.lat]);
-
-    let mejorSucursal = null;
-    let menorDistancia = Infinity;
-
-    for (const branch of branches) {
-      const puntoSucursal = point([branch.lng, branch.lat]);
-      const distanciaKm = distance(puntoCliente, puntoSucursal, {
-        units: "kilometers",
-      });
-
-      if (distanciaKm < menorDistancia) {
-        menorDistancia = distanciaKm;
-        mejorSucursal = { ...branch, distancia: distanciaKm };
-      }
-    }
-
-    if (!mejorSucursal || menorDistancia > maxDistanceKm) {
-      setSelectedKitchenId(null);
-      setShippingCost(0);
-      setError("Estás fuera del área de cobertura.");
+  const calcularEnvio = async (customCustomer = customer) => {
+    if (!customCustomer.lat || !customCustomer.lng || branches.length === 0)
       return;
+
+    try {
+      const configRes = await fetch("/api/settings/delivery");
+      const {
+        baseDeliveryCost,
+        pricePerKm,
+        maxDistanceKm,
+        freeShippingRadius,
+      } = await configRes.json();
+
+      const puntoCliente = point([customCustomer.lng, customCustomer.lat]);
+
+      let mejorSucursal = null;
+      let menorDistancia = Infinity;
+
+      for (const branch of branches) {
+        const puntoSucursal = point([branch.lng, branch.lat]);
+        const distanciaKm = distance(puntoCliente, puntoSucursal, {
+          units: "kilometers",
+        });
+
+        if (distanciaKm < menorDistancia) {
+          menorDistancia = distanciaKm;
+          mejorSucursal = { ...branch, distancia: distanciaKm };
+        }
+      }
+
+      if (!mejorSucursal || menorDistancia > maxDistanceKm) {
+        setSelectedKitchenId(null);
+        setShippingCost(0);
+        setError("Estás fuera del área de cobertura.");
+        return;
+      }
+
+      let costoEnvio = baseDeliveryCost;
+      if (menorDistancia > freeShippingRadius) {
+        const extraKm = Math.ceil(menorDistancia - freeShippingRadius);
+        costoEnvio += extraKm * pricePerKm;
+      } else {
+        costoEnvio = 0;
+      }
+
+      setSelectedKitchenId(mejorSucursal.id);
+      setShippingCost(costoEnvio);
+      setDistanciaSucursal(menorDistancia);
+      setError(null);
+    } catch (err) {
+      console.error("❌ Error al calcular envío:", err);
+      setError("No se pudo calcular el costo de envío.");
     }
-
-    let costoEnvio = baseDeliveryCost;
-    if (menorDistancia > freeShippingRadius) {
-      const extraKm = Math.ceil(menorDistancia - freeShippingRadius);
-      costoEnvio += extraKm * pricePerKm;
-    } else {
-      costoEnvio = 0;
-    }
-
-    setSelectedKitchenId(mejorSucursal.id);
-    setShippingCost(costoEnvio);
-    setDistanciaSucursal(menorDistancia);
-    setError(null);
-  } catch (err) {
-    console.error("❌ Error al calcular envío:", err);
-    setError("No se pudo calcular el costo de envío.");
-  }
-};
-
-
-
+  };
 
   const subtotal = cart.reduce(
     (sum, item) => sum + item.attributes.price * item.quantity,
@@ -429,77 +428,84 @@ const calcularEnvio = async (customCustomer = customer) => {
                           className="w-10 h-10 animate-bounce-soft"
                         />
                       </div>
-<Map
-  initialViewState={{
-    longitude: mapCenter.lng,
-    latitude: mapCenter.lat,
-    zoom: 13,
-  }}
-  mapStyle="mapbox://styles/mapbox/light-v10"
-  mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
-  onMoveEnd={(e) => {
-    const center = e.viewState;
-    const lat = center.latitude;
-    const lng = center.longitude;
-    setMapCenter({ lat, lng });
+                      <Map
+                        initialViewState={{
+                          longitude: mapCenter.lng,
+                          latitude: mapCenter.lat,
+                          zoom: 13,
+                        }}
+                        mapStyle="mapbox://styles/mapbox/light-v10"
+                        mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
+                        onMoveEnd={(e) => {
+                          const center = e.viewState;
+                          const lat = center.latitude;
+                          const lng = center.longitude;
+                          setMapCenter({ lat, lng });
 
-    clearTimeout(debounceTimeout.current);
-    debounceTimeout.current = setTimeout(() => {
-      fetch(`/api/reverse-geocode?lat=${lat}&lng=${lng}`)
-        .then(async (res) => {
-          const data = await res.json();
-          if (!res.ok) throw new Error(data.error || "Error desconocido");
+                          clearTimeout(debounceTimeout.current);
+                          debounceTimeout.current = setTimeout(() => {
+                            fetch(`/api/reverse-geocode?lat=${lat}&lng=${lng}`)
+                              .then(async (res) => {
+                                const data = await res.json();
+                                if (!res.ok)
+                                  throw new Error(
+                                    data.error || "Error desconocido"
+                                  );
 
-          setMapCandidate({
-            address: data.address,
-            lat,
-            lng,
-            isValidAddress: true,
-          });
-        })
-        .catch((err) => {
-          console.error("❌ Error en reverse geocoding:", err.message);
-          setMapCandidate(null);
-          setError(
-            err.message.includes("Corrientes")
-              ? "Por ahora solo entregamos en Corrientes Capital. Probá con otra ubicación dentro de la ciudad."
-              : "No pudimos obtener una dirección válida. Intentá mover el mapa."
-          );
-        });
-    }, 600);
-  }}
->
-  {/* 📍 Pin del centro */}
-  <div className="absolute top-1/2 left-1/2 z-10 -translate-x-1/2 -translate-y-full pointer-events-none">
-    <img
-      src="/pinn(3).png"
-      alt="Pin"
-      className="w-10 h-10 animate-bounce-soft"
-    />
-  </div>
+                                setMapCandidate({
+                                  address: data.address,
+                                  lat,
+                                  lng,
+                                  isValidAddress: true,
+                                });
+                              })
+                              .catch((err) => {
+                                console.error(
+                                  "❌ Error en reverse geocoding:",
+                                  err.message
+                                );
+                                setMapCandidate(null);
+                                setError(
+                                  err.message.includes("Corrientes")
+                                    ? "Por ahora solo entregamos en Corrientes Capital. Probá con otra ubicación dentro de la ciudad."
+                                    : "No pudimos obtener una dirección válida. Intentá mover el mapa."
+                                );
+                              });
+                          }, 600);
+                        }}
+                      >
+                        {/* 📍 Pin del centro */}
+                        <div className="absolute top-1/2 left-1/2 z-10 -translate-x-1/2 -translate-y-full pointer-events-none">
+                          <img
+                            src="/pinn(3).png"
+                            alt="Pin"
+                            className="w-10 h-10 animate-bounce-soft"
+                          />
+                        </div>
 
-  {/* 🏢 Sucursales */}
-  {branches.map((branch) => {
-    const isCercana = branch.id === selectedKitchenId;
-    return (
-      <Marker
-        key={branch.id}
-        longitude={branch.lng}
-        latitude={branch.lat}
-        anchor="bottom"
-      >
-        <div
-          className={`text-xs px-2 py-1 rounded shadow ${
-            isCercana ? "bg-red-600 text-white" : "bg-blue-600 text-white"
-          }`}
-        >
-          {branch.name}
-        </div>
-      </Marker>
-    );
-  })}
-</Map>
-
+                        {/* 🏢 Sucursales */}
+                        {branches.map((branch) => {
+                          const isCercana = branch.id === selectedKitchenId;
+                          return (
+                            <Marker
+                              key={branch.id}
+                              longitude={branch.lng}
+                              latitude={branch.lat}
+                              anchor="bottom"
+                            >
+                              <div
+                                className={`text-xs px-2 py-1 rounded shadow ${
+                                  isCercana
+                                    ? "bg-red-600 text-white"
+                                    : "bg-blue-600 text-white"
+                                }`}
+                              >
+                                {branch.name}
+                              </div>
+                            </Marker>
+                          );
+                        })}
+                      </Map>
                     </div>
                   </div>
 
@@ -571,24 +577,23 @@ const calcularEnvio = async (customCustomer = customer) => {
               />
             </div>
           </div>
-{selectedKitchenId && distanciaSucursal !== null && (
-  <div className="mt-3 text-sm">
-    {shippingCost === 0 ? (
-      <p className="text-green-600">
-        Envío gratuito — Estás a{" "}
-        <strong>{distanciaSucursal.toFixed(1)}km</strong> de nuestra sucursal{" "}
-        <strong>{selectedKitchenId}</strong>.
-      </p>
-    ) : (
-      <p className="text-blue-600">
-        Estás a <strong>{distanciaSucursal.toFixed(1)}km</strong> de{" "}
-        <strong>{selectedKitchenId}</strong>. Se aplica un costo de envío de{" "}
-        <strong>${shippingCost}</strong>.
-      </p>
-    )}
-  </div>
-)}
-
+          {selectedKitchenId && distanciaSucursal !== null && (
+            <div className="mt-3 text-sm">
+              {shippingCost === 0 ? (
+                <p className="text-green-600">
+                  Envío gratuito — Estás a{" "}
+                  <strong>{distanciaSucursal.toFixed(1)}km</strong> de nuestra
+                  sucursal <strong>{selectedKitchenId}</strong>.
+                </p>
+              ) : (
+                <p className="text-blue-600">
+                  Estás a <strong>{distanciaSucursal.toFixed(1)}km</strong> de{" "}
+                  <strong>{selectedKitchenId}</strong>. Se aplica un costo de
+                  envío de <strong>${shippingCost}</strong>.
+                </p>
+              )}
+            </div>
+          )}
 
           {shippingCost === 0 && selectedKitchenId ? (
             <p className="mt-2 text-sm text-green-700">
