@@ -184,6 +184,14 @@ export default function CheckoutPage() {
       return;
     }
 
+        if (!customer.name ) {
+      setError(
+        "Por favor ingresá tu nombre y apellido."
+      );
+      setLoading(false);
+      return;
+    }
+
     const formattedPhone = `549${customer.phone}`;
     const ref = `${formattedPhone}-${Date.now()}`;
 
