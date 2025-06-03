@@ -99,6 +99,7 @@ export default function CheckoutPage() {
   }, []);
 
   const calcularEnvio = async (customCustomer = customer) => {
+    const sucursalesDisponibles = branches.filter((b) => b.delivery);
     if (!customCustomer.lat || !customCustomer.lng || branches.length === 0)
       return;
 
@@ -116,7 +117,7 @@ export default function CheckoutPage() {
       let mejorSucursal = null;
       let menorDistancia = Infinity;
 
-      for (const branch of branches) {
+      for (const branch of sucursalesDisponibles) {
         const puntoSucursal = point([branch.lng, branch.lat]);
         const distanciaKm = distance(puntoCliente, puntoSucursal, {
           units: "kilometers",
@@ -131,7 +132,7 @@ export default function CheckoutPage() {
       if (!mejorSucursal || menorDistancia > maxDistanceKm) {
         setSelectedKitchenId(null);
         setShippingCost(0);
-        setError("Estás fuera del área de cobertura.");
+        setError("No hay sucursales disponibles para delivery en tu zona.");
         return;
       }
 
@@ -421,14 +422,6 @@ export default function CheckoutPage() {
                   </button>
                   <div className="relative w-full px-4 pb-4 pt-2">
                     <div className="h-[400px] w-full rounded-lg overflow-hidden relative">
-                      {/* Pin centrado */}
-                      <div className="absolute top-1/2 left-1/2 z-10 -translate-x-1/2 -translate-y-full pointer-events-none">
-                        <img
-                          src="/pinn(3).png"
-                          alt="Pin"
-                          className="w-10 h-10 animate-bounce-soft"
-                        />
-                      </div>
                       <Map
                         initialViewState={{
                           longitude: mapCenter.lng,
