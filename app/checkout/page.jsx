@@ -2,13 +2,11 @@
 import { useCart } from "@/context/CartContext";
 import { useState, useEffect } from "react";
 import AddressInput from "@/components/AddressInput";
-// import { point, distance as turfDistance } from "@turf/turf";
-
-import * as turf from "@turf/turf";
+import { point, distance } from "@turf/turf";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { useRef } from "react";
-
+import { Marker } from "react-map-gl"; // ⚠️ asegurate de tenerlo importado
 // Map importado solo del lado cliente, con fallback de carga
 const Map = dynamic(
   () => import("react-map-gl/mapbox").then((mod) => mod.Map),
@@ -67,6 +65,23 @@ export default function CheckoutPage() {
   const [showMapModal, setShowMapModal] = useState(false);
   const [mapCenter, setMapCenter] = useState({ lat: -27.47, lng: -58.83 });
   const [mapCandidate, setMapCandidate] = useState(null);
+const [branches, setBranches] = useState([]);
+
+
+  useEffect(() => {
+  const fetchBranches = async () => {
+    try {
+      const res = await fetch("/api/settings/branches");
+      const data = await res.json();
+      setBranches(data.branches);
+    } catch (err) {
+      console.error("Error al traer sucursales:", err);
+    }
+  };
+
+  fetchBranches();
+}, []);
+
 
   useEffect(() => {
     const fetchPaymentMethods = async () => {
@@ -84,45 +99,23 @@ export default function CheckoutPage() {
     fetchPaymentMethods();
   }, []);
 
-  // useEffect(() => {
-  //   const fetchZones = async () => {
-  //     try {
-  //       const res = await fetch("/api/zones");
-  //       if (!res.ok) throw new Error("Error al obtener zonas");
-
-  //       const text = await res.text();
-  //       if (!text) return;
-
-  //       const data = JSON.parse(text);
-  //       setZones(data);
-  //     } catch (err) {
-  //       console.error("❌ Error al traer zonas:", err);
-  //     }
-  //   };
-
-  //   fetchZones();
-  // }, []);
-
 
 const calcularEnvio = async (customCustomer = customer) => {
-  if (!customCustomer.lat || !customCustomer.lng) return;
+  if (!customCustomer.lat || !customCustomer.lng || branches.length === 0) return;
 
   try {
     const configRes = await fetch("/api/settings/delivery");
     const { baseDeliveryCost, pricePerKm, maxDistanceKm, freeShippingRadius } =
       await configRes.json();
 
-    const branchesRes = await fetch("/api/settings/branches");
-    const { branches } = await branchesRes.json();
-
-    const puntoCliente = turf.point([customCustomer.lng, customCustomer.lat]);
+    const puntoCliente = point([customCustomer.lng, customCustomer.lat]);
 
     let mejorSucursal = null;
     let menorDistancia = Infinity;
 
     for (const branch of branches) {
-      const puntoSucursal = turf.point([branch.lng, branch.lat]);
-      const distanciaKm = turf.distance(puntoCliente, puntoSucursal, {
+      const puntoSucursal = point([branch.lng, branch.lat]);
+      const distanciaKm = distance(puntoCliente, puntoSucursal, {
         units: "kilometers",
       });
 
@@ -152,10 +145,12 @@ const calcularEnvio = async (customCustomer = customer) => {
     setDistanciaSucursal(menorDistancia);
     setError(null);
   } catch (err) {
-    console.error("Error al calcular envío:", err);
+    console.error("❌ Error al calcular envío:", err);
     setError("No se pudo calcular el costo de envío.");
   }
 };
+
+
 
 
   const subtotal = cart.reduce(
@@ -434,52 +429,77 @@ const calcularEnvio = async (customCustomer = customer) => {
                           className="w-10 h-10 animate-bounce-soft"
                         />
                       </div>
-                      <Map
-                        initialViewState={{
-                          longitude: mapCenter.lng,
-                          latitude: mapCenter.lat,
-                          zoom: 13,
-                        }}
-                        mapStyle="mapbox://styles/mapbox/light-v10"
-                        mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
-                        onMoveEnd={(e) => {
-                          const center = e.viewState;
-                          const lat = center.latitude;
-                          const lng = center.longitude;
-                          setMapCenter({ lat, lng });
+<Map
+  initialViewState={{
+    longitude: mapCenter.lng,
+    latitude: mapCenter.lat,
+    zoom: 13,
+  }}
+  mapStyle="mapbox://styles/mapbox/light-v10"
+  mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
+  onMoveEnd={(e) => {
+    const center = e.viewState;
+    const lat = center.latitude;
+    const lng = center.longitude;
+    setMapCenter({ lat, lng });
 
-                          clearTimeout(debounceTimeout.current);
-                          debounceTimeout.current = setTimeout(() => {
-                            fetch(`/api/reverse-geocode?lat=${lat}&lng=${lng}`)
-                              .then(async (res) => {
-                                const data = await res.json();
-                                if (!res.ok)
-                                  throw new Error(
-                                    data.error || "Error desconocido"
-                                  );
+    clearTimeout(debounceTimeout.current);
+    debounceTimeout.current = setTimeout(() => {
+      fetch(`/api/reverse-geocode?lat=${lat}&lng=${lng}`)
+        .then(async (res) => {
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || "Error desconocido");
 
-                                setMapCandidate({
-                                  address: data.address,
-                                  lat,
-                                  lng,
-                                  isValidAddress: true,
-                                });
-                              })
-                              .catch((err) => {
-                                console.error(
-                                  "❌ Error en reverse geocoding:",
-                                  err.message
-                                );
-                                setMapCandidate(null);
-                                setError(
-                                  err.message.includes("Corrientes")
-                                    ? "Por ahora solo entregamos en Corrientes Capital. Probá con otra ubicación dentro de la ciudad."
-                                    : "No pudimos obtener una dirección válida. Intentá mover el mapa."
-                                );
-                              });
-                          }, 600); // espera 600ms luego de mover el mapa
-                        }}
-                      />
+          setMapCandidate({
+            address: data.address,
+            lat,
+            lng,
+            isValidAddress: true,
+          });
+        })
+        .catch((err) => {
+          console.error("❌ Error en reverse geocoding:", err.message);
+          setMapCandidate(null);
+          setError(
+            err.message.includes("Corrientes")
+              ? "Por ahora solo entregamos en Corrientes Capital. Probá con otra ubicación dentro de la ciudad."
+              : "No pudimos obtener una dirección válida. Intentá mover el mapa."
+          );
+        });
+    }, 600);
+  }}
+>
+  {/* 📍 Pin del centro */}
+  <div className="absolute top-1/2 left-1/2 z-10 -translate-x-1/2 -translate-y-full pointer-events-none">
+    <img
+      src="/pinn(3).png"
+      alt="Pin"
+      className="w-10 h-10 animate-bounce-soft"
+    />
+  </div>
+
+  {/* 🏢 Sucursales */}
+  {branches.map((branch) => {
+    const isCercana = branch.id === selectedKitchenId;
+    return (
+      <Marker
+        key={branch.id}
+        longitude={branch.lng}
+        latitude={branch.lat}
+        anchor="bottom"
+      >
+        <div
+          className={`text-xs px-2 py-1 rounded shadow ${
+            isCercana ? "bg-red-600 text-white" : "bg-blue-600 text-white"
+          }`}
+        >
+          {branch.name}
+        </div>
+      </Marker>
+    );
+  })}
+</Map>
+
                     </div>
                   </div>
 
