@@ -184,10 +184,8 @@ export default function CheckoutPage() {
       return;
     }
 
-        if (!customer.name ) {
-      setError(
-        "Por favor ingresá tu nombre y apellido."
-      );
+    if (!customer.name) {
+      setError("Por favor ingresá tu nombre y apellido.");
       setLoading(false);
       return;
     }
@@ -482,23 +480,25 @@ export default function CheckoutPage() {
                         </div>
 
                         {/* 🏢 Sucursales */}
-                        {branches.map((branch) => {
-                          const isCercana = branch.id === selectedKitchenId;
-                          return (
-                            <Marker
-                              key={branch.id}
-                              longitude={branch.lng}
-                              latitude={branch.lat}
-                              anchor="bottom"
-                            >
-                              <img
-                                src="/pinn(3).png"
-                                alt="Pin"
-                                className="w-8 h-8 "
-                              />
-                            </Marker>
-                          );
-                        })}
+                        {branches
+                          .filter((b) => b.delivery) // ✅ solo las sucursales que tienen delivery habilitado
+                          .map((branch) => {
+                            const isCercana = branch.id === selectedKitchenId;
+                            return (
+                              <Marker
+                                key={branch.id}
+                                longitude={branch.lng}
+                                latitude={branch.lat}
+                                anchor="bottom"
+                              >
+                                <img
+                                  src="/pinn(3).png"
+                                  alt="Pin"
+                                  className="w-8 h-8"
+                                />
+                              </Marker>
+                            );
+                          })}
                       </Map>
                     </div>
                   </div>
