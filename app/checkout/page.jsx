@@ -511,11 +511,6 @@ export default function CheckoutPage() {
                           <br />
                           <strong>{mapCandidate.address}</strong>
                         </p>
-                        {error && (
-                          <p className="text-center text-red-600 text-sm mb-2">
-                            {error}
-                          </p>
-                        )}
 
                         <button
                           onClick={() => {
