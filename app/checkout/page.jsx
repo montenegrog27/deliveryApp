@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import AddressInput from "@/components/AddressInput";
 import * as turf from "@turf/turf";
 import { useRouter } from "next/navigation";
-// import { Map } from "react-map-gl/mapbox";
 import dynamic from "next/dynamic";
 import { useRef } from "react";
 
@@ -401,41 +400,9 @@ export default function CheckoutPage() {
                         <img
                           src="/pin2.png"
                           alt="Pin"
-  className="w-10 h-10 animate-bounce-soft"                        />
+                          className="w-10 h-10 animate-bounce-soft"
+                        />
                       </div>
-
-                      {/* <Map
-                        initialViewState={{
-                          longitude: mapCenter.lng,
-                          latitude: mapCenter.lat,
-                          zoom: 13,
-                        }}
-                        mapStyle="mapbox://styles/mapbox/light-v10"
-                        mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
-                        onMoveEnd={(e) => {
-                          const center = e.viewState;
-                          const lat = center.latitude;
-                          const lng = center.longitude;
-                          setMapCenter({ lat, lng });
-
-                          fetch(
-                            `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${process.env.NEXT_PUBLIC_MAPBOX_TOKEN}`
-                          )
-                            .then((res) => res.json())
-                            .then((data) => {
-                              const place = data.features?.[0];
-                              setMapCandidate({
-                                address:
-                                  place?.place_name ||
-                                  "Ubicación seleccionada en el mapa",
-                                lat,
-                                lng,
-                                isValidAddress: true,
-                              });
-                            });
-                        }}
-                      /> */}
-
                       <Map
                         initialViewState={{
                           longitude: mapCenter.lng,
@@ -444,37 +411,39 @@ export default function CheckoutPage() {
                         }}
                         mapStyle="mapbox://styles/mapbox/light-v10"
                         mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
-                        onMoveEnd={(e) => {
-                          const center = e.viewState;
-                          const lat = center.latitude;
-                          const lng = center.longitude;
-                          setMapCenter({ lat, lng });
+onMoveEnd={(e) => {
+  const center = e.viewState;
+  const lat = center.latitude;
+  const lng = center.longitude;
+  setMapCenter({ lat, lng });
 
-                          clearTimeout(debounceTimeout.current);
-                          debounceTimeout.current = setTimeout(() => {
-                            fetch(
-                              `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${process.env.NEXT_PUBLIC_MAPBOX_TOKEN}`
-                            )
-                              .then((res) => res.json())
-                              .then((data) => {
-                                const place = data.features?.[0];
-                                setMapCandidate({
-                                  address:
-                                    place?.place_name ||
-                                    "Ubicación seleccionada en el mapa",
-                                  lat,
-                                  lng,
-                                  isValidAddress: true,
-                                });
-                              })
-                              .catch((err) => {
-                                console.error(
-                                  "❌ Error al hacer geocoding:",
-                                  err
-                                );
-                              });
-                          }, 600); // Espera 600ms antes de hacer fetch
-                        }}
+  clearTimeout(debounceTimeout.current);
+  debounceTimeout.current = setTimeout(() => {
+fetch(`/api/reverse-geocode?lat=${lat}&lng=${lng}`)
+  .then(async (res) => {
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Error desconocido");
+
+    setMapCandidate({
+      address: data.address,
+      lat,
+      lng,
+      isValidAddress: true,
+    });
+  })
+  .catch((err) => {
+    console.error("❌ Error en reverse geocoding:", err.message);
+    setMapCandidate(null);
+    setError(
+      err.message.includes("Corrientes")
+        ? "Por ahora solo entregamos en Corrientes Capital. Probá con otra ubicación dentro de la ciudad."
+        : "No pudimos obtener una dirección válida. Intentá mover el mapa."
+    );
+  });
+
+  }, 600); // espera 600ms luego de mover el mapa
+}}
+
                       />
                     </div>
                   </div>
@@ -487,6 +456,10 @@ export default function CheckoutPage() {
                           <br />
                           <strong>{mapCandidate.address}</strong>
                         </p>
+                        {error && (
+  <p className="text-center text-red-600 text-sm mb-2">{error}</p>
+)}
+
                         <button
                           onClick={() => {
                             const loc = mapCandidate;
