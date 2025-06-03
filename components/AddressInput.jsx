@@ -109,7 +109,7 @@ export default function AddressInput({
         </ul>
       )}
 
-      {selectedCandidate?.fromMap && (
+      {/* {selectedCandidate?.fromMap && (
         <div className="mt-2 border p-3 rounded bg-[#FFF9F2] text-sm text-gray-800 space-y-2">
           <p>Dirección seleccionada:</p>
           <p className="font-semibold">{selectedCandidate.address}</p>
@@ -120,7 +120,7 @@ export default function AddressInput({
             Aceptar
           </button>
         </div>
-      )}
+      )} */}
     </div>
   );
 }
