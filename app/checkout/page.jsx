@@ -470,7 +470,7 @@ export default function CheckoutPage() {
                         }}
                       >
                         <div className="absolute top-1/2 left-1/2 z-10 -translate-x-1/2 -translate-y-full pointer-events-none h-10 w-10 animate-bounce-soft">
-<FaLocationDot className="h-10 w-10 text-red-500"/>
+                          <FaLocationDot className="h-10 w-10 text-red-500" />
                         </div>
 
                         {/* 🏢 Sucursales */}
@@ -530,12 +530,19 @@ export default function CheckoutPage() {
                         </button>
                       </>
                     ) : (
-                      <button
-                        disabled
-                        className="bg-blue-600 text-white px-4 py-2 rounded-md w-full"
-                      >
-                        Aceptar
-                      </button>
+                      <>
+                        <p className="text-sm text-gray-700 mb-2">
+                          Dirección seleccionada:
+                          <br />
+                          <p className="text-gray-500">Marque en el mapa</p>
+                        </p>
+                        <button
+                          disabled
+                          className="bg-blue-600 text-white px-4 py-2 rounded-md w-full"
+                        >
+                          Aceptar
+                        </button>
+                      </>
                     )}
                   </div>
                 </div>
