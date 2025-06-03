@@ -470,7 +470,7 @@ export default function CheckoutPage() {
                         }}
                       >
                         <div className="absolute top-1/2 left-1/2 z-10 -translate-x-1/2 -translate-y-full pointer-events-none h-10 w-10 animate-bounce-soft">
-<FaLocationDot />
+<FaLocationDot className="h-10 w-10 text-red-500"/>
                         </div>
 
                         {/* 🏢 Sucursales */}
