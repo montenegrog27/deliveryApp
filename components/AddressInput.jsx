@@ -4,7 +4,7 @@ import { useState } from "react";
 export default function AddressInput({
   value,
   onSelect,
-  onInputChange, // ← NUEVO
+  onInputChange,
   setDireccionConfirmada,
   onChooseFromMap,
 }) {
@@ -12,7 +12,7 @@ export default function AddressInput({
   const [selectedCandidate, setSelectedCandidate] = useState(null);
 
   const handleInput = async (val) => {
-    setDireccionConfirmada(false);
+    setDireccionConfirmada?.(false);
     if (val.length < 3) {
       setResults([]);
       return;
@@ -22,8 +22,7 @@ export default function AddressInput({
       const res = await fetch(
         `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
           val
-        )}.json?access_token=${
-          process.env.NEXT_PUBLIC_MAPBOX_TOKEN
+        )}.json?access_token=${process.env.NEXT_PUBLIC_MAPBOX_TOKEN
         }&autocomplete=true&country=AR&bbox=-58.87,-27.51,-58.775,-27.43&limit=5`
       );
       const data = await res.json();
@@ -55,10 +54,10 @@ export default function AddressInput({
         <input
           type="text"
           placeholder="Ingresá tu dirección"
-          value={value} // ✅ controlado 100%
+          value={value}
           onChange={(e) => {
             handleInput(e.target.value);
-            onInputChange?.(e.target.value); // <- avisa al padre del cambio
+            onInputChange?.(e.target.value);
           }}
           className="w-full border border-neutral-300 rounded-lg px-4 py-2 text-base pr-10"
         />
@@ -66,16 +65,11 @@ export default function AddressInput({
         {value?.length > 0 && (
           <button
             onClick={() => {
-              onSelect({
-                address: "",
-                lat: null,
-                lng: null,
-                isValidAddress: false,
-              });
+              onSelect({ address: "", lat: null, lng: null, isValidAddress: false });
               setResults([]);
               setSelectedCandidate(null);
               setDireccionConfirmada?.(false);
-              onInputChange?.(""); // 👈 esto borra el input
+              onInputChange?.(""); // borra el input
             }}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-black"
           >
@@ -91,7 +85,7 @@ export default function AddressInput({
               key={r.id}
               className="px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer border-b"
               onClick={() =>
-                setSelectedCandidate({
+                confirmSelection({
                   address: r.place_name,
                   lat: r.center[1],
                   lng: r.center[0],
@@ -107,7 +101,7 @@ export default function AddressInput({
             onClick={() => {
               onChooseFromMap?.();
               setResults([]);
-              setSelectedCandidate(null);
+              setSelectedCandidate({ fromMap: true }); // solo si viene del mapa
             }}
           >
             📍 Elegir ubicación en el mapa
@@ -115,7 +109,7 @@ export default function AddressInput({
         </ul>
       )}
 
-      {selectedCandidate && (
+      {selectedCandidate?.fromMap && (
         <div className="mt-2 border p-3 rounded bg-[#FFF9F2] text-sm text-gray-800 space-y-2">
           <p>Dirección seleccionada:</p>
           <p className="font-semibold">{selectedCandidate.address}</p>
