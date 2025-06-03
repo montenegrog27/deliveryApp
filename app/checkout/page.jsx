@@ -470,12 +470,9 @@ export default function CheckoutPage() {
                       >
                         {/* 📍 Pin del centro */}
                         <div className="absolute top-1/2 left-1/2 z-10 -translate-x-1/2 -translate-y-full pointer-events-none">
-                          <img
-                            src="/pinn(3).png"
-                            alt="Pin"
-                            className="w-10 h-10 animate-bounce-soft"
-                          />
+                          📍
                         </div>
+
 
                         {/* 🏢 Sucursales */}
                         {branches.map((branch) => {
@@ -494,7 +491,11 @@ export default function CheckoutPage() {
                                     : "bg-blue-600 text-white"
                                 }`}
                               >
-                                {branch.name}
+                                                   <img
+                            src="/pinn(3).png"
+                            alt="Pin"
+                            className="w-10 h-10 animate-bounce-soft"
+                          />
                               </div>
                             </Marker>
                           );
@@ -538,9 +539,12 @@ export default function CheckoutPage() {
                         </button>
                       </>
                     ) : (
-                      <p className="text-sm text-gray-500 text-center">
-                        Mové el mapa para elegir la ubicación
-                      </p>
+                      <button
+                        disabled
+                        className="bg-blue-600 text-white px-4 py-2 rounded-md w-full"
+                      >
+                        Aceptar
+                      </button>
                     )}
                   </div>
                 </div>
