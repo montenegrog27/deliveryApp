@@ -2,6 +2,8 @@
 import { useCart } from "@/context/CartContext";
 import { useState, useEffect } from "react";
 import AddressInput from "@/components/AddressInput";
+// import { point, distance as turfDistance } from "@turf/turf";
+
 import * as turf from "@turf/turf";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
@@ -45,7 +47,7 @@ export default function CheckoutPage() {
     apartment: "",
   });
   const [direccionConfirmada, setDireccionConfirmada] = useState(false);
-  const [zones, setZones] = useState([]);
+  // const [zones, setZones] = useState([]);
   const [shippingCost, setShippingCost] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -82,51 +84,79 @@ export default function CheckoutPage() {
     fetchPaymentMethods();
   }, []);
 
-  useEffect(() => {
-    const fetchZones = async () => {
-      try {
-        const res = await fetch("/api/zones");
-        if (!res.ok) throw new Error("Error al obtener zonas");
+  // useEffect(() => {
+  //   const fetchZones = async () => {
+  //     try {
+  //       const res = await fetch("/api/zones");
+  //       if (!res.ok) throw new Error("Error al obtener zonas");
 
-        const text = await res.text();
-        if (!text) return;
+  //       const text = await res.text();
+  //       if (!text) return;
 
-        const data = JSON.parse(text);
-        setZones(data);
-      } catch (err) {
-        console.error("❌ Error al traer zonas:", err);
+  //       const data = JSON.parse(text);
+  //       setZones(data);
+  //     } catch (err) {
+  //       console.error("❌ Error al traer zonas:", err);
+  //     }
+  //   };
+
+  //   fetchZones();
+  // }, []);
+
+
+const calcularEnvio = async (customCustomer = customer) => {
+  if (!customCustomer.lat || !customCustomer.lng) return;
+
+  try {
+    const configRes = await fetch("/api/settings/delivery");
+    const { baseDeliveryCost, pricePerKm, maxDistanceKm, freeShippingRadius } =
+      await configRes.json();
+
+    const branchesRes = await fetch("/api/settings/branches");
+    const { branches } = await branchesRes.json();
+
+    const puntoCliente = turf.point([customCustomer.lng, customCustomer.lat]);
+
+    let mejorSucursal = null;
+    let menorDistancia = Infinity;
+
+    for (const branch of branches) {
+      const puntoSucursal = turf.point([branch.lng, branch.lat]);
+      const distanciaKm = turf.distance(puntoCliente, puntoSucursal, {
+        units: "kilometers",
+      });
+
+      if (distanciaKm < menorDistancia) {
+        menorDistancia = distanciaKm;
+        mejorSucursal = { ...branch, distancia: distanciaKm };
       }
-    };
+    }
 
-    fetchZones();
-  }, []);
-
-  const calcularEnvio = async (customCustomer = customer) => {
-    if (!customCustomer.lat || !customCustomer.lng || !zones.length) return;
-
-    const point = turf.point([customCustomer.lng, customCustomer.lat]);
-
-    const zona = zones.find((z) => {
-      if (!z.enabled) return false;
-      try {
-        const geometry = JSON.parse(z.geometry);
-        return turf.booleanPointInPolygon(point, geometry);
-      } catch (e) {
-        console.warn("Geometría inválida en zona", z.name, e);
-        return false;
-      }
-    });
-
-    if (zona) {
-      setSelectedKitchenId(zona.branchId || zona.cocinaId);
-      setShippingCost(Number(zona.cost || 0));
-      setError(null);
-    } else {
+    if (!mejorSucursal || menorDistancia > maxDistanceKm) {
       setSelectedKitchenId(null);
       setShippingCost(0);
-      setError("Lo sentimos, estás fuera de nuestras zonas de entrega");
+      setError("Estás fuera del área de cobertura.");
+      return;
     }
-  };
+
+    let costoEnvio = baseDeliveryCost;
+    if (menorDistancia > freeShippingRadius) {
+      const extraKm = Math.ceil(menorDistancia - freeShippingRadius);
+      costoEnvio += extraKm * pricePerKm;
+    } else {
+      costoEnvio = 0;
+    }
+
+    setSelectedKitchenId(mejorSucursal.id);
+    setShippingCost(costoEnvio);
+    setDistanciaSucursal(menorDistancia);
+    setError(null);
+  } catch (err) {
+    console.error("Error al calcular envío:", err);
+    setError("No se pudo calcular el costo de envío.");
+  }
+};
+
 
   const subtotal = cart.reduce(
     (sum, item) => sum + item.attributes.price * item.quantity,
@@ -521,28 +551,24 @@ export default function CheckoutPage() {
               />
             </div>
           </div>
-          {selectedKitchenId && distanciaSucursal !== null && (
-            <div className="mt-3 text-sm">
-              {shippingCost === 0 ? (
-                <p className="text-green-600">
-                  Envío gratuito — Estás dentro de la zona de cobertura de{" "}
-                  <strong>{selectedKitchenId}</strong>.
-                </p>
-              ) : distanciaSucursal > 10 ? (
-                <p className="text-yellow-600">
-                  Estás dentro de la zona de cobertura pero a{" "}
-                  <strong>{distanciaSucursal.toFixed(1)}km</strong>. Se aplica
-                  un costo adicional.
-                </p>
-              ) : (
-                <p className="text-blue-600">
-                  Estás dentro de la zona de cobertura de{" "}
-                  <strong>{selectedKitchenId}</strong> (a{" "}
-                  {distanciaSucursal.toFixed(1)}km).
-                </p>
-              )}
-            </div>
-          )}
+{selectedKitchenId && distanciaSucursal !== null && (
+  <div className="mt-3 text-sm">
+    {shippingCost === 0 ? (
+      <p className="text-green-600">
+        Envío gratuito — Estás a{" "}
+        <strong>{distanciaSucursal.toFixed(1)}km</strong> de nuestra sucursal{" "}
+        <strong>{selectedKitchenId}</strong>.
+      </p>
+    ) : (
+      <p className="text-blue-600">
+        Estás a <strong>{distanciaSucursal.toFixed(1)}km</strong> de{" "}
+        <strong>{selectedKitchenId}</strong>. Se aplica un costo de envío de{" "}
+        <strong>${shippingCost}</strong>.
+      </p>
+    )}
+  </div>
+)}
+
 
           {shippingCost === 0 && selectedKitchenId ? (
             <p className="mt-2 text-sm text-green-700">
