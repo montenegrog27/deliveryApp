@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { useRef } from "react";
 import { Marker } from "react-map-gl/mapbox";
+import { FaLocationDot } from "react-icons/fa6";
 
 // Map importado solo del lado cliente, con fallback de carga
 const Map = dynamic(
@@ -469,7 +470,7 @@ export default function CheckoutPage() {
                         }}
                       >
                         <div className="absolute top-1/2 left-1/2 z-10 -translate-x-1/2 -translate-y-full pointer-events-none h-10 w-10 animate-bounce-soft">
-                          📍
+<FaLocationDot />
                         </div>
 
                         {/* 🏢 Sucursales */}
