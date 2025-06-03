@@ -6,7 +6,8 @@ import { point, distance } from "@turf/turf";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { useRef } from "react";
-import { Marker } from "react-map-gl"; // ⚠️ asegurate de tenerlo importado
+import { Marker } from "react-map-gl/mapbox";
+
 // Map importado solo del lado cliente, con fallback de carga
 const Map = dynamic(
   () => import("react-map-gl/mapbox").then((mod) => mod.Map),
