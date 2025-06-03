@@ -363,28 +363,27 @@ export default function CheckoutPage() {
               />
             </div>
 
-<AddressInput
-  value={customer.address}
-  onInputChange={(val) =>
-    setCustomer((prev) => ({ ...prev, address: val }))
-  }
-  onSelect={(loc) => {
-    if (!loc || !loc.lat || !loc.lng) return;
-    const updatedCustomer = {
-      ...customer,
-      address: loc.address,
-      lat: loc.lat,
-      lng: loc.lng,
-      isValidAddress: loc.isValidAddress,
-    };
-    setCustomer(updatedCustomer);
-    setDireccionConfirmada(true);
-    calcularEnvio(updatedCustomer);
-  }}
-  onChooseFromMap={() => setShowMapModal(true)}
-  setDireccionConfirmada={setDireccionConfirmada}
-/>
-
+            <AddressInput
+              value={customer.address}
+              onInputChange={(val) =>
+                setCustomer((prev) => ({ ...prev, address: val }))
+              }
+              onSelect={(loc) => {
+                if (!loc || !loc.lat || !loc.lng) return;
+                const updatedCustomer = {
+                  ...customer,
+                  address: loc.address,
+                  lat: loc.lat,
+                  lng: loc.lng,
+                  isValidAddress: loc.isValidAddress,
+                };
+                setCustomer(updatedCustomer);
+                setDireccionConfirmada(true);
+                calcularEnvio(updatedCustomer);
+              }}
+              onChooseFromMap={() => setShowMapModal(true)}
+              setDireccionConfirmada={setDireccionConfirmada}
+            />
 
             {showMapModal && (
               <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center">

@@ -23,27 +23,34 @@ export async function GET(req) {
         { status: 404 }
       );
     }
-
     const result = data.results[0];
-    const address = result.formatted_address;
-    const components = result.address_components;
 
-    const ciudad = components.find((c) =>
-      c.types.includes("locality") || c.types.includes("administrative_area_level_2")
-    )?.long_name;
+    if (!result || !result.formatted_address) {
+      return new Response(
+        JSON.stringify({ error: "No se encontraron resultados" }),
+        { status: 404 }
+      );
+    }
 
-    const pais = components.find((c) => c.types.includes("country"))?.short_name;
+    const isCorrientes = result.address_components.some((comp) =>
+      comp.long_name.includes("Corrientes")
+    );
 
-    if (ciudad?.toLowerCase() !== "corrientes" || pais !== "AR") {
+    if (!isCorrientes) {
       return new Response(
         JSON.stringify({
-          error: "Solo entregamos en Corrientes Capital",
+          error:
+            "Por ahora solo entregamos en Corrientes Capital. Probá con otra ubicación dentro de la ciudad.",
         }),
         { status: 400 }
       );
     }
 
-    return new Response(JSON.stringify({ address }));
+    return new Response(
+      JSON.stringify({
+        address: result.formatted_address,
+      })
+    );
   } catch (err) {
     console.error("Error en reverse-geocode:", err);
     return new Response(
