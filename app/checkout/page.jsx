@@ -468,11 +468,9 @@ export default function CheckoutPage() {
                           }, 600);
                         }}
                       >
-                        {/* 📍 Pin del centro */}
-                        <div className="absolute top-1/2 left-1/2 z-10 -translate-x-1/2 -translate-y-full pointer-events-none">
+                        <div className="absolute top-1/2 left-1/2 z-10 -translate-x-1/2 -translate-y-full pointer-events-none h-10 w-10 animate-bounce-soft">
                           📍
                         </div>
-
 
                         {/* 🏢 Sucursales */}
                         {branches.map((branch) => {
@@ -484,19 +482,11 @@ export default function CheckoutPage() {
                               latitude={branch.lat}
                               anchor="bottom"
                             >
-                              <div
-                                className={`text-xs px-2 py-1 rounded shadow ${
-                                  isCercana
-                                    ? "bg-red-600 text-white"
-                                    : "bg-blue-600 text-white"
-                                }`}
-                              >
-                                                   <img
-                            src="/pinn(3).png"
-                            alt="Pin"
-                            className="w-10 h-10 animate-bounce-soft"
-                          />
-                              </div>
+                              <img
+                                src="/pinn(3).png"
+                                alt="Pin"
+                                className="w-6 h-6 "
+                              />
                             </Marker>
                           );
                         })}
