@@ -144,7 +144,7 @@ export default function CheckoutPage() {
         costoEnvio = 0;
       }
 
-      setSelectedKitchenId(mejorSucursal.id);
+      setSelectedKitchenId(mejorSucursal.name);
       setShippingCost(costoEnvio);
       setDistanciaSucursal(menorDistancia);
       setError(null);
