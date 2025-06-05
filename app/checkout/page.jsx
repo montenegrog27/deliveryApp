@@ -330,7 +330,7 @@ export default function CheckoutPage() {
           break;
       }
 
-      // ✅ Si pasó todas las validaciones
+      // ✅ Si pasó todas  validaciones
       setCuponDescuento(Number(cupon.discount || 0));
       setCuponData(cupon);
       setCuponValido(true);
@@ -583,27 +583,23 @@ export default function CheckoutPage() {
               {shippingCost === 0 ? (
                 <p className="text-green-600">
                   Envío gratuito — Estás a{" "}
-                  <strong>{distanciaSucursal.toFixed(1)}km</strong> de nuestra
-                  sucursal <strong>{selectedKitchenId}</strong>.
+                  <strong>{distanciaSucursal.toFixed(1)}km</strong> de nuestro local.
                 </p>
               ) : (
                 <p className="text-blue-600">
-                  Estás a <strong>{distanciaSucursal.toFixed(1)}km</strong> de{" "}
-                  <strong>{selectedKitchenId}</strong>. Se aplica un costo de
+                  Estás a <strong>{distanciaSucursal.toFixed(1)}km</strong> del local. Se aplica un costo de
                   envío de <strong>${shippingCost}</strong>.
                 </p>
               )}
             </div>
           )}
-
           {shippingCost === 0 && selectedKitchenId ? (
             <p className="mt-2 text-sm text-green-700">
-              Envío gratuito — Sucursal: <strong>{selectedKitchenId}</strong>
+              Envío gratuito 
             </p>
           ) : (
             <p className="mt-2 text-sm text-gray-700">
-              Envío: ${shippingCost} — Sucursal:{" "}
-              <strong>{selectedKitchenName}</strong>
+              Envío: ${shippingCost} 
             </p>
           )}
 

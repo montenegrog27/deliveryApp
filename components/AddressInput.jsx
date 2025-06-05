@@ -109,18 +109,6 @@ export default function AddressInput({
         </ul>
       )}
 
-      {/* {selectedCandidate?.fromMap && (
-        <div className="mt-2 border p-3 rounded bg-[#FFF9F2] text-sm text-gray-800 space-y-2">
-          <p>Dirección seleccionada:</p>
-          <p className="font-semibold">{selectedCandidate.address}</p>
-          <button
-            onClick={() => confirmSelection(selectedCandidate)}
-            className="bg-blue-600 text-white px-4 py-1 rounded text-sm"
-          >
-            Aceptar
-          </button>
-        </div>
-      )} */}
     </div>
   );
 }
