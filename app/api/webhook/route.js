@@ -267,7 +267,7 @@ const nuevoMensaje = { ...message, timestamp, read: false };
       trackingId,
       orderId: trackingId,
       createdAt: timestamp,
-      status: order?.status || "pending",
+      status:  "pending",
       orderMode: order?.orderMode || "delivery",
       messages: [nuevoMensaje],
     });

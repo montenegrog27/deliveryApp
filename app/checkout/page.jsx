@@ -54,6 +54,7 @@ export default function CheckoutPage() {
   const [success, setSuccess] = useState(false);
 
   const [selectedKitchenId, setSelectedKitchenId] = useState(null);
+  const [selectedKitchenName, setSelectedKitchenName] = useState(null)
   const [paymentMethods, setPaymentMethods] = useState([]);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("");
   const [distanciaSucursal, setDistanciaSucursal] = useState(null);
@@ -145,7 +146,8 @@ export default function CheckoutPage() {
         costoEnvio = 0;
       }
 
-      setSelectedKitchenId(mejorSucursal.name);
+      setSelectedKitchenId(mejorSucursal.id);
+      setSelectedKitchenName(mejorSucursal.name); // si necesitás mostrarlo
       setShippingCost(costoEnvio);
       setDistanciaSucursal(menorDistancia);
       setError(null);
@@ -601,7 +603,7 @@ export default function CheckoutPage() {
           ) : (
             <p className="mt-2 text-sm text-gray-700">
               Envío: ${shippingCost} — Sucursal:{" "}
-              <strong>{selectedKitchenId}</strong>
+              <strong>{selectedKitchenName}</strong>
             </p>
           )}
 
