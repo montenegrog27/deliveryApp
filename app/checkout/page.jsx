@@ -153,8 +153,16 @@ export default function CheckoutPage() {
     0
   );
 
-  const descuentoAplicado = (subtotal * cuponDescuento) / 100;
-  const total = subtotal + shippingCost - descuentoAplicado;
+let descuentoAplicado = 0;
+
+if (cuponData?.discountType === "amount") {
+  descuentoAplicado = cuponDescuento;
+} else {
+  descuentoAplicado = (subtotal * cuponDescuento) / 100;
+}
+
+const total = subtotal + shippingCost - descuentoAplicado;
+
 
   const handleSubmit = async () => {
     setLoading(true);
@@ -192,10 +200,7 @@ export default function CheckoutPage() {
         phone: formattedPhone,
       },
       cart: cart.map((item) => ({
-        // id: item.id,
-        // quantity: item.quantity,
-        // price: item.attributes.price,
-        // discountPrice: item.discountPrice || item.attributes.price,
+
         id: item.id,
           name: item.attributes.name, // ✅ nombre del producto
         quantity: item.quantity,
