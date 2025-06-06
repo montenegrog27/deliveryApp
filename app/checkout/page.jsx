@@ -250,6 +250,7 @@ export default function CheckoutPage() {
           customerName: customer.name,
           templateName: "confirmar_pedido",
           branchName: "Santa Fe 1583",
+          totalAmount: orderPayload.cart.price,
         }),
       });
 

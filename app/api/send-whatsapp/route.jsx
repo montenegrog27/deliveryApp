@@ -5,9 +5,15 @@ import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
 export async function POST(req) {
   try {
     const body = await req.json();
-    const { phone, trackingId: rawId, customerName, branchName } = body;
+    const {
+      phone,
+      trackingId: rawId,
+      customerName,
+      branchName,
+      totalAmount,
+    } = body;
 
-    if (!phone || !rawId || !customerName || !branchName) {
+    if (!phone || !rawId || !customerName || !branchName || !totalAmount) {
       return NextResponse.json(
         { error: "Faltan datos requeridos" },
         { status: 400 }
@@ -31,7 +37,10 @@ export async function POST(req) {
         components: [
           {
             type: "body",
-            parameters: [{ type: "text", text: customerName }],
+            parameters: [
+              { type: "text", text: customerName },
+              // { type: "text", text: totalAmount }, // ⬅️ nuevo
+            ],
           },
         ],
       },
