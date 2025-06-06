@@ -81,7 +81,7 @@ export async function POST(req) {
     const total = Math.max(totalBase - discountAmount + (shippingCost || 0), 0);
 
     const trackingId = `tracking_${externalRef}`;
-
+// prueba
     const orderData = {
       branch: kitchenId,
       cashier: "cliente-web",
