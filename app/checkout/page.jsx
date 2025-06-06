@@ -254,7 +254,7 @@ const total = subtotal + shippingCost - descuentoAplicado;
           customerName: customer.name,
           templateName: "confirmar_pedido",
           branchName: "Santa Fe 1583",
-          totalAmount: orderPayload.cart[0].price,
+          totalAmount: total,
         }),
       });
 
