@@ -435,6 +435,7 @@ export async function POST(req) {
         await sendText(phoneNormalized, "✅ Pedido confirmado. Te avisaremos por acá cuando esté yendo el repartidor. ¡Gracias!");
       }
     }
+    //fefefef
 
     if (payload.includes("cancelar")) {
       if (order.clientConfirm === true) {
