@@ -10,10 +10,10 @@ export async function POST(req) {
       trackingId: rawId,
       customerName,
       branchName,
-      totalAmount,
+      // totalAmount, todavia no
     } = body;
 
-    if (!phone || !rawId || !customerName || !branchName || !totalAmount) {
+    if (!phone || !rawId || !customerName || !branchName ) {
       return NextResponse.json(
         { error: "Faltan datos requeridos" },
         { status: 400 }
