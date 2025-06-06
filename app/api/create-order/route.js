@@ -89,7 +89,7 @@ export async function POST(req) {
       items: cart,
       paymentMethodId: paymentMethod || "cash",
       paid: paid || false,
-      status: "preparing",
+      status: "pending",
       total,
       coupon: coupon || null,
       couponDiscount: couponDiscount || 0,
