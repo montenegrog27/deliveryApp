@@ -31,13 +31,17 @@ export default function HomePage() {
   }, []);
 
   const drinksCategory = menu.find((cat) => cat.name === "Bebidas");
-  const friesProduct = menu.find((cat) => cat.name === "Papas fritas")?.items?.[0];
-  const selectedDrink = drinksCategory?.items.find((item) => item.id === selectedDrinkId) || null;
+  const friesProduct = menu.find((cat) => cat.name === "Papas fritas")
+    ?.items?.[0];
+  const selectedDrink =
+    drinksCategory?.items.find((item) => item.id === selectedDrinkId) || null;
 
   const finalPrice =
-    (selectedItem?.attributes.discountPrice || selectedItem?.attributes.price || 0) +
+    (selectedItem?.attributes.discountPrice ||
+      selectedItem?.attributes.price ||
+      0) +
     (selectedDrink?.attributes?.price || 0) +
-    (includeFries ? (friesProduct?.attributes?.price || 0) : 0);
+    (includeFries ? friesProduct?.attributes?.price || 0 : 0);
 
   const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
 
@@ -90,7 +94,9 @@ export default function HomePage() {
 
               return (
                 <section key={cat.id} className="space-y-6">
-                  <h2 className="text-2xl font-bold text-[#E00000]">{cat.name}</h2>
+                  <h2 className="text-2xl font-bold text-[#E00000]">
+                    {cat.name}
+                  </h2>
                   <ul className="space-y-4">
                     {availableItems.map((item) => (
                       <li key={item.id} className="flex gap-4 items-center">
@@ -118,7 +124,9 @@ export default function HomePage() {
                           )}
                           <div className="flex items-center justify-between mt-2">
                             <span className="text-[#E00000] font-bold text-sm">
-                              ${item.attributes.discountPrice || item.attributes.price}
+                              $
+                              {item.attributes.discountPrice ||
+                                item.attributes.price}
                             </span>
                             <button
                               onClick={() => setSelectedItem(item)}
@@ -168,12 +176,12 @@ export default function HomePage() {
 
               {/* Observaciones */}
               <div>
-                <label className="block text-sm font-medium mb-1 text-[#1A1A1A]">
+                <label className="block text-sm font-medium mt-5 mb-1 text-[#1A1A1A]">
                   Observaciones
                 </label>
                 <textarea
                   className="w-full border rounded p-2 text-base"
-                  placeholder="Ej: sin lechuga, cortar al medio..."
+                  placeholder="Ej: sin lechuga, sin tomate.."
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
                 />
@@ -181,6 +189,9 @@ export default function HomePage() {
 
               {/* Extras */}
               <div className="space-y-4">
+                <label className="block text-sm font-medium mt-5 mb-1 text-[#1A1A1A]">
+                  Agrega extras a tu pedido!
+                </label>
                 <label className="flex items-center justify-between text-sm">
                   <span>🥤 Agregar bebida</span>
                   <input
@@ -208,10 +219,11 @@ export default function HomePage() {
                   </select>
                 )}
 
-                {friesProduct && (
+                {/* {friesProduct && (
                   <label className="flex items-center justify-between text-sm">
                     <span>
-                      🍟 {friesProduct.attributes.name} (+${friesProduct.attributes.price})
+                      🍟 {friesProduct.attributes.name} (+$
+                      {friesProduct.attributes.price})
                     </span>
                     <input
                       type="checkbox"
@@ -219,7 +231,7 @@ export default function HomePage() {
                       onChange={() => setIncludeFries((prev) => !prev)}
                     />
                   </label>
-                )}
+                )} */}
               </div>
 
               {/* Total */}
@@ -256,7 +268,7 @@ export default function HomePage() {
                     setIncludeFries(false);
                     setShowDrinkDropdown(false);
                   }}
-                  className="w-full bg-[#E00000] hover:bg-[#C40000] text-white py-2 rounded-full font-bold text-sm"
+                  className="w-[50%] bg-[#E00000] hover:bg-[#C40000] text-white py-3 rounded-full font-bold text-sm"
                 >
                   Agregar al pedido
                 </button>
