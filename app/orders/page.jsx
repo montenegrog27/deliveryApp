@@ -188,7 +188,7 @@ export default function HomePage() {
               </div>
 
               {/* Extras */}
-              <div className="space-y-4">
+              {/* <div className="space-y-4">
                 <label className="block text-sm font-medium mt-5 mb-1 text-[#1A1A1A]">
                   Agrega extras a tu pedido!
                 </label>
@@ -217,7 +217,7 @@ export default function HomePage() {
                       </option>
                     ))}
                   </select>
-                )}
+                )} */}
 
                 {/* {friesProduct && (
                   <label className="flex items-center justify-between text-sm">
@@ -232,7 +232,7 @@ export default function HomePage() {
                     />
                   </label>
                 )} */}
-              </div>
+              {/* </div> */}
 
               {/* Total */}
               <div className="text-right text-sm font-semibold text-[#1A1A1A]">
