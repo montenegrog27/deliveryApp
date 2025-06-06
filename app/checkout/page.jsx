@@ -636,13 +636,13 @@ const total = subtotal + shippingCost - descuentoAplicado;
             </label>
 
             {tieneCupon && (
-              <div className="mt-2 space-y-2">
+              <div className="mt-2 space-y-2 border ">
                 <input
                   type="text"
                   placeholder="Código de cupón"
                   value={cuponInput}
                   onChange={(e) => setCuponInput(e.target.value.toLowerCase())}
-                  className="w-full border-neutral-300 px-4 py-2 rounded-md text-base"
+                  className="w-full border border-neutral-300 px-4 py-2 rounded-md text-base"
                 />
                 <button
                   onClick={validarCupon}
