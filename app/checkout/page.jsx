@@ -54,7 +54,7 @@ export default function CheckoutPage() {
   const [success, setSuccess] = useState(false);
 
   const [selectedKitchenId, setSelectedKitchenId] = useState(null);
-  const [selectedKitchenName, setSelectedKitchenName] = useState(null)
+  const [selectedKitchenName, setSelectedKitchenName] = useState(null);
   const [paymentMethods, setPaymentMethods] = useState([]);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("");
   const [distanciaSucursal, setDistanciaSucursal] = useState(null);
@@ -240,6 +240,7 @@ export default function CheckoutPage() {
         router.push(`${init_point}&ref=${ref}`);
         return;
       }
+      console.log("orderPayload.cart[0].price", orderPayload.cart[0].price);
 
       await fetch("/api/send-whatsapp", {
         method: "POST",
@@ -250,7 +251,7 @@ export default function CheckoutPage() {
           customerName: customer.name,
           templateName: "confirmar_pedido",
           branchName: "Santa Fe 1583",
-          totalAmount: orderPayload.cart.price,
+          totalAmount: orderPayload.cart[0].price,
         }),
       });
 
@@ -584,24 +585,22 @@ export default function CheckoutPage() {
               {shippingCost === 0 ? (
                 <p className="text-green-600">
                   Envío gratuito — Estás a{" "}
-                  <strong>{distanciaSucursal.toFixed(1)}km</strong> de nuestro local.
+                  <strong>{distanciaSucursal.toFixed(1)}km</strong> de nuestro
+                  local.
                 </p>
               ) : (
                 <p className="text-blue-600">
-                  Estás a <strong>{distanciaSucursal.toFixed(1)}km</strong> del local. Se aplica un costo de
-                  envío de <strong>${shippingCost}</strong>.
+                  Estás a <strong>{distanciaSucursal.toFixed(1)}km</strong> del
+                  local. Se aplica un costo de envío de{" "}
+                  <strong>${shippingCost}</strong>.
                 </p>
               )}
             </div>
           )}
           {shippingCost === 0 && selectedKitchenId ? (
-            <p className="mt-2 text-sm text-green-700">
-              Envío gratuito 
-            </p>
+            <p className="mt-2 text-sm text-green-700">Envío gratuito</p>
           ) : (
-            <p className="mt-2 text-sm text-gray-700">
-              Envío: ${shippingCost} 
-            </p>
+            <p className="mt-2 text-sm text-gray-700">Envío: ${shippingCost}</p>
           )}
 
           {error && (

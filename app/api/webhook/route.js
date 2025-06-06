@@ -432,7 +432,7 @@ export async function POST(req) {
           clientConfirmAt: serverTimestamp(),
         });
         baseMessage.message = "✅ Pedido confirmado por el cliente.";
-        await sendText(phoneNormalized, "✅ Pedido confirmado. ¡Gracias!");
+        await sendText(phoneNormalized, "✅ Pedido confirmado. Te avisaremos por acá cuando esté yendo el repartidor. ¡Gracias!");
       }
     }
 
