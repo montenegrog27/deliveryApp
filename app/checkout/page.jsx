@@ -22,15 +22,6 @@ const Map = dynamic(
   }
 );
 
-// function formatOrderSummary(cart) {
-//   const lines = cart.map((item) => `${item.quantity} ${item.attributes.name}`);
-//   const total = cart.reduce(
-//     (sum, item) => sum + item.attributes.price * item.quantity,
-//     0
-//   );
-//   return lines.join("\n") + `\nTotal: $${total}`;
-// }
-
 export default function CheckoutPage() {
   const debounceTimeout = useRef(null);
 
@@ -201,10 +192,17 @@ export default function CheckoutPage() {
         phone: formattedPhone,
       },
       cart: cart.map((item) => ({
+        // id: item.id,
+        // quantity: item.quantity,
+        // price: item.attributes.price,
+        // discountPrice: item.discountPrice || item.attributes.price,
         id: item.id,
+          name: item.attributes.name, // ✅ nombre del producto
         quantity: item.quantity,
         price: item.attributes.price,
         discountPrice: item.discountPrice || item.attributes.price,
+        note: item.attributes.note || "", // ✅ incluir observaciones
+        extras: item.attributes.extras || null, //
       })),
       shippingCost,
       kitchenId: selectedKitchenId,
