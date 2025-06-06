@@ -241,6 +241,7 @@ export default function HomePage() {
 
               {/* Botones */}
               <div className="space-y-2">
+                <div className="w-full flex justify-center items-center">
                 <button
                   onClick={() => {
                     const extras = {
@@ -272,6 +273,7 @@ export default function HomePage() {
                 >
                   Agregar al pedido
                 </button>
+                </div>
                 <button
                   onClick={() => {
                     setSelectedItem(null);
