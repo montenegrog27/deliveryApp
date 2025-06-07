@@ -187,52 +187,6 @@ export default function HomePage() {
                 />
               </div>
 
-              {/* Extras */}
-              {/* <div className="space-y-4">
-                <label className="block text-sm font-medium mt-5 mb-1 text-[#1A1A1A]">
-                  Agrega extras a tu pedido!
-                </label>
-                <label className="flex items-center justify-between text-sm">
-                  <span>🥤 Agregar bebida</span>
-                  <input
-                    type="checkbox"
-                    checked={showDrinkDropdown}
-                    onChange={(e) => {
-                      setShowDrinkDropdown(e.target.checked);
-                      if (!e.target.checked) setSelectedDrinkId("");
-                    }}
-                  />
-                </label>
-
-                {showDrinkDropdown && (
-                  <select
-                    value={selectedDrinkId}
-                    onChange={(e) => setSelectedDrinkId(e.target.value)}
-                    className="w-full border rounded p-2 text-base"
-                  >
-                    <option value="">-- Seleccionar bebida --</option>
-                    {drinksCategory?.items.map((drink) => (
-                      <option key={drink.id} value={drink.id}>
-                        {drink.attributes.name} (${drink.attributes.price})
-                      </option>
-                    ))}
-                  </select>
-                )} */}
-
-                {/* {friesProduct && (
-                  <label className="flex items-center justify-between text-sm">
-                    <span>
-                      🍟 {friesProduct.attributes.name} (+$
-                      {friesProduct.attributes.price})
-                    </span>
-                    <input
-                      type="checkbox"
-                      checked={includeFries}
-                      onChange={() => setIncludeFries((prev) => !prev)}
-                    />
-                  </label>
-                )} */}
-              {/* </div> */}
 
               {/* Total */}
               <div className="text-right text-sm font-semibold text-[#1A1A1A]">
