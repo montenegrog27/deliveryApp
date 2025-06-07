@@ -8,6 +8,7 @@ export default function SuccessPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const ref = searchParams.get("ref");
+  const [orderMode, setOrderMode] = useState("delivery");
 
   useEffect(() => {
     const confirmarPago = async () => {
@@ -24,11 +25,16 @@ export default function SuccessPage() {
       let pedido = null;
       try {
         pedido = pendingData ? JSON.parse(pendingData) : null;
+        if (pedido?.orderMode) {
+          setOrderMode(pedido.orderMode);
+        }
       } catch {
         pedido = null;
       }
 
-      const pagoConMP = pedido?.paymentMethod?.toLowerCase().includes("mercado");
+      const pagoConMP = pedido?.paymentMethod
+        ?.toLowerCase()
+        .includes("mercado");
 
       if (alreadyCreated === "true" || !pagoConMP) {
         try {
@@ -98,11 +104,14 @@ export default function SuccessPage() {
 
         {status === "ok" && (
           <>
-            <h1 className="text-2xl font-bold text-green-600">¡Pedido registrado!</h1>
+            <h1 className="text-2xl font-bold text-green-600">
+              ¡Pedido registrado!
+            </h1>
             <p className="text-sm text-gray-600">
-              Te contactaremos por WhatsApp para confirmarlo.
+              {orderMode === "takeaway"
+                ? "Podés pasar a retirar tu pedido en unos minutos. Te vamos a avisar por WhatsApp cuando esté listo. 🍔"
+                : "Te contactaremos por WhatsApp para confirmar la entrega. 📦"}
             </p>
-
 
             <p className="text-xs text-neutral-500 mt-4">
               Serás redirigido automáticamente en 5 segundos...

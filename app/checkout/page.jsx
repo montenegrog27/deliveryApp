@@ -60,6 +60,7 @@ export default function CheckoutPage() {
   const [mapCenter, setMapCenter] = useState({ lat: -27.47, lng: -58.83 });
   const [mapCandidate, setMapCandidate] = useState(null);
   const [branches, setBranches] = useState([]);
+  const [orderMode, setOrderMode] = useState("delivery");
 
   useEffect(() => {
     const fetchBranches = async () => {
@@ -153,29 +154,35 @@ export default function CheckoutPage() {
     0
   );
 
-let descuentoAplicado = 0;
+  let descuentoAplicado = 0;
 
-if (cuponData?.discountType === "amount") {
-  descuentoAplicado = cuponDescuento;
-} else {
-  descuentoAplicado = (subtotal * cuponDescuento) / 100;
-}
+  if (cuponData?.discountType === "amount") {
+    descuentoAplicado = cuponDescuento;
+  } else {
+    descuentoAplicado = (subtotal * cuponDescuento) / 100;
+  }
 
-const total = subtotal + shippingCost - descuentoAplicado;
-
+  const total = subtotal + shippingCost - descuentoAplicado;
 
   const handleSubmit = async () => {
     setLoading(true);
     setError(null);
     setSuccess(false);
 
-    if (!direccionConfirmada || !customer.isValidAddress) {
-      setError(
-        "Por favor seleccioná una dirección válida que incluya calle y altura (número)."
-      );
-      setLoading(false);
-      return;
-    }
+if (orderMode === "delivery") {
+  if (!direccionConfirmada || !customer.isValidAddress) {
+    setError("Por favor seleccioná una dirección válida...");
+    setLoading(false);
+    return;
+  }
+
+  if (!customer.phone || customer.phone.length < 10) {
+    setError("Ingresá un número válido (sin el +54)");
+    setLoading(false);
+    return;
+  }
+}
+
 
     if (!customer.phone || customer.phone.length < 10) {
       setError(
@@ -200,9 +207,8 @@ const total = subtotal + shippingCost - descuentoAplicado;
         phone: formattedPhone,
       },
       cart: cart.map((item) => ({
-
         id: item.id,
-          name: item.attributes.name, // ✅ nombre del producto
+        name: item.attributes.name, // ✅ nombre del producto
         quantity: item.quantity,
         price: item.attributes.price,
         discountPrice: item.discountPrice || item.attributes.price,
@@ -216,6 +222,7 @@ const total = subtotal + shippingCost - descuentoAplicado;
       ref,
       coupon: cuponData?.code || null,
       couponDiscount: cuponDescuento,
+      orderMode,
     };
 
     try {
@@ -377,6 +384,32 @@ const total = subtotal + shippingCost - descuentoAplicado;
           </div>
 
           <div className="space-y-4">
+            <div className="flex gap-2 mb-6">
+              <button
+                type="button"
+                onClick={() => setOrderMode("takeaway")}
+                className={`flex-1 py-2 rounded-full font-bold text-sm ${
+                  orderMode === "takeaway"
+                    ? "bg-green-100 text-green-800 shadow-inner"
+                    : "bg-gray-200 text-gray-600"
+                }`}
+              >
+                Para retirar
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setOrderMode("delivery")}
+                className={`flex-1 py-2 rounded-full font-bold text-sm ${
+                  orderMode === "delivery"
+                    ? "bg-blue-100 text-blue-800 shadow-inner"
+                    : "bg-gray-200 text-gray-600"
+                }`}
+              >
+                Delivery
+              </button>
+            </div>
+
             <input
               type="text"
               placeholder="Nombre completo"
@@ -402,228 +435,240 @@ const total = subtotal + shippingCost - descuentoAplicado;
                 }}
               />
             </div>
-
-            <AddressInput
-              value={customer.address}
-              onInputChange={(val) =>
-                setCustomer((prev) => ({ ...prev, address: val }))
-              }
-              onSelect={(loc) => {
-                if (!loc || !loc.lat || !loc.lng) return;
-                const updatedCustomer = {
-                  ...customer,
-                  address: loc.address,
-                  lat: loc.lat,
-                  lng: loc.lng,
-                  isValidAddress: loc.isValidAddress,
-                };
-                setCustomer(updatedCustomer);
-                setDireccionConfirmada(true);
-                calcularEnvio(updatedCustomer);
-              }}
-              onChooseFromMap={() => setShowMapModal(true)}
-              setDireccionConfirmada={setDireccionConfirmada}
-            />
-
-            {showMapModal && (
-              <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center">
-                <div className="bg-white rounded-xl overflow-hidden w-full max-w-2xl max-h-[90vh] relative">
-                  <button
-                    onClick={() => setShowMapModal(false)}
-                    className="absolute top-3 right-4 text-gray-600 text-xl z-10"
-                  >
-                    ✕
-                  </button>
-                  <div className="relative w-full px-4 pb-4 pt-2">
-                    <div className="h-[400px] w-full rounded-lg overflow-hidden relative">
-                      <Map
-                        initialViewState={{
-                          longitude: mapCenter.lng,
-                          latitude: mapCenter.lat,
-                          zoom: 13,
-                        }}
-                        mapStyle="mapbox://styles/mapbox/light-v10"
-                        mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
-                        onMoveEnd={(e) => {
-                          const center = e.viewState;
-                          const lat = center.latitude;
-                          const lng = center.longitude;
-                          setMapCenter({ lat, lng });
-
-                          clearTimeout(debounceTimeout.current);
-                          debounceTimeout.current = setTimeout(() => {
-                            fetch(`/api/reverse-geocode?lat=${lat}&lng=${lng}`)
-                              .then(async (res) => {
-                                const data = await res.json();
-                                if (!res.ok)
-                                  throw new Error(
-                                    data.error || "Error desconocido"
-                                  );
-
-                                setMapCandidate({
-                                  address: data.address,
-                                  lat,
-                                  lng,
-                                  isValidAddress: true,
-                                });
-                              })
-                              .catch((err) => {
-                                console.error(
-                                  "❌ Error en reverse geocoding:",
-                                  err.message
-                                );
-                                setMapCandidate(null);
-                                setError(
-                                  err.message.includes("Corrientes")
-                                    ? "Por ahora solo entregamos en Corrientes Capital. Probá con otra ubicación dentro de la ciudad."
-                                    : "No pudimos obtener una dirección válida. Intentá mover el mapa."
-                                );
-                              });
-                          }, 600);
-                        }}
+            {orderMode === "delivery" && (
+              <>
+                <AddressInput
+                  value={customer.address}
+                  onInputChange={(val) =>
+                    setCustomer((prev) => ({ ...prev, address: val }))
+                  }
+                  onSelect={(loc) => {
+                    if (!loc || !loc.lat || !loc.lng) return;
+                    const updatedCustomer = {
+                      ...customer,
+                      address: loc.address,
+                      lat: loc.lat,
+                      lng: loc.lng,
+                      isValidAddress: loc.isValidAddress,
+                    };
+                    setCustomer(updatedCustomer);
+                    setDireccionConfirmada(true);
+                    calcularEnvio(updatedCustomer);
+                  }}
+                  onChooseFromMap={() => setShowMapModal(true)}
+                  setDireccionConfirmada={setDireccionConfirmada}
+                />
+                {showMapModal && (
+                  <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center">
+                    <div className="bg-white rounded-xl overflow-hidden w-full max-w-2xl max-h-[90vh] relative">
+                      <button
+                        onClick={() => setShowMapModal(false)}
+                        className="absolute top-3 right-4 text-gray-600 text-xl z-10"
                       >
-                        <div className="absolute top-1/2 left-1/2 z-10 -translate-x-1/2 -translate-y-full pointer-events-none h-10 w-10 animate-bounce-soft">
-                          <FaLocationDot className="h-10 w-10 text-red-500" />
-                        </div>
+                        ✕
+                      </button>
+                      <div className="relative w-full px-4 pb-4 pt-2">
+                        <div className="h-[400px] w-full rounded-lg overflow-hidden relative">
+                          <Map
+                            initialViewState={{
+                              longitude: mapCenter.lng,
+                              latitude: mapCenter.lat,
+                              zoom: 13,
+                            }}
+                            mapStyle="mapbox://styles/mapbox/light-v10"
+                            mapboxAccessToken={
+                              process.env.NEXT_PUBLIC_MAPBOX_TOKEN
+                            }
+                            onMoveEnd={(e) => {
+                              const center = e.viewState;
+                              const lat = center.latitude;
+                              const lng = center.longitude;
+                              setMapCenter({ lat, lng });
 
-                        {/* 🏢 Sucursales */}
-                        {branches
-                          .filter((b) => b.delivery) // ✅ solo las sucursales que tienen delivery habilitado
-                          .map((branch) => {
-                            const isCercana = branch.id === selectedKitchenId;
-                            return (
-                              <Marker
-                                key={branch.id}
-                                longitude={branch.lng}
-                                latitude={branch.lat}
-                                anchor="bottom"
-                              >
-                                <img
-                                  src="/pinn(3).png"
-                                  alt="Pin"
-                                  className="w-8 h-8"
-                                />
-                              </Marker>
-                            );
-                          })}
-                      </Map>
+                              clearTimeout(debounceTimeout.current);
+                              debounceTimeout.current = setTimeout(() => {
+                                fetch(
+                                  `/api/reverse-geocode?lat=${lat}&lng=${lng}`
+                                )
+                                  .then(async (res) => {
+                                    const data = await res.json();
+                                    if (!res.ok)
+                                      throw new Error(
+                                        data.error || "Error desconocido"
+                                      );
+
+                                    setMapCandidate({
+                                      address: data.address,
+                                      lat,
+                                      lng,
+                                      isValidAddress: true,
+                                    });
+                                  })
+                                  .catch((err) => {
+                                    console.error(
+                                      "❌ Error en reverse geocoding:",
+                                      err.message
+                                    );
+                                    setMapCandidate(null);
+                                    setError(
+                                      err.message.includes("Corrientes")
+                                        ? "Por ahora solo entregamos en Corrientes Capital. Probá con otra ubicación dentro de la ciudad."
+                                        : "No pudimos obtener una dirección válida. Intentá mover el mapa."
+                                    );
+                                  });
+                              }, 600);
+                            }}
+                          >
+                            <div className="absolute top-1/2 left-1/2 z-10 -translate-x-1/2 -translate-y-full pointer-events-none h-10 w-10 animate-bounce-soft">
+                              <FaLocationDot className="h-10 w-10 text-red-500" />
+                            </div>
+
+                            {/* 🏢 Sucursales */}
+                            {branches
+                              .filter((b) => b.delivery) // ✅ solo las sucursales que tienen delivery habilitado
+                              .map((branch) => {
+                                const isCercana =
+                                  branch.id === selectedKitchenId;
+                                return (
+                                  <Marker
+                                    key={branch.id}
+                                    longitude={branch.lng}
+                                    latitude={branch.lat}
+                                    anchor="bottom"
+                                  >
+                                    <img
+                                      src="/pinn(3).png"
+                                      alt="Pin"
+                                      className="w-8 h-8"
+                                    />
+                                  </Marker>
+                                );
+                              })}
+                          </Map>
+                        </div>
+                      </div>
+
+                      <div className="p-4">
+                        {mapCandidate ? (
+                          <>
+                            <p className="text-sm text-gray-700 mb-2">
+                              Dirección seleccionada:
+                              <br />
+                              <strong>{mapCandidate.address}</strong>
+                            </p>
+
+                            <button
+                              onClick={() => {
+                                const loc = mapCandidate;
+                                const updatedCustomer = {
+                                  ...customer,
+                                  address: loc.address,
+                                  lat: loc.lat,
+                                  lng: loc.lng,
+                                  isValidAddress: loc.isValidAddress,
+                                };
+                                setCustomer(updatedCustomer);
+                                setDireccionConfirmada(true);
+                                setShowMapModal(false);
+                                calcularEnvio(updatedCustomer);
+                              }}
+                              className="bg-blue-600 text-white px-4 py-2 rounded-md w-full"
+                            >
+                              Aceptar
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <p className="text-sm text-gray-700 mb-2">
+                              Dirección seleccionada:
+                              <br />
+                              <p className="text-gray-500">Marque en el mapa</p>
+                            </p>
+                            <button
+                              disabled
+                              className="bg-blue-600 text-white px-4 py-2 rounded-md w-full"
+                            >
+                              Aceptar
+                            </button>
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
-
-                  <div className="p-4">
-                    {mapCandidate ? (
-                      <>
-                        <p className="text-sm text-gray-700 mb-2">
-                          Dirección seleccionada:
-                          <br />
-                          <strong>{mapCandidate.address}</strong>
-                        </p>
-
-                        <button
-                          onClick={() => {
-                            const loc = mapCandidate;
-                            const updatedCustomer = {
-                              ...customer,
-                              address: loc.address,
-                              lat: loc.lat,
-                              lng: loc.lng,
-                              isValidAddress: loc.isValidAddress,
-                            };
-                            setCustomer(updatedCustomer);
-                            setDireccionConfirmada(true);
-                            setShowMapModal(false);
-                            calcularEnvio(updatedCustomer);
-                          }}
-                          className="bg-blue-600 text-white px-4 py-2 rounded-md w-full"
-                        >
-                          Aceptar
-                        </button>
-                      </>
+                )}
+                <div className="flex gap-4 mt-2">
+                  <input
+                    type="text"
+                    placeholder="Piso"
+                    value={customer.floor}
+                    onChange={(e) =>
+                      setCustomer((prev) => ({
+                        ...prev,
+                        floor: e.target.value,
+                      }))
+                    }
+                    className="w-1/2 border border-neutral-300 px-4 py-2 rounded-md text-base"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Dpto"
+                    value={customer.apartment}
+                    onChange={(e) =>
+                      setCustomer((prev) => ({
+                        ...prev,
+                        apartment: e.target.value,
+                      }))
+                    }
+                    className="w-1/2 border border-neutral-300 px-4 py-2 rounded-md text-base"
+                  />
+                </div>
+                {selectedKitchenId && distanciaSucursal !== null && (
+                  <div className="mt-3 text-sm">
+                    {shippingCost === 0 ? (
+                      <p className="text-green-600">
+                        Envío gratuito — Estás a{" "}
+                        <strong>{distanciaSucursal.toFixed(1)}km</strong> de
+                        nuestro local.
+                      </p>
                     ) : (
-                      <>
-                        <p className="text-sm text-gray-700 mb-2">
-                          Dirección seleccionada:
-                          <br />
-                          <p className="text-gray-500">Marque en el mapa</p>
-                        </p>
-                        <button
-                          disabled
-                          className="bg-blue-600 text-white px-4 py-2 rounded-md w-full"
-                        >
-                          Aceptar
-                        </button>
-                      </>
+                      <p className="text-blue-600">
+                        Estás a{" "}
+                        <strong>{distanciaSucursal.toFixed(1)}km</strong> del
+                        local. Se aplica un costo de envío de{" "}
+                        <strong>${shippingCost}</strong>.
+                      </p>
                     )}
                   </div>
-                </div>
-              </div>
+                )}
+                {shippingCost === 0 && selectedKitchenId ? (
+                  <p className="mt-2 text-sm text-green-700">Envío gratuito</p>
+                ) : (
+                  <p className="mt-2 text-sm text-gray-700">
+                    Envío: ${shippingCost}
+                  </p>
+                )}
+
+                {error && (
+                  <p className="mt-4 text-center text-red-600 text-sm">
+                    {error.includes("zona") ? (
+                      <>
+                        😔 Lo sentimos, no llegamos a tu ubicación todavía.
+                        <br />
+                        Probá con otra dirección cercana.
+                      </>
+                    ) : (
+                      error
+                    )}
+                  </p>
+                )}
+                {success && (
+                  <p className="text-green-600 text-sm mt-2">
+                    ¡Pedido confirmado con éxito!
+                  </p>
+                )}
+              </>
             )}
-
-            <div className="flex gap-4 mt-2">
-              <input
-                type="text"
-                placeholder="Piso"
-                value={customer.floor}
-                onChange={(e) =>
-                  setCustomer((prev) => ({ ...prev, floor: e.target.value }))
-                }
-                className="w-1/2 border border-neutral-300 px-4 py-2 rounded-md text-base"
-              />
-              <input
-                type="text"
-                placeholder="Dpto"
-                value={customer.apartment}
-                onChange={(e) =>
-                  setCustomer((prev) => ({
-                    ...prev,
-                    apartment: e.target.value,
-                  }))
-                }
-                className="w-1/2 border border-neutral-300 px-4 py-2 rounded-md text-base"
-              />
-            </div>
           </div>
-          {selectedKitchenId && distanciaSucursal !== null && (
-            <div className="mt-3 text-sm">
-              {shippingCost === 0 ? (
-                <p className="text-green-600">
-                  Envío gratuito — Estás a{" "}
-                  <strong>{distanciaSucursal.toFixed(1)}km</strong> de nuestro
-                  local.
-                </p>
-              ) : (
-                <p className="text-blue-600">
-                  Estás a <strong>{distanciaSucursal.toFixed(1)}km</strong> del
-                  local. Se aplica un costo de envío de{" "}
-                  <strong>${shippingCost}</strong>.
-                </p>
-              )}
-            </div>
-          )}
-          {shippingCost === 0 && selectedKitchenId ? (
-            <p className="mt-2 text-sm text-green-700">Envío gratuito</p>
-          ) : (
-            <p className="mt-2 text-sm text-gray-700">Envío: ${shippingCost}</p>
-          )}
-
-          {error && (
-            <p className="mt-4 text-center text-red-600 text-sm">
-              {error.includes("zona") ? (
-                <>
-                  😔 Lo sentimos, no llegamos a tu ubicación todavía.
-                  <br />
-                  Probá con otra dirección cercana.
-                </>
-              ) : (
-                error
-              )}
-            </p>
-          )}
-          {success && (
-            <p className="text-green-600 text-sm mt-2">
-              ¡Pedido confirmado con éxito!
-            </p>
-          )}
 
           <div className="mt-4">
             <label className="flex items-center space-x-2 text-sm">
