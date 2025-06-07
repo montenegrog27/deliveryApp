@@ -27,6 +27,7 @@ export async function POST(req) {
       paymentMethod,
       paid,
       ref: externalRef,
+      orderMode
     } = body;
 
     if (customer.phone) {
@@ -85,7 +86,7 @@ export async function POST(req) {
     const orderData = {
       branch: kitchenId,
       cashier: "cliente-web",
-      delivery: true,
+      delivery: orderMode === "delivery"? true: false,
       items: cart,
       paymentMethodId: paymentMethod || "cash",
       paid: paid || false,
