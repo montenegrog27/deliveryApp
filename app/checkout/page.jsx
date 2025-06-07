@@ -162,7 +162,9 @@ export default function CheckoutPage() {
     descuentoAplicado = (subtotal * cuponDescuento) / 100;
   }
 
-  const total = subtotal + shippingCost - descuentoAplicado;
+  const descuentoFinal = Math.min(descuentoAplicado, subtotal); // nunca mayor al subtotal
+const total = Math.max(0, subtotal - descuentoFinal + shippingCost);
+
 
   const handleSubmit = async () => {
     setLoading(true);
