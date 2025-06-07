@@ -258,7 +258,7 @@
 
 
 
-// ✅ Webhook modificado para mensaje según orderMode
+// ✅ Webhook modificado para mensaje según propiedad delivery
 import { db } from "@/lib/firebase";
 import {
   collection,
@@ -316,7 +316,7 @@ async function upsertMessage({ phone, name, trackingId, order, message }) {
       orderId: trackingId,
       createdAt: timestamp,
       status: "pending",
-      orderMode: order?.orderMode || "delivery",
+      orderMode: order?.delivery === false ? "takeaway" : "delivery",
       messages: [nuevoMensaje],
     });
   }
@@ -401,7 +401,7 @@ export async function POST(req) {
         baseMessage.message = "✅ Pedido confirmado por el cliente.";
 
         const mensajeFinal =
-          order.orderMode === "takeaway"
+          order.delivery === false
             ? "✅ Pedido confirmado. Te avisaremos por acá cuando esté listo para retirarlo. ¡Gracias!"
             : "✅ Pedido confirmado. Te avisaremos por acá cuando esté yendo el repartidor. ¡Gracias!";
 
