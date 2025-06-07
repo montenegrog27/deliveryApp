@@ -169,20 +169,19 @@ export default function CheckoutPage() {
     setError(null);
     setSuccess(false);
 
-if (orderMode === "delivery") {
-  if (!direccionConfirmada || !customer.isValidAddress) {
-    setError("Por favor seleccioná una dirección válida...");
-    setLoading(false);
-    return;
-  }
+    if (orderMode === "delivery") {
+      if (!direccionConfirmada || !customer.isValidAddress) {
+        setError("Por favor seleccioná una dirección válida...");
+        setLoading(false);
+        return;
+      }
 
-  if (!customer.phone || customer.phone.length < 10) {
-    setError("Ingresá un número válido (sin el +54)");
-    setLoading(false);
-    return;
-  }
-}
-
+      if (!customer.phone || customer.phone.length < 10) {
+        setError("Ingresá un número válido (sin el +54)");
+        setLoading(false);
+        return;
+      }
+    }
 
     if (!customer.phone || customer.phone.length < 10) {
       setError(
@@ -201,6 +200,13 @@ if (orderMode === "delivery") {
     const formattedPhone = `549${customer.phone}`;
     const ref = `${formattedPhone}-${Date.now()}`;
 
+    if (orderMode === "takeaway") {
+      if (!selectedKitchenId) {
+        setError("Por favor seleccioná una sucursal para retirar.");
+        setLoading(false);
+        return;
+      }
+    }
     const orderPayload = {
       customer: {
         ...customer,
@@ -354,6 +360,8 @@ if (orderMode === "delivery") {
     }
   };
 
+  const sucursalesTakeaway = branches.filter((b) => b.takeaway);
+
   return (
     <div className="min-h-screen bg-[#FFF9F5] px-4 py-6 max-w-2xl mx-auto text-[#1A1A1A] font-inter space-y-8">
       <h1 className="text-3xl font-bold mb-8"> Confirmá tu pedido</h1>
@@ -435,6 +443,31 @@ if (orderMode === "delivery") {
                 }}
               />
             </div>
+            {orderMode === "takeaway" && (
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Seleccioná la sucursal para retirar:
+                </label>
+                <select
+                  className="w-full border border-neutral-300 bg-white px-4 py-2 rounded-md text-sm"
+                  value={selectedKitchenId || ""}
+                  onChange={(e) => {
+                    const branch = branches.find(
+                      (b) => b.id === e.target.value
+                    );
+                    setSelectedKitchenId(branch?.id || null);
+                    setSelectedKitchenName(branch?.name || null);
+                  }}
+                >
+                  <option value="">Seleccioná una sucursal</option>
+                  {sucursalesTakeaway.map((suc) => (
+                    <option key={suc.id} value={suc.id}>
+                      {suc.name} - {suc.address}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
             {orderMode === "delivery" && (
               <>
                 <AddressInput
