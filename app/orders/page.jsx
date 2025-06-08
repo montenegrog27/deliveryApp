@@ -3,6 +3,8 @@ import { useCart } from "@/context/CartContext";
 import CartSidebar from "@/components/CartSidebar";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 export default function HomePage() {
   const { addItem, toggleCart, cart } = useCart();
@@ -13,6 +15,104 @@ export default function HomePage() {
   const [selectedDrinkId, setSelectedDrinkId] = useState("");
   const [includeFries, setIncludeFries] = useState(false);
   const [showDrinkDropdown, setShowDrinkDropdown] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
+  const [mensajeHorario, setMensajeHorario] = useState("");
+
+const parseHora = (str) => {
+  const [h, m] = str.split(":").map(Number);
+  return h * 60 + (m || 0);
+};
+
+useEffect(() => {
+const checkHorario = async () => {
+  try {
+    const now = new Date();
+    const hora = now.getHours();
+    const minutos = now.getMinutes();
+    const totalMinutos = hora * 60 + minutos;
+
+    const dias = [
+      "sunday",
+      "monday",
+      "tuesday",
+      "wednesday",
+      "thursday",
+      "friday",
+      "saturday"
+    ];
+    const dayIndex = now.getDay();
+    const day = dias[dayIndex];
+    const prevDay = dias[(dayIndex + 6) % 7];
+
+    const settingsRef = doc(db, "settings", "businessHours");
+    const snap = await getDoc(settingsRef);
+    const rawData = snap.data();
+console.log(rawData)
+    const configHoy = rawData.businessHours[day];
+    const configAyer = rawData.businessHours[prevDay];
+
+    const parseHora = (str) => {
+      const [h, m] = str.split(":").map(Number);
+      return h * 60 + (m || 0);
+    };
+
+    // ⚠️ Verificamos si seguimos abiertos por el horario del día anterior
+    if (
+      configAyer?.open &&
+      configAyer.from &&
+      configAyer.to &&
+      parseHora(configAyer.to) < parseHora(configAyer.from) &&
+      totalMinutos < parseHora(configAyer.to)
+    ) {
+      setIsOpen(true);
+      setMensajeHorario("");
+      return;
+    }
+
+
+    // ⚠️ Verificamos si abrimos hoy
+    if (!configHoy || !configHoy.open) {
+      setIsOpen(false);
+      setMensajeHorario("Hoy no abrimos. Nos vemos mañana!");
+      return;
+    }
+
+    const apertura = parseHora(configHoy.from);
+    const cierre = parseHora(configHoy.to);
+    const cruzaMedianoche = cierre < apertura;
+
+    const abierto =
+      cruzaMedianoche
+        ? totalMinutos >= apertura || totalMinutos < cierre
+        : totalMinutos >= apertura && totalMinutos < cierre;
+
+    setIsOpen(abierto);
+
+    if (abierto) {
+      setMensajeHorario("");
+    } else {
+      if (totalMinutos < apertura) {
+        setMensajeHorario(`Cerrado, abrimos a las ${configHoy.from} hs.`);
+      } else {
+        setMensajeHorario("Ya cerramos. Nos vemos mañana!");
+      }
+    }
+  } catch (err) {
+    console.error("❌ Error al verificar horario:", err);
+    setIsOpen(false);
+    setMensajeHorario("⚠️ No pudimos verificar el horario.");
+  }
+};
+
+
+  checkHorario();
+  const intervalo = setInterval(checkHorario, 60000); // chequear cada minuto
+  return () => clearInterval(intervalo);
+}, []);
+
+
+
+
 
   useEffect(() => {
     const fetchMenu = async () => {
@@ -45,6 +145,11 @@ export default function HomePage() {
 
   const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
 
+
+
+
+
+
   return (
     <div className="min-h-screen bg-[#FFF9F5] font-inter text-[#1A1A1A]">
       {/* HEADER */}
@@ -54,6 +159,12 @@ export default function HomePage() {
           alt="MORDISCO"
           className="h-8"
         />
+{mensajeHorario && (
+  <div className="text-center text-sm text-red-600 font-semibold mt-4">
+    {mensajeHorario}
+  </div>
+)}
+
         <button
           onClick={toggleCart}
           className="relative flex items-center gap-2 px-4 py-2 rounded-full bg-[#E00000] text-white text-sm font-bold transition hover:scale-105"
@@ -128,12 +239,17 @@ export default function HomePage() {
                               {item.attributes.discountPrice ||
                                 item.attributes.price}
                             </span>
-                            <button
-                              onClick={() => setSelectedItem(item)}
-                              className="text-sm font-semibold text-white bg-[#E00000] hover:bg-[#C40000] px-4 py-1.5 rounded-full transition-all"
-                            >
-                              Agregar
-                            </button>
+<button
+  onClick={() => setSelectedItem(item)}
+  disabled={!isOpen}
+  className={`text-sm font-semibold px-4 py-1.5 rounded-full transition-all
+    ${isOpen
+      ? "bg-[#E00000] hover:bg-[#C40000] text-white"
+      : "bg-gray-300 text-gray-500 cursor-not-allowed"}
+  `}
+>
+  Agregar
+</button>
                           </div>
                         </div>
                       </li>
@@ -187,7 +303,6 @@ export default function HomePage() {
                 />
               </div>
 
-
               {/* Total */}
               <div className="text-right text-sm font-semibold text-[#1A1A1A]">
                 Total: ${finalPrice}
@@ -196,37 +311,37 @@ export default function HomePage() {
               {/* Botones */}
               <div className="space-y-2">
                 <div className="w-full flex justify-center items-center">
-                <button
-                  onClick={() => {
-                    const extras = {
-                      drink: selectedDrink
-                        ? {
-                            id: selectedDrink.id,
-                            name: selectedDrink.attributes.name,
-                            price: selectedDrink.attributes.price,
-                          }
-                        : null,
-                      fries: includeFries,
-                    };
-                    addItem({
-                      ...selectedItem,
-                      attributes: {
-                        ...selectedItem.attributes,
-                        price: finalPrice,
-                        note,
-                        extras,
-                      },
-                    });
-                    setSelectedItem(null);
-                    setNote("");
-                    setSelectedDrinkId("");
-                    setIncludeFries(false);
-                    setShowDrinkDropdown(false);
-                  }}
-                  className="w-[50%] bg-[#E00000] hover:bg-[#C40000] text-white py-3 rounded-full font-bold text-sm"
-                >
-                  Agregar al pedido
-                </button>
+                  <button
+                    onClick={() => {
+                      const extras = {
+                        drink: selectedDrink
+                          ? {
+                              id: selectedDrink.id,
+                              name: selectedDrink.attributes.name,
+                              price: selectedDrink.attributes.price,
+                            }
+                          : null,
+                        fries: includeFries,
+                      };
+                      addItem({
+                        ...selectedItem,
+                        attributes: {
+                          ...selectedItem.attributes,
+                          price: finalPrice,
+                          note,
+                          extras,
+                        },
+                      });
+                      setSelectedItem(null);
+                      setNote("");
+                      setSelectedDrinkId("");
+                      setIncludeFries(false);
+                      setShowDrinkDropdown(false);
+                    }}
+                    className="w-[50%] bg-[#E00000] hover:bg-[#C40000] text-white py-3 rounded-full font-bold text-sm"
+                  >
+                    Agregar al pedido
+                  </button>
                 </div>
                 <button
                   onClick={() => {
