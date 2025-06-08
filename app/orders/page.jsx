@@ -18,13 +18,16 @@ export default function HomePage() {
   const [isOpen, setIsOpen] = useState(true);
   const [mensajeHorario, setMensajeHorario] = useState("");
 
-  const parseHora = (str) => {
-    const [h, m] = str.split(":").map(Number);
-    return h * 60 + (m || 0);
-  };
+
+const isLocalhost = typeof window !== "undefined" && window.location.hostname === "localhost";
 
   useEffect(() => {
     const checkHorario = async () => {
+          if (isLocalhost) {
+      setIsOpen(true);
+      setMensajeHorario("⚠️ Modo desarrollo (ignorado horario)");
+      return;
+    }
       try {
         const now = new Date();
         const hora = now.getHours();
