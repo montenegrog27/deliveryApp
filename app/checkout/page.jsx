@@ -229,7 +229,7 @@ const total = Math.max(0, subtotal - descuentoFinal + shippingCost);
       paid: false,
       ref,
       coupon: cuponData?.code || null,
-      couponDiscount: cuponDescuento,
+      couponDiscount: descuentoFinal,
       orderMode,
     };
 
