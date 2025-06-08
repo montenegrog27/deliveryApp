@@ -18,101 +18,94 @@ export default function HomePage() {
   const [isOpen, setIsOpen] = useState(true);
   const [mensajeHorario, setMensajeHorario] = useState("");
 
-const parseHora = (str) => {
-  const [h, m] = str.split(":").map(Number);
-  return h * 60 + (m || 0);
-};
+  const parseHora = (str) => {
+    const [h, m] = str.split(":").map(Number);
+    return h * 60 + (m || 0);
+  };
 
-useEffect(() => {
-const checkHorario = async () => {
-  try {
-    const now = new Date();
-    const hora = now.getHours();
-    const minutos = now.getMinutes();
-    const totalMinutos = hora * 60 + minutos;
+  useEffect(() => {
+    const checkHorario = async () => {
+      try {
+        const now = new Date();
+        const hora = now.getHours();
+        const minutos = now.getMinutes();
+        const totalMinutos = hora * 60 + minutos;
 
-    const dias = [
-      "sunday",
-      "monday",
-      "tuesday",
-      "wednesday",
-      "thursday",
-      "friday",
-      "saturday"
-    ];
-    const dayIndex = now.getDay();
-    const day = dias[dayIndex];
-    const prevDay = dias[(dayIndex + 6) % 7];
+        const dias = [
+          "sunday",
+          "monday",
+          "tuesday",
+          "wednesday",
+          "thursday",
+          "friday",
+          "saturday",
+        ];
+        const dayIndex = now.getDay();
+        const day = dias[dayIndex];
+        const prevDay = dias[(dayIndex + 6) % 7];
 
-    const settingsRef = doc(db, "settings", "businessHours");
-    const snap = await getDoc(settingsRef);
-    const rawData = snap.data();
-console.log(rawData)
-    const configHoy = rawData.businessHours[day];
-    const configAyer = rawData.businessHours[prevDay];
+        const settingsRef = doc(db, "settings", "businessHours");
+        const snap = await getDoc(settingsRef);
+        const rawData = snap.data();
+        console.log(rawData);
+        const configHoy = rawData.businessHours[day];
+        const configAyer = rawData.businessHours[prevDay];
 
-    const parseHora = (str) => {
-      const [h, m] = str.split(":").map(Number);
-      return h * 60 + (m || 0);
+        const parseHora = (str) => {
+          const [h, m] = str.split(":").map(Number);
+          return h * 60 + (m || 0);
+        };
+
+        // ⚠️ Verificamos si seguimos abiertos por el horario del día anterior
+        if (
+          configAyer?.open &&
+          configAyer.from &&
+          configAyer.to &&
+          parseHora(configAyer.to) < parseHora(configAyer.from) &&
+          totalMinutos < parseHora(configAyer.to)
+        ) {
+          setIsOpen(true);
+          setMensajeHorario("");
+          return;
+        }
+
+        // ⚠️ Verificamos si abrimos hoy
+        if (!configHoy || !configHoy.open) {
+          setIsOpen(false);
+          setMensajeHorario("Hoy no abrimos. Nos vemos mañana!");
+          return;
+        }
+
+        const apertura = parseHora(configHoy.from);
+        const cierre = parseHora(configHoy.to);
+        const cruzaMedianoche = cierre < apertura;
+
+        const abierto = cruzaMedianoche
+          ? totalMinutos >= apertura || totalMinutos < cierre
+          : totalMinutos >= apertura && totalMinutos < cierre;
+
+        setIsOpen(abierto);
+
+        if (abierto) {
+          setMensajeHorario("");
+        } else {
+          if (totalMinutos < apertura) {
+            setMensajeHorario(`Cerrado, abrimos a las ${configHoy.from} hs.`);
+          } else {
+            setMensajeHorario("Ya cerramos. Nos vemos mañana!");
+          }
+        }
+      } catch (err) {
+        console.error("❌ Error al verificar horario:", err);
+        setIsOpen(false);
+        setMensajeHorario("⚠️ No pudimos verificar el horario.");
+      }
     };
 
-    // ⚠️ Verificamos si seguimos abiertos por el horario del día anterior
-    if (
-      configAyer?.open &&
-      configAyer.from &&
-      configAyer.to &&
-      parseHora(configAyer.to) < parseHora(configAyer.from) &&
-      totalMinutos < parseHora(configAyer.to)
-    ) {
-      setIsOpen(true);
-      setMensajeHorario("");
-      return;
-    }
-
-
-    // ⚠️ Verificamos si abrimos hoy
-    if (!configHoy || !configHoy.open) {
-      setIsOpen(false);
-      setMensajeHorario("Hoy no abrimos. Nos vemos mañana!");
-      return;
-    }
-
-    const apertura = parseHora(configHoy.from);
-    const cierre = parseHora(configHoy.to);
-    const cruzaMedianoche = cierre < apertura;
-
-    const abierto =
-      cruzaMedianoche
-        ? totalMinutos >= apertura || totalMinutos < cierre
-        : totalMinutos >= apertura && totalMinutos < cierre;
-
-    setIsOpen(abierto);
-
-    if (abierto) {
-      setMensajeHorario("");
-    } else {
-      if (totalMinutos < apertura) {
-        setMensajeHorario(`Cerrado, abrimos a las ${configHoy.from} hs.`);
-      } else {
-        setMensajeHorario("Ya cerramos. Nos vemos mañana!");
-      }
-    }
-  } catch (err) {
-    console.error("❌ Error al verificar horario:", err);
-    setIsOpen(false);
-    setMensajeHorario("⚠️ No pudimos verificar el horario.");
-  }
-};
-
-
-  checkHorario();
-  const intervalo = setInterval(checkHorario, 60000); // chequear cada minuto
-  return () => clearInterval(intervalo);
-}, []);
-
-
-
-
+    checkHorario();
+    const intervalo = setInterval(checkHorario, 60000); // chequear cada minuto
+    return () => clearInterval(intervalo);
+  }, []);
 
   useEffect(() => {
     const fetchMenu = async () => {
@@ -145,11 +138,6 @@ console.log(rawData)
 
   const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
 
-
-
-
-
-
   return (
     <div className="min-h-screen bg-[#FFF9F5] font-inter text-[#1A1A1A]">
       {/* HEADER */}
@@ -159,11 +147,11 @@ console.log(rawData)
           alt="MORDISCO"
           className="h-8"
         />
-{mensajeHorario && (
-  <div className="text-center text-sm text-red-600 font-semibold mt-4">
-    {mensajeHorario}
-  </div>
-)}
+        {mensajeHorario && (
+          <div className="text-center text-sm text-red-600 font-semibold mt-4">
+            {mensajeHorario}
+          </div>
+        )}
 
         <button
           onClick={toggleCart}
@@ -211,7 +199,7 @@ console.log(rawData)
                   <ul className="space-y-4">
                     {availableItems.map((item) => (
                       <li key={item.id} className="flex gap-4 items-center">
-                        <div className="w-[96px] h-[96px] rounded-lg overflow-hidden bg-neutral-100">
+                        <div className="relative w-[96px] h-[96px] rounded-lg overflow-hidden bg-neutral-100">
                           {item.attributes.image ? (
                             <img
                               src={item.attributes.image}
@@ -223,6 +211,12 @@ console.log(rawData)
                               Sin imagen
                             </div>
                           )}
+                          {item.attributes.hasDiscount && (
+  <div className="absolute top-1 right-1 bg-green-600 text-white text-[11px] font-semibold px-2 py-0.5 rounded-full shadow-sm">
+    -{item.attributes.discountPercent}%
+  </div>
+)}
+
                         </div>
                         <div className="flex-1 flex flex-col min-w-0">
                           <h3 className="text-base font-bold text-[#1A1A1A] truncate">
@@ -234,22 +228,39 @@ console.log(rawData)
                             </p>
                           )}
                           <div className="flex items-center justify-between mt-2">
-                            <span className="text-[#E00000] font-bold text-sm">
-                              $
-                              {item.attributes.discountPrice ||
-                                item.attributes.price}
-                            </span>
-<button
-  onClick={() => setSelectedItem(item)}
-  disabled={!isOpen}
-  className={`text-sm font-semibold px-4 py-1.5 rounded-full transition-all
-    ${isOpen
-      ? "bg-[#E00000] hover:bg-[#C40000] text-white"
-      : "bg-gray-300 text-gray-500 cursor-not-allowed"}
+<div className="flex flex-col">
+  {item.attributes.hasDiscount ? (
+    <>
+      <span className="text-[#E00000] font-bold text-sm">
+        ${item.attributes.discountPrice}
+      </span>
+      <span className="text-xs text-gray-500 line-through">
+        ${item.attributes.price}
+      </span>
+      <span className="text-xs text-green-600 font-semibold">
+        -{item.attributes.discountPercent}%
+      </span>
+    </>
+  ) : (
+    <span className="text-[#E00000] font-bold text-sm">
+      ${item.attributes.price}
+    </span>
+  )}
+</div>
+
+                            <button
+                              onClick={() => setSelectedItem(item)}
+                              disabled={!isOpen}
+                              className={`text-sm font-semibold px-4 py-1.5 rounded-full transition-all
+    ${
+      isOpen
+        ? "bg-[#E00000] hover:bg-[#C40000] text-white"
+        : "bg-gray-300 text-gray-500 cursor-not-allowed"
+    }
   `}
->
-  Agregar
-</button>
+                            >
+                              Agregar
+                            </button>
                           </div>
                         </div>
                       </li>
