@@ -237,9 +237,7 @@ export default function HomePage() {
       <span className="text-xs text-gray-500 line-through">
         ${item.attributes.price}
       </span>
-      <span className="text-xs text-green-600 font-semibold">
-        -{item.attributes.discountPercent}%
-      </span>
+
     </>
   ) : (
     <span className="text-[#E00000] font-bold text-sm">
