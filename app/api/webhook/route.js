@@ -472,6 +472,74 @@ export async function POST(req) {
       message: incomingMessage,
     });
   }
+  if (type === "image") {
+  const phoneNormalized = phone.replace(/\D/g, "");
+  const mediaId = message.image?.id;
+  const mimeType = message.image?.mime_type || "image/jpeg";
+
+  if (!mediaId) return new Response("Sin media ID", { status: 200 });
+
+  try {
+    // Paso 1: Obtener la URL de descarga de la imagen
+    const resUrl = await fetch(`https://graph.facebook.com/v19.0/${mediaId}`, {
+      headers: {
+        Authorization: `Bearer ${process.env.WHATSAPP_API_TOKEN}`,
+      },
+    });
+    const mediaMeta = await resUrl.json();
+    const mediaUrl = mediaMeta.url;
+
+    if (!mediaUrl) throw new Error("No se pudo obtener la URL de la imagen");
+
+    // Paso 2: Descargar la imagen (como blob o base64 si querés guardarla)
+    const resImage = await fetch(mediaUrl, {
+      headers: {
+        Authorization: `Bearer ${process.env.WHATSAPP_API_TOKEN}`,
+      },
+    });
+    const imageBuffer = await resImage.arrayBuffer();
+    const base64Image = Buffer.from(imageBuffer).toString("base64");
+
+    // Paso 3: Guardar el mensaje con la imagen
+    const q = query(
+      collection(db, "orders"),
+      where("customer.phone", "==", phoneNormalized),
+      where("status", "!=", "delivered")
+    );
+    const snap = await getDocs(q);
+
+    let order = null;
+    let trackingId = `tracking_unknown_${phoneNormalized}_${Date.now()}`;
+    let customerName = null;
+
+    if (!snap.empty) {
+      const doc = snap.docs[0];
+      order = doc.data();
+      trackingId = order.trackingId;
+      customerName = order.customer?.name || null;
+    }
+
+    const incomingMessage = {
+      direction: "incoming",
+      tipo: "imagen",
+      message: `data:${mimeType};base64,${base64Image}`, // para mostrar como imagen en <img src=... />
+    };
+
+    await upsertMessage({
+      phone: phoneNormalized,
+      name: customerName,
+      trackingId,
+      order,
+      message: incomingMessage,
+    });
+
+    return new Response("Imagen recibida", { status: 200 });
+  } catch (err) {
+    console.error("❌ Error procesando imagen:", err);
+    return new Response("Error imagen", { status: 500 });
+  }
+}
+
 
   return new Response("EVENT_RECEIVED", { status: 200 });
 }
