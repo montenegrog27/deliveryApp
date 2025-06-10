@@ -420,7 +420,7 @@ export async function POST(req) {
             "\n\n📞 Para cualquier reclamo podés comunicarte a este número:"
         );
 
-        if (order.paymentMethod === "transfer") {
+        if (order.paymentMethodId  === "transfer") {
           await sendText(phoneNormalized, "ALIAS: 👇👇👇");
           await sendText(phoneNormalized, "MORDISCOBURGERS");
         }
