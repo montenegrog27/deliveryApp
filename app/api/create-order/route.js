@@ -27,7 +27,8 @@ export async function POST(req) {
       paymentMethod,
       paid,
       ref: externalRef,
-      orderMode
+      orderMode,
+        discountType, // <-- nuevo
     } = body;
 
     if (customer.phone) {
@@ -79,7 +80,23 @@ export async function POST(req) {
     console.log("couponDiscountFixed",couponDiscountFixed)
         console.log("manualDiscountFixed",manualDiscountFixed)
 
-const discountAmount = Number(couponDiscountFixed || 0) + Number(manualDiscount || 0);
+// const discountAmount = Number(couponDiscountFixed || 0) + Number(manualDiscount || 0);
+
+
+
+let discountAmount = 0;
+
+if (discountType === "percent") {
+  discountAmount = totalBase * (couponDiscountFixed / 100);
+} else {
+  discountAmount = couponDiscountFixed; // monto fijo
+}
+
+discountAmount += manualDiscountFixed;
+
+
+
+
 
     const total = Math.max(totalBase - discountAmount + (shippingCost || 0), 0);
 

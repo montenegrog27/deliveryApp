@@ -230,6 +230,7 @@ export default function CheckoutPage() {
       ref,
       coupon: cuponData?.code || null,
       couponDiscount: descuentoFinal,
+      discountType: cuponData?.discountType || "amount", // importante!
       orderMode,
     };
 
@@ -378,8 +379,6 @@ export default function CheckoutPage() {
         <p className="text-gray-500">El carrito está vacío</p>
       ) : (
         <>
-
-
           <div className="space-y-4">
             <div className="flex gap-2 mb-6">
               <button
@@ -741,7 +740,7 @@ export default function CheckoutPage() {
             rows={2}
           />
 
-                    <div className="space-y-4 mb-8">
+          <div className="space-y-4 mb-8">
             {cart.map((item) => (
               <div key={item.uid} className="flex justify-between items-start">
                 <div className="text-sm leading-tight">
