@@ -61,7 +61,7 @@ export default function CheckoutPage() {
   const [mapCandidate, setMapCandidate] = useState(null);
   const [branches, setBranches] = useState([]);
   const [orderMode, setOrderMode] = useState("delivery");
-const [cuponMensaje, setCuponMensaje] = useState("");
+  const [cuponMensaje, setCuponMensaje] = useState("");
 
   useEffect(() => {
     const fetchBranches = async () => {
@@ -164,8 +164,7 @@ const [cuponMensaje, setCuponMensaje] = useState("");
   }
 
   const descuentoFinal = Math.min(descuentoAplicado, subtotal); // nunca mayor al subtotal
-const total = Math.max(0, subtotal - descuentoFinal + shippingCost);
-
+  const total = Math.max(0, subtotal - descuentoFinal + shippingCost);
 
   const handleSubmit = async () => {
     setLoading(true);
@@ -355,10 +354,10 @@ const total = Math.max(0, subtotal - descuentoFinal + shippingCost);
       setCuponDescuento(Number(cupon.discount || 0));
       setCuponData(cupon);
       if (cupon.phoneRequired && cupon.name) {
-  setCuponMensaje(`Hola ${cupon.name}, tu cupón es válido 😉`);
-} else {
-  setCuponMensaje("Cupón válido");
-}
+        setCuponMensaje(`Hola ${cupon.name}, tu cupón es válido! 😉`);
+      } else {
+        setCuponMensaje("Cupón válido");
+      }
 
       setCuponValido(true);
     } catch (err) {
@@ -624,7 +623,9 @@ const total = Math.max(0, subtotal - descuentoFinal + shippingCost);
                             <p className="text-sm text-gray-700 mb-2">
                               Dirección seleccionada:
                               <br />
-                              <span className="text-gray-500">Marque en el mapa</span>
+                              <span className="text-gray-500">
+                                Marque en el mapa
+                              </span>
                             </p>
                             <button
                               disabled
@@ -723,7 +724,7 @@ const total = Math.max(0, subtotal - descuentoFinal + shippingCost);
             </label>
 
             {tieneCupon && (
-              <div className="mt-2 space-y-2 border ">
+              <div className="mt-2 space-y-2 ">
                 <input
                   type="text"
                   placeholder="Código de cupón"
@@ -739,9 +740,9 @@ const total = Math.max(0, subtotal - descuentoFinal + shippingCost);
                   Validar cupón
                 </button>
 
-{cuponValido && (
-  <p className="text-green-600 text-sm">✅ {cuponMensaje}</p>
-)}
+                {cuponValido && (
+                  <p className="text-black text-sm">✅ {cuponMensaje}</p>
+                )}
                 {cuponError && (
                   <p className="text-red-600 text-sm">{cuponError}</p>
                 )}
