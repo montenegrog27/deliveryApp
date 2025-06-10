@@ -617,7 +617,7 @@ const total = Math.max(0, subtotal - descuentoFinal + shippingCost);
                             <p className="text-sm text-gray-700 mb-2">
                               Dirección seleccionada:
                               <br />
-                              <p className="text-gray-500">Marque en el mapa</p>
+                              <span className="text-gray-500">Marque en el mapa</span>
                             </p>
                             <button
                               disabled
