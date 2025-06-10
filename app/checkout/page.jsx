@@ -378,26 +378,7 @@ export default function CheckoutPage() {
         <p className="text-gray-500">El carrito está vacío</p>
       ) : (
         <>
-          <div className="space-y-4 mb-8">
-            {cart.map((item) => (
-              <div key={item.uid} className="flex justify-between items-start">
-                <div className="text-sm leading-tight">
-                  <p className="font-bold">{item.attributes.name}</p>
-                  <p className="text-neutral-600 text-xs">
-                    x{item.quantity} • ${item.attributes.price}
-                  </p>
-                </div>
-                <div className="font-bold text-sm">
-                  `${item.attributes.price * item.quantity}`
-                </div>
-              </div>
-            ))}
 
-            <p className="text-right text-sm text-neutral-600">
-              Envío: ${shippingCost}
-            </p>
-            <p className="text-right font-bold text-lg">Total: ${total}</p>
-          </div>
 
           <div className="space-y-4">
             <div className="flex gap-2 mb-6">
@@ -759,6 +740,27 @@ export default function CheckoutPage() {
             className="w-full border border-neutral-300 px-4 py-2 rounded-md text-sm"
             rows={2}
           />
+
+                    <div className="space-y-4 mb-8">
+            {cart.map((item) => (
+              <div key={item.uid} className="flex justify-between items-start">
+                <div className="text-sm leading-tight">
+                  <p className="font-bold">{item.attributes.name}</p>
+                  <p className="text-neutral-600 text-xs">
+                    x{item.quantity} • ${item.attributes.price}
+                  </p>
+                </div>
+                <div className="font-bold text-sm">
+                  `${item.attributes.price * item.quantity}`
+                </div>
+              </div>
+            ))}
+
+            <p className="text-right text-sm text-neutral-600">
+              Envío: ${shippingCost}
+            </p>
+            <p className="text-right font-bold text-lg">Total: ${total}</p>
+          </div>
 
           <label className="block text-sm font-medium text-gray-700 mt-4">
             Método de pago

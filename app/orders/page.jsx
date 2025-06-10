@@ -157,7 +157,6 @@ export default function HomePage() {
             {mensajeHorario}
           </div>
         )}
-
         <button
           onClick={toggleCart}
           className="relative flex items-center gap-2 px-4 py-2 rounded-full bg-[#E00000] text-white text-sm font-bold transition hover:scale-105"

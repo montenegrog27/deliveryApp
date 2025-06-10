@@ -76,8 +76,10 @@ export async function POST(req) {
 
     const manualDiscountFixed = Number(manualDiscount || 0);
     const couponDiscountFixed = Number(couponDiscount || 0);
-    const discountAmount =
-      totalBase * ((couponDiscountFixed + manualDiscountFixed) / 100);
+    console.log("couponDiscountFixed",couponDiscountFixed)
+        console.log("manualDiscountFixed",manualDiscountFixed)
+
+const discountAmount = Number(couponDiscountFixed || 0) + Number(manualDiscount || 0);
 
     const total = Math.max(totalBase - discountAmount + (shippingCost || 0), 0);
 
