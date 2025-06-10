@@ -61,6 +61,7 @@ export default function CheckoutPage() {
   const [mapCandidate, setMapCandidate] = useState(null);
   const [branches, setBranches] = useState([]);
   const [orderMode, setOrderMode] = useState("delivery");
+const [cuponMensaje, setCuponMensaje] = useState("");
 
   useEffect(() => {
     const fetchBranches = async () => {
@@ -353,6 +354,12 @@ const total = Math.max(0, subtotal - descuentoFinal + shippingCost);
       // ✅ Si pasó todas  validaciones
       setCuponDescuento(Number(cupon.discount || 0));
       setCuponData(cupon);
+      if (cupon.phoneRequired && cupon.name) {
+  setCuponMensaje(`Hola ${cupon.name}, tu cupón es válido 😉`);
+} else {
+  setCuponMensaje("Cupón válido");
+}
+
       setCuponValido(true);
     } catch (err) {
       setCuponDescuento(0);
@@ -732,9 +739,9 @@ const total = Math.max(0, subtotal - descuentoFinal + shippingCost);
                   Validar cupón
                 </button>
 
-                {cuponValido && (
-                  <p className="text-green-600 text-sm">✅ Cupón válido</p>
-                )}
+{cuponValido && (
+  <p className="text-green-600 text-sm">✅ {cuponMensaje}</p>
+)}
                 {cuponError && (
                   <p className="text-red-600 text-sm">{cuponError}</p>
                 )}
