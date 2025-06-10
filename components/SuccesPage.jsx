@@ -87,7 +87,7 @@ export default function SuccessPage() {
   useEffect(() => {
     if (status === "ok") {
       const timeout = setTimeout(() => {
-        router.push("/orders");
+        router.push("/");
       }, 5000);
       return () => clearTimeout(timeout);
     }
