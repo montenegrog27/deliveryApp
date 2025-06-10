@@ -419,6 +419,11 @@ export async function POST(req) {
           mensajeFinal +
             "\n\n📞 Para cualquier reclamo podés comunicarte a este número:"
         );
+
+        if (order.paymentMethod === "transfer") {
+          await sendText(phoneNormalized, "ALIAS: 👇👇👇");
+          await sendText(phoneNormalized, "MORDISCOBURGERS");
+        }
         await sendContact(phoneNormalized);
       }
     }
