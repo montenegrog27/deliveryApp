@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { Phone, Mail, MapPin, MessageCircle, LucideMail } from "lucide-react";
+import { FaFacebook, FaInstagram, FaMailchimp, FaWhatsapp } from "react-icons/fa6";
 
 export default function HomePage() {
   const { addItem, toggleCart, cart } = useCart();
@@ -18,16 +20,16 @@ export default function HomePage() {
   const [isOpen, setIsOpen] = useState(true);
   const [mensajeHorario, setMensajeHorario] = useState("");
 
-
-const isLocalhost = typeof window !== "undefined" && window.location.hostname === "localhost";
+  const isLocalhost =
+    typeof window !== "undefined" && window.location.hostname === "localhost";
 
   useEffect(() => {
     const checkHorario = async () => {
-          if (isLocalhost) {
-      setIsOpen(true);
-      setMensajeHorario("⚠️ Modo desarrollo (ignorado horario)");
-      return;
-    }
+      if (isLocalhost) {
+        setIsOpen(true);
+        setMensajeHorario("⚠️ Modo desarrollo (ignorado horario)");
+        return;
+      }
       try {
         const now = new Date();
         const hora = now.getHours();
@@ -186,90 +188,138 @@ const isLocalhost = typeof window !== "undefined" && window.location.hostname ==
             />
           </div>
         ) : (
-          menu
-            .slice()
-            .sort((a, b) => (a.inOrder ?? 0) - (b.inOrder ?? 0))
-            .map((cat) => {
-              const availableItems =
-                cat.items?.filter((item) => item.attributes?.available) || [];
-              if (availableItems.length === 0) return null;
+          <>
+            {menu
+              .slice()
+              .sort((a, b) => (a.inOrder ?? 0) - (b.inOrder ?? 0))
+              .map((cat) => {
+                const availableItems =
+                  cat.items?.filter((item) => item.attributes?.available) || [];
+                if (availableItems.length === 0) return null;
 
-              return (
-                <section key={cat.id} className="space-y-6">
-                  <h2 className="text-2xl font-bold text-[#E00000]">
-                    {cat.name}
-                  </h2>
-                  <ul className="space-y-4">
-                    {availableItems.map((item) => (
-                      <li key={item.id} className="flex gap-4 items-center">
-                        <div className="relative w-[96px] h-[96px] rounded-lg overflow-hidden bg-neutral-100">
-                          {item.attributes.image ? (
-                            <img
-                              src={item.attributes.image}
-                              alt={item.attributes.name}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className="flex items-center justify-center h-full text-sm text-neutral-400">
-                              Sin imagen
-                            </div>
-                          )}
-                          {item.attributes.hasDiscount && (
-  <div className="absolute top-1 right-1 bg-green-600 text-white text-[11px] font-semibold px-2 py-0.5 rounded-full shadow-sm">
-    -{item.attributes.discountPercent}%
-  </div>
-)}
+                return (
+                  <section key={cat.id} className="space-y-6">
+                    <h2 className="text-2xl font-bold text-[#E00000]">
+                      {cat.name}
+                    </h2>
+                    <ul className="space-y-4">
+                      {availableItems.map((item) => (
+                        <li key={item.id} className="flex gap-4 items-center">
+                          <div className="relative w-[96px] h-[96px] rounded-lg overflow-hidden bg-neutral-100">
+                            {item.attributes.image ? (
+                              <img
+                                src={item.attributes.image}
+                                alt={item.attributes.name}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="flex items-center justify-center h-full text-sm text-neutral-400">
+                                Sin imagen
+                              </div>
+                            )}
+                            {item.attributes.hasDiscount && (
+                              <div className="absolute top-1 right-1 bg-green-600 text-white text-[11px] font-semibold px-2 py-0.5 rounded-full shadow-sm">
+                                -{item.attributes.discountPercent}%
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex-1 flex flex-col min-w-0">
+                            <h3 className="text-base font-bold text-[#1A1A1A] truncate">
+                              {item.attributes.name}
+                            </h3>
+                            {item.attributes.description && (
+                              <p className="text-sm text-neutral-600 line-clamp-2">
+                                {item.attributes.description}
+                              </p>
+                            )}
+                            <div className="flex items-center justify-between mt-2">
+                              <div className="flex flex-col">
+                                {item.attributes.hasDiscount ? (
+                                  <>
+                                    <span className="text-[#E00000] font-bold text-sm">
+                                      ${item.attributes.discountPrice}
+                                    </span>
+                                    <span className="text-xs text-gray-500 line-through">
+                                      ${item.attributes.price}
+                                    </span>
+                                  </>
+                                ) : (
+                                  <span className="text-[#E00000] font-bold text-sm">
+                                    ${item.attributes.price}
+                                  </span>
+                                )}
+                              </div>
 
-                        </div>
-                        <div className="flex-1 flex flex-col min-w-0">
-                          <h3 className="text-base font-bold text-[#1A1A1A] truncate">
-                            {item.attributes.name}
-                          </h3>
-                          {item.attributes.description && (
-                            <p className="text-sm text-neutral-600 line-clamp-2">
-                              {item.attributes.description}
-                            </p>
-                          )}
-                          <div className="flex items-center justify-between mt-2">
-<div className="flex flex-col">
-  {item.attributes.hasDiscount ? (
-    <>
-      <span className="text-[#E00000] font-bold text-sm">
-        ${item.attributes.discountPrice}
-      </span>
-      <span className="text-xs text-gray-500 line-through">
-        ${item.attributes.price}
-      </span>
-
-    </>
-  ) : (
-    <span className="text-[#E00000] font-bold text-sm">
-      ${item.attributes.price}
-    </span>
-  )}
-</div>
-
-                            <button
-                              onClick={() => setSelectedItem(item)}
-                              disabled={!isOpen}
-                              className={`text-sm font-semibold px-4 py-1.5 rounded-full transition-all
+                              <button
+                                onClick={() => setSelectedItem(item)}
+                                disabled={!isOpen}
+                                className={`text-sm font-semibold px-4 py-1.5 rounded-full transition-all
     ${
       isOpen
         ? "bg-[#E00000] hover:bg-[#C40000] text-white"
         : "bg-gray-300 text-gray-500 cursor-not-allowed"
     }
   `}
-                            >
-                              Agregar
-                            </button>
+                              >
+                                Agregar
+                              </button>
+                            </div>
                           </div>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                </section>
-              );
-            })
+                        </li>
+                      ))}
+                    </ul>
+                  </section>
+                );
+              })}
+
+            <footer className="bg-[#FFF9F5] border-t border-neutral-200 mt-16 px-6 py-10 text-sm text-neutral-600">
+              <div className="max-w-xl mx-auto space-y-6">
+                <div className="flex items-start gap-3">
+                  <MapPin className="w-5 h-5 mt-1 text-neutral-700" />
+                  <div>
+                    <p>Santa Fe 1583, Corrientes Capital, Argentina</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <LucideMail className="w-5 h-5 mt-1 text-neutral-700" />
+                  <div>
+                    <p className="text-sm font-semibold text-neutral-800">
+                      Email
+                    </p>
+                    <p>consultas@mordiscoburgers.com.ar</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-start gap-6 mt-4">
+                  <a
+                    href="https://wa.me/5493794055152"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="WhatsApp"
+                  >
+                    <FaWhatsapp className="w-5 h-5 text-[#25D366]" />
+                  </a>
+                  <a
+                    href="https://instagram.com/mordisco.arg"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Instagram"
+                  >
+                    <FaInstagram className="w-5 h-5 text-[#E1306C]" />
+                  </a>
+                  <a
+                    href="https://www.facebook.com/profile.php?id=61575119946351"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Facebook"
+                  >
+                    <FaFacebook className="w-5 h-5 text-[#1877F2]" />
+                  </a>
+                </div>
+              </div>
+            </footer>
+          </>
         )}
       </main>
 
