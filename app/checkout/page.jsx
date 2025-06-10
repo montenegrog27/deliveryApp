@@ -83,7 +83,7 @@ export default function CheckoutPage() {
         const data = await res.json();
         const activos = data.filter((m) => m.active);
         setPaymentMethods(activos);
-        if (activos.length > 0) setSelectedPaymentMethod(activos[0].id);
+        if (activos.length > 0) setSelectedPaymentMethod(activos[0].type);
       } catch (err) {
         console.error("Error al traer métodos de pago:", err);
       }
@@ -761,7 +761,7 @@ const total = Math.max(0, subtotal - descuentoFinal + shippingCost);
             className="w-full border border-neutral-300 bg-white px-4 py-2 rounded-md text-sm"
           >
             {paymentMethods.map((m) => (
-              <option key={m.id} value={m.id}>
+              <option key={m.id} value={m.type}>
                 {m.name}
               </option>
             ))}
