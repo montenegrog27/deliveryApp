@@ -217,11 +217,11 @@ export default function HomePage() {
                                 Sin imagen
                               </div>
                             )}
-                            {/* {item.attributes.hasDiscount && (
+                            {item.attributes.hasDiscount && (
                               <div className="absolute top-1 right-1 bg-green-600 text-white text-[11px] font-semibold px-2 py-0.5 rounded-full shadow-sm">
                                 -{item.attributes.discountPercent}%
                               </div>
-                            )} */}
+                            )}
                           </div>
                           <div className="flex-1 flex flex-col min-w-0">
                             <h3 className="text-base font-bold text-[#1A1A1A] truncate">
@@ -237,15 +237,15 @@ export default function HomePage() {
                                 {item.attributes.hasDiscount ? (
                                   <>
                                     <span className="text-[#E00000] font-bold text-sm">
-                                      {/* ${item.attributes.discountPrice} */}
+                                      ${item.attributes.discountPrice}
                                     </span>
                                     <span className="text-xs text-gray-500 line-through">
-                                      {/* ${item.attributes.price} */}
+                                      ${item.attributes.price}
                                     </span>
                                   </>
                                 ) : (
                                   <span className="text-[#E00000] font-bold text-sm">
-                                    {/* ${item.attributes.price} */}
+                                    ${item.attributes.price}
                                   </span>
                                 )}
                               </div>
