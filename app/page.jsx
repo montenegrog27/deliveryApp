@@ -92,7 +92,7 @@ export default function HomePage() {
         setIsOpen(abierto);
 
         if (abierto) {
-          setMensajeHorario("PREVENTA HASTA LAS 20hs");
+          setMensajeHorario("PREVENTA HASTA LAS 20:15hs");
         } else {
           if (totalMinutos < apertura) {
             setMensajeHorario(`Cerrado, abrimos a las ${configHoy.from} hs.`);
