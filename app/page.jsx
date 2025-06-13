@@ -323,8 +323,7 @@ export default function HomePage() {
         )}
       </main>
 
-      <CartSidebar />
-
+{isOpen && <CartSidebar />}
       {/* MODAL DE EXTRAS */}
       <AnimatePresence>
         {selectedItem && (
