@@ -416,15 +416,12 @@ export async function POST(req) {
         // await sendText(phoneNormalized, mensajeFinal);
         await sendText(
           phoneNormalized,
-          mensajeFinal +
-            "\n\n📞 Para cualquier reclamo podés comunicarte a este número:"
-        );
+          mensajeFinal);
 
         if (order.paymentMethodId  === "transfer") {
           await sendText(phoneNormalized, "ALIAS: 👇👇👇");
           await sendText(phoneNormalized, "MORDISCOBURGERS");
         }
-        await sendContact(phoneNormalized);
       }
     }
 
