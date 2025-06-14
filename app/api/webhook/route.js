@@ -615,5 +615,81 @@ export async function POST(req) {
     }
   }
 
+  if (type === "document") {
+  const phoneNormalized = phone.replace(/\D/g, "");
+  const mediaId = message.document?.id;
+  const mimeType = message.document?.mime_type || "application/pdf";
+  const filename = message.document?.filename || "archivo.pdf";
+
+  if (!mediaId) return new Response("Sin media ID", { status: 200 });
+
+  try {
+    // 1. Obtener URL de descarga del documento
+    const resUrl = await fetch(
+      `https://graph.facebook.com/v19.0/${mediaId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.WHATSAPP_API_TOKEN}`,
+        },
+      }
+    );
+    const mediaMeta = await resUrl.json();
+    const mediaUrl = mediaMeta.url;
+
+    if (!mediaUrl) throw new Error("No se pudo obtener la URL del documento");
+
+    // 2. Descargar el documento (como base64 o guardás el link)
+    const resFile = await fetch(mediaUrl, {
+      headers: {
+        Authorization: `Bearer ${process.env.WHATSAPP_API_TOKEN}`,
+      },
+    });
+    const fileBuffer = await resFile.arrayBuffer();
+    const base64File = Buffer.from(fileBuffer).toString("base64");
+
+    // 3. Buscar orden activa
+    const q = query(
+      collection(db, "orders"),
+      where("customer.phone", "==", phoneNormalized),
+      where("status", "!=", "delivered")
+    );
+    const snap = await getDocs(q);
+
+    let order = null;
+    let trackingId = `tracking_unknown_${phoneNormalized}_${Date.now()}`;
+    let customerName = null;
+
+    if (!snap.empty) {
+      const doc = snap.docs[0];
+      order = doc.data();
+      trackingId = order.trackingId;
+      customerName = order.customer?.name || null;
+    }
+
+    // 4. Guardar mensaje como tipo "documento"
+    const incomingMessage = {
+      direction: "incoming",
+      tipo: "documento",
+      filename,
+      mimeType,
+      message: `data:${mimeType};base64,${base64File}`,
+    };
+
+    await upsertMessage({
+      phone: phoneNormalized,
+      name: customerName,
+      trackingId,
+      order,
+      message: incomingMessage,
+    });
+
+    return new Response("Documento recibido", { status: 200 });
+  } catch (err) {
+    console.error("❌ Error procesando documento:", err);
+    return new Response("Error documento", { status: 500 });
+  }
+}
+
+
   return new Response("EVENT_RECEIVED", { status: 200 });
 }
