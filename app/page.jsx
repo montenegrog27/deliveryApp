@@ -19,93 +19,116 @@ export default function HomePage() {
   const [showDrinkDropdown, setShowDrinkDropdown] = useState(false);
   const [isOpen, setIsOpen] = useState(true);
   const [mensajeHorario, setMensajeHorario] = useState("");
+const [newsMessage, setNewsMessage] = useState("");
+const [webClosed, setWebClosed] = useState(false);
+
 
   const isLocalhost =
     typeof window !== "undefined" && window.location.hostname === "localhost";
 
   useEffect(() => {
-    const checkHorario = async () => {
-      if (isLocalhost) {
-        setIsOpen(true);
-        setMensajeHorario("⚠️ Modo desarrollo (ignorado horario)");
-        return;
-      }
-      try {
-        const now = new Date();
-        const hora = now.getHours();
-        const minutos = now.getMinutes();
-        const totalMinutos = hora * 60 + minutos;
+const checkHorario = async () => {
+  if (isLocalhost) {
+    setIsOpen(true);
+    setMensajeHorario("⚠️ Modo desarrollo (ignorado horario)");
+    return;
+  }
 
-        const dias = [
-          "sunday",
-          "monday",
-          "tuesday",
-          "wednesday",
-          "thursday",
-          "friday",
-          "saturday",
-        ];
-        const dayIndex = now.getDay();
-        const day = dias[dayIndex];
-        const prevDay = dias[(dayIndex + 6) % 7];
+  try {
+    const now = new Date();
+    const hora = now.getHours();
+    const minutos = now.getMinutes();
+    const totalMinutos = hora * 60 + minutos;
 
-        const settingsRef = doc(db, "settings", "businessHours");
-        const snap = await getDoc(settingsRef);
-        const rawData = snap.data();
-        console.log(rawData);
-        const configHoy = rawData.businessHours[day];
-        const configAyer = rawData.businessHours[prevDay];
+    const dias = [
+      "sunday",
+      "monday",
+      "tuesday",
+      "wednesday",
+      "thursday",
+      "friday",
+      "saturday",
+    ];
+    const dayIndex = now.getDay();
+    const day = dias[dayIndex];
+    const prevDay = dias[(dayIndex + 6) % 7];
 
-        const parseHora = (str) => {
-          const [h, m] = str.split(":").map(Number);
-          return h * 60 + (m || 0);
-        };
+    const settingsRef = doc(db, "settings", "businessHours");
+    const snap = await getDoc(settingsRef);
+    const rawData = snap.data();
+if (rawData.showNews) {
+  setNewsMessage(rawData.news);
+} else {
+  setNewsMessage(""); // limpiar si no hay que mostrar
+}
+    const configHoy = rawData.businessHours[day];
+    const configAyer = rawData.businessHours[prevDay];
 
-        // ⚠️ Verificamos si seguimos abiertos por el horario del día anterior
-        if (
-          configAyer?.open &&
-          configAyer.from &&
-          configAyer.to &&
-          parseHora(configAyer.to) < parseHora(configAyer.from) &&
-          totalMinutos < parseHora(configAyer.to)
-        ) {
-          setIsOpen(true);
-          setMensajeHorario("");
-          return;
-        }
-
-        // ⚠️ Verificamos si abrimos hoy
-        if (!configHoy || !configHoy.open) {
-          setIsOpen(false);
-          setMensajeHorario("Hoy no abrimos. Nos vemos mañana!");
-          return;
-        }
-
-        const apertura = parseHora(configHoy.from);
-        const cierre = parseHora(configHoy.to);
-        const cruzaMedianoche = cierre < apertura;
-
-        const abierto = cruzaMedianoche
-          ? totalMinutos >= apertura || totalMinutos < cierre
-          : totalMinutos >= apertura && totalMinutos < cierre;
-
-        setIsOpen(abierto);
-
-        if (abierto) {
-          setMensajeHorario("");
-        } else {
-          if (totalMinutos < apertura) {
-            setMensajeHorario(`Cerrado, abrimos a las ${configHoy.from} hs.`);
-          } else {
-            setMensajeHorario("Ya cerramos. Nos vemos mañana!");
-          }
-        }
-      } catch (err) {
-        console.error("❌ Error al verificar horario:", err);
-        setIsOpen(false);
-        setMensajeHorario("⚠️ No pudimos verificar el horario.");
-      }
+    const parseHora = (str) => {
+      const [h, m] = str.split(":").map(Number);
+      return h * 60 + (m || 0);
     };
+
+    // ⛔ Si webClose está activado, desactivamos todo
+if (rawData.webClose === true) {
+  setWebClosed(true);
+  setIsOpen(false);
+  setMensajeHorario("Actualmente cerrado por mantenimiento.");
+  return;
+}
+setWebClosed(false);
+
+
+    // ⚠️ Verificamos si seguimos abiertos por el horario del día anterior
+    if (
+      configAyer?.open &&
+      configAyer.from &&
+      configAyer.to &&
+      parseHora(configAyer.to) < parseHora(configAyer.from) &&
+      totalMinutos < parseHora(configAyer.to)
+    ) {
+      setIsOpen(true);
+      setMensajeHorario("");
+      return;
+    }
+
+    // ⚠️ Verificamos si abrimos hoy
+    if (!configHoy || !configHoy.open) {
+      setIsOpen(false);
+      setMensajeHorario(
+        rawData.showNews ? rawData.news : "Hoy no abrimos. Nos vemos mañana!"
+      );
+      return;
+    }
+
+    const apertura = parseHora(configHoy.from);
+    const cierre = parseHora(configHoy.to);
+    const cruzaMedianoche = cierre < apertura;
+
+    const abierto = cruzaMedianoche
+      ? totalMinutos >= apertura || totalMinutos < cierre
+      : totalMinutos >= apertura && totalMinutos < cierre;
+
+    setIsOpen(abierto);
+
+    if (abierto) {
+      setMensajeHorario("");
+    } else {
+      if (rawData.showNews) {
+        setMensajeHorario(rawData.news);
+      } else if (totalMinutos < apertura) {
+        setMensajeHorario(`Cerrado, abrimos a las ${configHoy.from} hs.`);
+      } else {
+        setMensajeHorario("Ya cerramos. Nos vemos mañana!");
+      }
+    }
+  } catch (err) {
+    console.error("❌ Error al verificar horario:", err);
+    setIsOpen(false);
+    setMensajeHorario("⚠️ No pudimos verificar el horario.");
+  }
+};
+
 
     checkHorario();
     const intervalo = setInterval(checkHorario, 60000); // chequear cada minuto
@@ -157,7 +180,11 @@ export default function HomePage() {
             {mensajeHorario}
           </div>
         )}
-
+{newsMessage && (
+  <div className="text-center text-sm text-[#1A1A1A] font-semibold mt-1">
+    {newsMessage}
+  </div>
+)}
         <button
           onClick={toggleCart}
           className="relative flex items-center gap-2 px-4 py-2 rounded-full bg-[#E00000] text-white text-sm font-bold transition hover:scale-105"
@@ -252,7 +279,7 @@ export default function HomePage() {
 
                               <button
                                 onClick={() => setSelectedItem(item)}
-                                disabled={!isOpen}
+                                disabled={!isOpen || webClosed}
                                 className={`text-sm font-semibold px-4 py-1.5 rounded-full transition-all
     ${
       isOpen
