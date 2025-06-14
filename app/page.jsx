@@ -175,11 +175,7 @@ setWebClosed(false);
           alt="MORDISCO"
           className="h-8"
         />
-        {mensajeHorario && (
-          <div className="text-center text-sm text-red-600 font-semibold mt-4">
-            {mensajeHorario}
-          </div>
-        )}
+
 {newsMessage && (
   <div className="text-center text-sm text-[#1A1A1A] font-semibold mt-1">
     {newsMessage}
