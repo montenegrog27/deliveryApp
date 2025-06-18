@@ -1,6 +1,14 @@
 @import "tailwindcss";
 @import "mapbox-gl/dist/mapbox-gl.css";
 
+@font-face {
+  font-family: 'BricolageExtraBold';
+  src: url('/font/BricolageGrotesque-ExtraBold.ttf') format('truetype');
+  font-weight: 800;
+  font-style: normal;
+}
+
+
 @layer utilities {
   .animate-bounce-sm {
     animation: bounce-sm 0.3s ease-in-out;

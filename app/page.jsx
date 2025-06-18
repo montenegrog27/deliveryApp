@@ -6,7 +6,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Phone, Mail, MapPin, MessageCircle, LucideMail } from "lucide-react";
-import { FaFacebook, FaInstagram, FaMailchimp, FaWhatsapp } from "react-icons/fa6";
+import {
+  FaFacebook,
+  FaInstagram,
+  FaMailchimp,
+  FaWhatsapp,
+} from "react-icons/fa6";
 
 export default function HomePage() {
   const { addItem, toggleCart, cart } = useCart();
@@ -19,116 +24,130 @@ export default function HomePage() {
   const [showDrinkDropdown, setShowDrinkDropdown] = useState(false);
   const [isOpen, setIsOpen] = useState(true);
   const [mensajeHorario, setMensajeHorario] = useState("");
-const [newsMessage, setNewsMessage] = useState("");
-const [webClosed, setWebClosed] = useState(false);
-
+  const [newsMessage, setNewsMessage] = useState("");
+  const [webClosed, setWebClosed] = useState(false);
+const [showPromo, setShowPromo] = useState(false);
 
   const isLocalhost =
     typeof window !== "undefined" && window.location.hostname === "localhost";
 
   useEffect(() => {
-const checkHorario = async () => {
-  if (isLocalhost) {
-    setIsOpen(true);
-    setMensajeHorario("⚠️ Modo desarrollo (ignorado horario)");
-    return;
-  }
+    const checkHorario = async () => {
+      
 
-  try {
-    const now = new Date();
-    const hora = now.getHours();
-    const minutos = now.getMinutes();
-    const totalMinutos = hora * 60 + minutos;
 
-    const dias = [
-      "sunday",
-      "monday",
-      "tuesday",
-      "wednesday",
-      "thursday",
-      "friday",
-      "saturday",
-    ];
-    const dayIndex = now.getDay();
-    const day = dias[dayIndex];
-    const prevDay = dias[(dayIndex + 6) % 7];
+      try {
+        const now = new Date();
+        const hora = now.getHours();
+        const minutos = now.getMinutes();
+        const totalMinutos = hora * 60 + minutos;
 
-    const settingsRef = doc(db, "settings", "businessHours");
-    const snap = await getDoc(settingsRef);
-    const rawData = snap.data();
-if (rawData.showNews) {
-  setNewsMessage(rawData.news);
+        const dias = [
+          "sunday",
+          "monday",
+          "tuesday",
+          "wednesday",
+          "thursday",
+          "friday",
+          "saturday",
+        ];
+        const dayIndex = now.getDay();
+        const day = dias[dayIndex];
+        const prevDay = dias[(dayIndex + 6) % 7];
+
+        const settingsRef = doc(db, "settings", "businessHours");
+        const snap = await getDoc(settingsRef);
+        const rawData = snap.data();
+        console.log("rawData:", rawData);
+console.log("rawData.homePromo:", rawData?.homePromo);
+        setShowPromo(rawData.homePromo === true);
+        if (rawData.homePromo) {
+  document.body.classList.add("show-promo");
 } else {
-  setNewsMessage(""); // limpiar si no hay que mostrar
+  document.body.classList.remove("show-promo");
 }
-    const configHoy = rawData.businessHours[day];
-    const configAyer = rawData.businessHours[prevDay];
 
-    const parseHora = (str) => {
-      const [h, m] = str.split(":").map(Number);
-      return h * 60 + (m || 0);
-    };
-
-    // ⛔ Si webClose está activado, desactivamos todo
-if (rawData.webClose === true) {
-  setWebClosed(true);
-  setIsOpen(false);
-  setMensajeHorario("Actualmente cerrado por mantenimiento.");
-  return;
-}
-setWebClosed(false);
-
-
-    // ⚠️ Verificamos si seguimos abiertos por el horario del día anterior
-    if (
-      configAyer?.open &&
-      configAyer.from &&
-      configAyer.to &&
-      parseHora(configAyer.to) < parseHora(configAyer.from) &&
-      totalMinutos < parseHora(configAyer.to)
-    ) {
-      setIsOpen(true);
-      setMensajeHorario("");
-      return;
-    }
-
-    // ⚠️ Verificamos si abrimos hoy
-    if (!configHoy || !configHoy.open) {
-      setIsOpen(false);
-      setMensajeHorario(
-        rawData.showNews ? rawData.news : "Hoy no abrimos. Nos vemos mañana!"
-      );
-      return;
-    }
-
-    const apertura = parseHora(configHoy.from);
-    const cierre = parseHora(configHoy.to);
-    const cruzaMedianoche = cierre < apertura;
-
-    const abierto = cruzaMedianoche
-      ? totalMinutos >= apertura || totalMinutos < cierre
-      : totalMinutos >= apertura && totalMinutos < cierre;
-
-    setIsOpen(abierto);
-
-    if (abierto) {
-      setMensajeHorario("");
-    } else {
-      if (rawData.showNews) {
-        setMensajeHorario(rawData.news);
-      } else if (totalMinutos < apertura) {
-        setMensajeHorario(`Cerrado, abrimos a las ${configHoy.from} hs.`);
-      } else {
-        setMensajeHorario("Ya cerramos. Nos vemos mañana!");
+              if (isLocalhost) {
+        setIsOpen(true);
+        setMensajeHorario("⚠️ Modo desarrollo (ignorado horario)");
+        return;
       }
-    }
-  } catch (err) {
-    console.error("❌ Error al verificar horario:", err);
-    setIsOpen(false);
-    setMensajeHorario("⚠️ No pudimos verificar el horario.");
-  }
-};
 
+
+
+        if (rawData.showNews) {
+          setNewsMessage(rawData.news);
+        } else {
+          setNewsMessage(""); // limpiar si no hay que mostrar
+        }
+        const configHoy = rawData.businessHours[day];
+        const configAyer = rawData.businessHours[prevDay];
+
+        const parseHora = (str) => {
+          const [h, m] = str.split(":").map(Number);
+          return h * 60 + (m || 0);
+        };
+
+        // ⛔ Si webClose está activado, desactivamos todo
+        if (rawData.webClose === true) {
+          setWebClosed(true);
+          setIsOpen(false);
+          setMensajeHorario("Actualmente cerrado por mantenimiento.");
+          return;
+        }
+        setWebClosed(false);
+
+        // ⚠️ Verificamos si seguimos abiertos por el horario del día anterior
+        if (
+          configAyer?.open &&
+          configAyer.from &&
+          configAyer.to &&
+          parseHora(configAyer.to) < parseHora(configAyer.from) &&
+          totalMinutos < parseHora(configAyer.to)
+        ) {
+          setIsOpen(true);
+          setMensajeHorario("");
+          return;
+        }
+
+        // ⚠️ Verificamos si abrimos hoy
+        if (!configHoy || !configHoy.open) {
+          setIsOpen(false);
+          setMensajeHorario(
+            rawData.showNews
+              ? rawData.news
+              : "Hoy no abrimos. Nos vemos mañana!"
+          );
+          return;
+        }
+
+        const apertura = parseHora(configHoy.from);
+        const cierre = parseHora(configHoy.to);
+        const cruzaMedianoche = cierre < apertura;
+
+        const abierto = cruzaMedianoche
+          ? totalMinutos >= apertura || totalMinutos < cierre
+          : totalMinutos >= apertura && totalMinutos < cierre;
+
+        setIsOpen(abierto);
+
+        if (abierto) {
+          setMensajeHorario("");
+        } else {
+          if (rawData.showNews) {
+            setMensajeHorario(rawData.news);
+          } else if (totalMinutos < apertura) {
+            setMensajeHorario(`Cerrado, abrimos a las ${configHoy.from} hs.`);
+          } else {
+            setMensajeHorario("Ya cerramos. Nos vemos mañana!");
+          }
+        }
+      } catch (err) {
+        console.error("❌ Error al verificar horario:", err);
+        setIsOpen(false);
+        setMensajeHorario("⚠️ No pudimos verificar el horario.");
+      }
+    };
 
     checkHorario();
     const intervalo = setInterval(checkHorario, 60000); // chequear cada minuto
@@ -169,30 +188,64 @@ setWebClosed(false);
   return (
     <div className="min-h-screen bg-[#FFF9F5] font-inter text-[#1A1A1A]">
       {/* HEADER */}
-      <header className="bg-[#FFF9F5]/90 backdrop-blur-md sticky top-0 z-50 px-4 py-3 flex items-center justify-between border-b border-neutral-200">
-        <img
-          src="https://res.cloudinary.com/dsbrnqc5z/image/upload/v1744755147/Versi%C3%B3n_principal_xer7zs.svg"
-          alt="MORDISCO"
-          className="h-8"
-        />
+<header
+  className={`sticky top-0 z-50 px-4 py-3 flex items-center justify-between border-b ${
+    showPromo ? "bg-[#E00000]" : "bg-[#FFF9F5]/90 backdrop-blur-md"
+  }`}
+>
+  <img
+    src={
+      showPromo
+        ? "https://res.cloudinary.com/dsbrnqc5z/image/upload/v1747913968/Versi%C3%B3n_principal_2_d3jz2q.png"
+        : "https://res.cloudinary.com/dsbrnqc5z/image/upload/v1744755147/Versi%C3%B3n_principal_xer7zs.svg"
+    }
+    alt="MORDISCO"
+    className="h-8"
+  />
 
-{newsMessage && (
-  <div className="text-center text-sm text-[#1A1A1A] font-semibold mt-1">
-    {newsMessage}
-  </div>
+  <button
+    onClick={toggleCart}
+    className={`relative flex items-center gap-2 px-4 py-2 rounded-full font-bold transition hover:scale-105 ${
+      showPromo
+        ? "bg-white text-[#E00000]"
+        : "bg-[#E00000] text-white"
+    }`}
+  >
+    <span>Mi pedido</span>
+    {totalItems > 0 && (
+      <span
+        className={`rounded-full px-2 py-0.5 text-xs font-bold ${
+          showPromo ? "bg-[#E00000] text-white" : "bg-white text-[#E00000]"
+        }`}
+      >
+        {totalItems}
+      </span>
+    )}
+  </button>
+</header>
+
+{showPromo && (
+  <section
+    className="relative bg-[#E00000] -mt-16 text-white px-6 py-8 flex items-center justify-between rounded-br-3xl rounded-bl-[25%]"
+    style={{ height: "50vh" }}
+  >
+    <div className="max-w-md space-y-2">
+      <h1 className="text-3xl font-extrabold leading-tight">
+        ¡Hasta 20% OFF!
+      </h1>
+      <p className="text-sm text-white/90">
+        Por tiempo limitado!.
+      </p>
+
+    </div>
+    <img
+      src="https://res.cloudinary.com/dsbrnqc5z/image/upload/v1749238288/DSC03746_1_-removebg-preview_hzef4r.png"
+      alt="Hamburguesa promo"
+      className="w-[550px] ml-10 sm:w-52 lg:w-64 drop-shadow-xl"
+    />
+  </section>
 )}
-        <button
-          onClick={toggleCart}
-          className="relative flex items-center gap-2 px-4 py-2 rounded-full bg-[#E00000] text-white text-sm font-bold transition hover:scale-105"
-        >
-          <span>Mi pedido</span>
-          {totalItems > 0 && (
-            <span className="bg-white text-[#E00000] rounded-full px-2 py-0.5 text-xs font-bold">
-              {totalItems}
-            </span>
-          )}
-        </button>
-      </header>
+
 
       {/* CONTENIDO */}
       <main className="max-w-3xl mx-auto px-4 py-8 space-y-16">
@@ -222,12 +275,22 @@ setWebClosed(false);
 
                 return (
                   <section key={cat.id} className="space-y-6">
-                    <h2 className="text-2xl font-bold text-[#E00000]">
+                    <h2 className="text-2xl font-bold text-[#E00000] font-[BricolageExtraBold]">
                       {cat.name}
                     </h2>
                     <ul className="space-y-4">
                       {availableItems.map((item) => (
-                        <li key={item.id} className="flex gap-4 items-center">
+                        <li
+                          key={item.id}
+                          onClick={() =>
+                            isOpen && !webClosed ? setSelectedItem(item) : null
+                          }
+                          className={`flex gap-4 items-center p-2 rounded-lg transition cursor-pointer hover:bg-neutral-100 ${
+                            !isOpen || webClosed
+                              ? "opacity-50 cursor-not-allowed"
+                              : ""
+                          }`}
+                        >
                           <div className="relative w-[96px] h-[96px] rounded-lg overflow-hidden bg-neutral-100">
                             {item.attributes.image ? (
                               <img
@@ -274,7 +337,11 @@ setWebClosed(false);
                               </div>
 
                               <button
-                                onClick={() => setSelectedItem(item)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (isOpen && !webClosed)
+                                    setSelectedItem(item);
+                                }}
                                 disabled={!isOpen || webClosed}
                                 className={`text-sm font-semibold px-4 py-1.5 rounded-full transition-all
     ${
@@ -346,7 +413,7 @@ setWebClosed(false);
         )}
       </main>
 
-{isOpen && <CartSidebar />}
+      {isOpen && <CartSidebar />}
       {/* MODAL DE EXTRAS */}
       <AnimatePresence>
         {selectedItem && (
