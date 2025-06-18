@@ -226,22 +226,22 @@ console.log("rawData.homePromo:", rawData?.homePromo);
 
 {showPromo && (
   <section
-    className="relative bg-[#E00000] -mt-16 text-white px-6 py-8 flex items-center justify-between rounded-br-3xl rounded-bl-[25%]"
+    className="relative bg-[#E00000] -mt-25 text-white px-6 py-8 flex items-center justify-between rounded-br-3xl rounded-bl-[25%]"
     style={{ height: "50vh" }}
   >
-    <div className="max-w-md space-y-2">
-      <h1 className="text-3xl font-extrabold leading-tight">
-        ¡Hasta 20% OFF!
+    <div className="max-w-md min-w-[200px] -mr-15  space-y-2 ">
+      <h1 className="text-3xl font-extrabold leading-tight font-[BricolageExtraBold]">
+        MES APERTURA
       </h1>
       <p className="text-sm text-white/90">
-        Por tiempo limitado!.
+        ¡Sorpresas todos los días!
       </p>
 
     </div>
     <img
       src="https://res.cloudinary.com/dsbrnqc5z/image/upload/v1749238288/DSC03746_1_-removebg-preview_hzef4r.png"
       alt="Hamburguesa promo"
-      className="w-[550px] ml-10 sm:w-52 lg:w-64 drop-shadow-xl"
+      className="w-[550px] ml-10 sm:w-52 lg:w-64 drop-shadow-xl -mr-30"
     />
   </section>
 )}
