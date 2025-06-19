@@ -203,7 +203,7 @@ console.log("rawData.homePromo:", rawData?.homePromo);
     className="h-8"
   />
 
-  <button
+  {/* <button
     onClick={toggleCart}
     className={`relative flex items-center gap-2 px-4 py-2 rounded-full font-bold transition hover:scale-105 ${
       showPromo
@@ -221,9 +221,35 @@ console.log("rawData.homePromo:", rawData?.homePromo);
         {totalItems}
       </span>
     )}
-  </button>
-</header>
+  </button> */}
 
+    {(isOpen && !webClosed) && (
+    <button
+      onClick={toggleCart}
+      className={`relative flex items-center gap-2 px-4 py-2 rounded-full font-bold transition hover:scale-105 ${
+        showPromo
+          ? "bg-white text-[#E00000]"
+          : "bg-[#E00000] text-white"
+      }`}
+    >
+      <span>Mi pedido</span>
+      {totalItems > 0 && (
+        <span
+          className={`rounded-full px-2 py-0.5 text-xs font-bold ${
+            showPromo ? "bg-[#E00000] text-white" : "bg-white text-[#E00000]"
+          }`}
+        >
+          {totalItems}
+        </span>
+      )}
+    </button>
+  )}
+</header>
+{mensajeHorario && (
+  <div className="bg-yellow-100 text-yellow-800 text-center py-2 px-4">
+    {mensajeHorario}
+  </div>
+)}
 {showPromo && (
   <section
     className="relative bg-[#E00000] -mt-25 text-white px-6 py-8 flex items-center justify-between rounded-br-3xl rounded-bl-[25%]"
@@ -241,7 +267,7 @@ console.log("rawData.homePromo:", rawData?.homePromo);
     <img
       src="https://res.cloudinary.com/dsbrnqc5z/image/upload/v1749238288/DSC03746_1_-removebg-preview_hzef4r.png"
       alt="Hamburguesa promo"
-      className="w-[550px] ml-10 sm:w-52 lg:w-64 drop-shadow-xl -mr-30"
+      className="w-[550px] ml-10 sm:w-52 lg:w-64 drop-shadow-xls"
     />
   </section>
 )}
