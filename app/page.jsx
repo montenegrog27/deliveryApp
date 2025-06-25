@@ -225,6 +225,11 @@ console.log("rawData.homePromo:", rawData?.homePromo);
 
   
 </header>
+{newsMessage && (
+  <div className="bg-blue-100 text-blue-800 text-center py-2 px-4">
+    {newsMessage}
+  </div>
+)}
 {mensajeHorario && (
   <div className="bg-yellow-100 text-yellow-800 text-center py-2 px-4">
     {mensajeHorario}
