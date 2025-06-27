@@ -194,7 +194,7 @@ export default function HomePage() {
         setMenu(data);
         try {
           const q = query(
-            collection(db, "timediscounts"),
+            collection(db, "timeDiscounts"),
             where("active", "==", true)
           );
           const snap = await getDocs(q);
