@@ -1,10 +1,17 @@
 "use client";
 import { useCart } from "@/context/CartContext";
 import CartSidebar from "@/components/CartSidebar";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import {
+  collection,
+  getDocs,
+  getDoc,
+  query,
+  where,
+  doc,
+  Timestamp,
+} from "firebase/firestore";import { db } from "@/lib/firebase";
 import { Phone, Mail, MapPin, MessageCircle, LucideMail } from "lucide-react";
 import {
   FaFacebook,
@@ -12,6 +19,8 @@ import {
   FaMailchimp,
   FaWhatsapp,
 } from "react-icons/fa6";
+import CategoryNav from "@/components/CategoryNav";
+import CategoryCards from "@/components/CategoryCards";
 
 export default function HomePage() {
   const { addItem, toggleCart, cart } = useCart();
@@ -26,16 +35,41 @@ export default function HomePage() {
   const [mensajeHorario, setMensajeHorario] = useState("");
   const [newsMessage, setNewsMessage] = useState("");
   const [webClosed, setWebClosed] = useState(false);
-const [showPromo, setShowPromo] = useState(false);
+  const [showPromo, setShowPromo] = useState(false);
+  const [showStickyNav, setShowStickyNav] = useState(false);
+  const [timeDiscountPercent, setTimeDiscountPercent] = useState(0);
+
+
+  const cardsRef = useRef(null);
+
+  const sectionRefs = useRef({});
 
   const isLocalhost =
     typeof window !== "undefined" && window.location.hostname === "localhost";
 
   useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setShowStickyNav(!entry.isIntersecting);
+      },
+      {
+        rootMargin: "-80px 0px 0px 0px", // ajusta según alto de tu header
+        threshold: 0,
+      }
+    );
+
+    const node = cardsRef.current;
+    if (node) {
+      observer.observe(node);
+    }
+
+    return () => {
+      if (node) observer.unobserve(node);
+    };
+  }, []);
+
+  useEffect(() => {
     const checkHorario = async () => {
-      
-
-
       try {
         const now = new Date();
         const hora = now.getHours();
@@ -58,22 +92,19 @@ const [showPromo, setShowPromo] = useState(false);
         const settingsRef = doc(db, "settings", "businessHours");
         const snap = await getDoc(settingsRef);
         const rawData = snap.data();
-        console.log("rawData:", rawData);
-console.log("rawData.homePromo:", rawData?.homePromo);
+
         setShowPromo(rawData.homePromo === true);
         if (rawData.homePromo) {
-  document.body.classList.add("show-promo");
-} else {
-  document.body.classList.remove("show-promo");
-}
+          document.body.classList.add("show-promo");
+        } else {
+          document.body.classList.remove("show-promo");
+        }
 
-              if (isLocalhost) {
-        setIsOpen(true);
-        setMensajeHorario("⚠️ Modo desarrollo (ignorado horario)");
-        return;
-      }
-
-
+        if (isLocalhost) {
+          setIsOpen(true);
+          setMensajeHorario("⚠️ Modo desarrollo (ignorado horario)");
+          return;
+        }
 
         if (rawData.showNews) {
           setNewsMessage(rawData.news);
@@ -161,6 +192,28 @@ console.log("rawData.homePromo:", rawData?.homePromo);
         if (!res.ok) throw new Error(await res.text());
         const data = await res.json();
         setMenu(data);
+        try {
+  const q = query(collection(db, "timediscounts"), where("active", "==", true));
+  const snap = await getDocs(q);
+  const now = new Date();
+
+  for (const docSnap of snap.docs) {
+    const data = docSnap.data();
+
+    const start = new Date(data.startTime);
+    const end = new Date(data.endTime);
+
+    if (now >= start && now <= end) {
+      if (data.percentage > 0) {
+        setTimeDiscountPercent(data.percentage);
+        break; // aplicamos solo el primero válido
+      }
+    }
+  }
+} catch (err) {
+  console.error("❌ Error al verificar descuentos por horario:", err);
+}
+
       } catch (err) {
         console.error("❌ Error al obtener el menú:", err);
       } finally {
@@ -176,88 +229,99 @@ console.log("rawData.homePromo:", rawData?.homePromo);
   const selectedDrink =
     drinksCategory?.items.find((item) => item.id === selectedDrinkId) || null;
 
-  const finalPrice =
-    (selectedItem?.attributes.discountPrice ||
-      selectedItem?.attributes.price ||
-      0) +
-    (selectedDrink?.attributes?.price || 0) +
-    (includeFries ? friesProduct?.attributes?.price || 0 : 0);
+  // const finalPrice =
+  //   (selectedItem?.attributes.discountPrice ||
+  //     selectedItem?.attributes.price ||
+  //     0) +
+  //   (selectedDrink?.attributes?.price || 0) +
+  //   (includeFries ? friesProduct?.attributes?.price || 0 : 0);
 
   const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
+
+  const basePrice =
+  selectedItem?.attributes.price || 0;
+
+const discountPrice =
+  selectedItem?.attributes.hasDiscount
+    ? selectedItem.attributes.discountPrice
+    : timeDiscountPercent > 0
+    ? Math.round(basePrice * (1 - timeDiscountPercent / 100))
+    : basePrice;
+
+const finalPrice =
+  discountPrice +
+  (selectedDrink?.attributes?.price || 0) +
+  (includeFries ? friesProduct?.attributes?.price || 0 : 0);
+
+
+
 
   return (
     <div className="min-h-screen bg-[#FFF9F5] font-inter text-[#1A1A1A]">
       {/* HEADER */}
-<header
-  className={`sticky top-0 z-50 px-4 py-3 flex items-center justify-between border-b ${
-    showPromo ? "bg-[#E00000]" : "bg-[#FFF9F5]/90 backdrop-blur-md"
-  }`}
->
-  <img
-    src={
-      showPromo
-        ? "https://res.cloudinary.com/dsbrnqc5z/image/upload/v1747913968/Versi%C3%B3n_principal_2_d3jz2q.png"
-        : "https://res.cloudinary.com/dsbrnqc5z/image/upload/v1744755147/Versi%C3%B3n_principal_xer7zs.svg"
-    }
-    alt="MORDISCO"
-    className="h-8"
-  />
-
-  <button
-    onClick={toggleCart}
-    className={`relative flex items-center gap-2 px-4 py-2 rounded-full font-bold transition hover:scale-105 ${
-      showPromo
-        ? "bg-white text-[#E00000]"
-        : "bg-[#E00000] text-white"
-    }`}
-  >
-    <span>Mi pedido</span>
-    {totalItems > 0 && (
-      <span
-        className={`rounded-full px-2 py-0.5 text-xs font-bold ${
-          showPromo ? "bg-[#E00000] text-white" : "bg-white text-[#E00000]"
+      <header
+        className={`sticky top-0 z-50 px-4 py-3 flex items-center justify-between border-b ${
+          showPromo ? "bg-[#E00000]" : "bg-[#FFF9F5]/90 backdrop-blur-md"
         }`}
       >
-        {totalItems}
-      </span>
-    )}
-  </button>
+        <img
+          src={
+            showPromo
+              ? "https://res.cloudinary.com/dsbrnqc5z/image/upload/v1747913968/Versi%C3%B3n_principal_2_d3jz2q.png"
+              : "https://res.cloudinary.com/dsbrnqc5z/image/upload/v1744755147/Versi%C3%B3n_principal_xer7zs.svg"
+          }
+          alt="MORDISCO"
+          className="h-8"
+        />
 
-  
-</header>
-{newsMessage && (
-  <div className="bg-blue-100 text-blue-800 text-center py-2 px-4">
-    {newsMessage}
-  </div>
-)}
-{mensajeHorario && (
-  <div className="bg-yellow-100 text-yellow-800 text-center py-2 px-4">
-    {mensajeHorario}
-  </div>
-)}
-{showPromo && (
-  <section
-    className="relative bg-[#E00000] -mt-25 text-white px-6 py-8 flex items-center justify-between rounded-br-3xl rounded-bl-[25%]"
-    style={{ height: "50vh" }}
-  >
-    <div className="max-w-md min-w-[200px] -mr-15  space-y-2 ">
-      <h1 className="text-3xl font-extrabold leading-tight font-[BricolageExtraBold]">
-        MES APERTURA
-      </h1>
-      <p className="text-sm text-white/90">
-        ¡Sorpresas todos los días!
-      </p>
-
-    </div>
-    <img
-      src="https://res.cloudinary.com/dsbrnqc5z/image/upload/v1749238288/DSC03746_1_-removebg-preview_hzef4r.png"
-      alt="Hamburguesa promo"
-      className="w-[550px] ml-10 sm:w-52 lg:w-64 drop-shadow-xls"
-    />
-  </section>
-)}
-
-
+        <button
+          onClick={toggleCart}
+          className={`relative flex items-center gap-2 px-4 py-2 rounded-full font-bold transition hover:scale-105 ${
+            showPromo ? "bg-white text-[#E00000]" : "bg-[#E00000] text-white"
+          }`}
+        >
+          <span>Mi pedido</span>
+          {totalItems > 0 && (
+            <span
+              className={`rounded-full px-2 py-0.5 text-xs font-bold ${
+                showPromo
+                  ? "bg-[#E00000] text-white"
+                  : "bg-white text-[#E00000]"
+              }`}
+            >
+              {totalItems}
+            </span>
+          )}
+        </button>
+      </header>
+      {newsMessage && (
+        <div className="bg-blue-100 text-blue-800 text-center py-2 px-4">
+          {newsMessage}
+        </div>
+      )}
+      {mensajeHorario && (
+        <div className="bg-yellow-100 text-yellow-800 text-center py-2 px-4">
+          {mensajeHorario}
+        </div>
+      )}
+      {showPromo && (
+        <section
+          className="relative bg-[#E00000] -mt-25 text-white px-6 py-8 flex items-center justify-between rounded-br-3xl rounded-bl-[25%]"
+          style={{ height: "50vh" }}
+        >
+          <div className="max-w-md min-w-[200px] -mr-15  space-y-2 ">
+            <h1 className="text-3xl font-extrabold leading-tight font-[BricolageExtraBold]">
+              MES APERTURA
+            </h1>
+            <p className="text-sm text-white/90">¡Sorpresas todos los días!</p>
+          </div>
+          <img
+            src="https://res.cloudinary.com/dsbrnqc5z/image/upload/v1749238288/DSC03746_1_-removebg-preview_hzef4r.png"
+            alt="Hamburguesa promo"
+            className="w-[550px] ml-10 sm:w-52 lg:w-64 drop-shadow-xls"
+          />
+        </section>
+      )}
 
       {/* CONTENIDO */}
       <main className="max-w-3xl mx-auto px-4 py-8 space-y-16">
@@ -277,6 +341,21 @@ console.log("rawData.homePromo:", rawData?.homePromo);
           </div>
         ) : (
           <>
+            {/* <div ref={cardsRef}>
+              <CategoryCards
+                categories={menu}
+                onSelect={(id) => {
+                  const ref = sectionRefs.current[id];
+                  if (ref) {
+                    ref.scrollIntoView({ behavior: "smooth", block: "start" });
+                  }
+                }}
+              />
+              <div ref={cardsRef} className="h-1 w-full bg-red-500" />
+            </div> */}
+            {/* {showStickyNav && (
+              <CategoryNav categories={menu} sectionRefs={sectionRefs} />
+            )}{" "} */}
             {menu
               .slice()
               .sort((a, b) => (a.inOrder ?? 0) - (b.inOrder ?? 0))
@@ -286,7 +365,13 @@ console.log("rawData.homePromo:", rawData?.homePromo);
                 if (availableItems.length === 0) return null;
 
                 return (
-                  <section key={cat.id} className="space-y-6">
+                  <section
+                    key={cat.id}
+                    ref={(el) => {
+                      sectionRefs.current[cat.id] = el;
+                    }}
+                    className="space-y-6"
+                  >
                     <h2 className="text-2xl font-bold text-[#E00000] font-[BricolageExtraBold]">
                       {cat.name}
                     </h2>
@@ -373,7 +458,6 @@ console.log("rawData.homePromo:", rawData?.homePromo);
                   </section>
                 );
               })}
-
             <footer className="bg-[#FFF9F5] border-t border-neutral-200 mt-16 px-6 py-10 text-sm text-neutral-600">
               <div className="max-w-xl mx-auto space-y-6">
                 <div className="flex items-start gap-3">

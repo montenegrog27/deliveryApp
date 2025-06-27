@@ -28,7 +28,7 @@ export async function POST(req) {
       paid,
       ref: externalRef,
       orderMode,
-        discountType, // <-- nuevo
+      discountType, // <-- nuevo
     } = body;
 
     if (customer.phone) {
@@ -77,35 +77,74 @@ export async function POST(req) {
 
     const manualDiscountFixed = Number(manualDiscount || 0);
     const couponDiscountFixed = Number(couponDiscount || 0);
-    console.log("couponDiscountFixed",couponDiscountFixed)
-        console.log("manualDiscountFixed",manualDiscountFixed)
+    console.log("couponDiscountFixed", couponDiscountFixed);
+    console.log("manualDiscountFixed", manualDiscountFixed);
 
-// const discountAmount = Number(couponDiscountFixed || 0) + Number(manualDiscount || 0);
+    // const discountAmount = Number(couponDiscountFixed || 0) + Number(manualDiscount || 0);
 
-
-
-let discountAmount = 0;
-
-if (discountType === "percent") {
-  discountAmount = totalBase * (couponDiscountFixed / 100);
-} else {
-  discountAmount = couponDiscountFixed; // monto fijo
-}
-
-discountAmount += manualDiscountFixed;
-
-
-
+const discountAmount = Number(couponDiscountFixed || 0) + Number(manualDiscountFixed || 0);
 
 
     const total = Math.max(totalBase - discountAmount + (shippingCost || 0), 0);
+    const shipping = Number(shippingCost || 0);
+    // Cargar datos de recetas e ingredientes
+    const [recipesSnap, ingredientsSnap] = await Promise.all([
+      getDocs(collection(db, "recipes")),
+      getDocs(collection(db, "ingredients")),
+    ]);
+    // Mapas rápidos
+    const recetasMap = {};
+    recipesSnap.docs.forEach((d) => {
+      const r = d.data();
+      recetasMap[r.productId] ??= [];
+      recetasMap[r.productId].push(r);
+    });
+    const ingCostMap = {};
+    ingredientsSnap.docs.forEach((d) => {
+      ingCostMap[d.id] = d.data().cost || 0;
+    });
 
+    // Calcular costoIngredientes dinámicamente considerando combos
+    const combosMap = {};
+    let costoIngredientes = 0;
+    for (const item of cart) {
+      const qtyItem = item.quantity;
+      // Inicializar combosMap[item.id] si no existe
+      if (!(item.id in combosMap)) {
+        const prodSnap = await getDoc(doc(db, "products", item.id));
+        if (prodSnap.exists() && prodSnap.data().isCombo) {
+          combosMap[item.id] = prodSnap.data().comboItems || [];
+        } else {
+          combosMap[item.id] = null;
+        }
+      }
+      const comboItems = combosMap[item.id];
+      if (comboItems) {
+        // Es combo: expandir a productos
+        for (const sub of comboItems) {
+          const recs = recetasMap[sub.productId] || [];
+          recs.forEach((r) => {
+            const costUnit = ingCostMap[r.ingredientId] || 0;
+            costoIngredientes += costUnit * r.quantity * sub.quantity * qtyItem;
+          });
+        }
+      } else {
+        // Producto individual
+        const recs = recetasMap[item.id] || [];
+        recs.forEach((r) => {
+          const costUnit = ingCostMap[r.ingredientId] || 0;
+          costoIngredientes += costUnit * r.quantity * qtyItem;
+        });
+      }
+    }
+    const ganancia = total - shipping - costoIngredientes;
+
+    // Preparar orden
     const trackingId = `tracking_${externalRef}`;
-// prueba
     const orderData = {
       branch: kitchenId,
       cashier: "cliente-web",
-      delivery: orderMode === "delivery"? true: false,
+      delivery: orderMode === "delivery",
       items: cart,
       paymentMethodId: paymentMethod || "cash",
       paid: paid || false,
@@ -113,11 +152,14 @@ discountAmount += manualDiscountFixed;
       total,
       coupon: coupon || null,
       couponDiscount: couponDiscount || 0,
-      discountAmount: discountAmount || 0,
+      discountAmount,
       shippingCost,
       customer,
       trackingId,
       externalRef,
+      costoIngredientes,
+      ganancia,
+      notes: notes || "",
     };
 
     const ref = await createOrderWithNumber(orderData);

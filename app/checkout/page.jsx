@@ -78,6 +78,21 @@ export default function CheckoutPage() {
   }, []);
 
   useEffect(() => {
+    if (orderMode === "takeaway") {
+      setShippingCost(0);
+      setSelectedKitchenId(null); // si querés que seleccione manualmente
+      setSelectedKitchenName(null);
+      setDireccionConfirmada(false);
+      setDistanciaSucursal(null);
+    } else {
+      // Si vuelve a delivery y ya había dirección, recalculamos
+      if (customer.lat && customer.lng) {
+        calcularEnvio(customer);
+      }
+    }
+  }, [orderMode]);
+
+  useEffect(() => {
     const fetchPaymentMethods = async () => {
       try {
         const res = await fetch("/api/payment-methods");
@@ -155,15 +170,27 @@ export default function CheckoutPage() {
     0
   );
 
+  // let descuentoAplicado = 0;
+
+  // if (cuponData?.discountType === "amount") {
+  //   descuentoAplicado = cuponDescuento;
+  // } else {
+  //   descuentoAplicado = (subtotal * cuponDescuento) / 100;
+  // }
+
+  // const descuentoFinal = Math.min(descuentoAplicado, subtotal); // nunca mayor al subtotal
+  // const total = Math.max(0, subtotal - descuentoFinal + shippingCost);
+
   let descuentoAplicado = 0;
 
   if (cuponData?.discountType === "amount") {
-    descuentoAplicado = cuponDescuento;
-  } else {
+    descuentoAplicado = Math.min(cuponDescuento, subtotal); // nunca mayor al subtotal
+  } else if (cuponData?.discountType === "percent") {
     descuentoAplicado = (subtotal * cuponDescuento) / 100;
   }
 
-  const descuentoFinal = Math.min(descuentoAplicado, subtotal); // nunca mayor al subtotal
+  // Total = subtotal - descuento + envío (envío no se descuenta)
+  const descuentoFinal = Math.round(descuentoAplicado); // redondeo limpio
   const total = Math.max(0, subtotal - descuentoFinal + shippingCost);
 
   const handleSubmit = async () => {
@@ -369,7 +396,11 @@ export default function CheckoutPage() {
     }
   };
 
-  const sucursalesTakeaway = branches.filter((b) => b.takeaway);
+  // const sucursalesTakeaway = branches.filter((b) => b.takeaway);
+
+  const sucursalesTakeaway = Array.isArray(branches)
+    ? branches.filter((b) => b.takeaway)
+    : [];
 
   return (
     <div className="min-h-screen bg-[#FFF9F5] px-4 py-6 max-w-2xl mx-auto text-[#1A1A1A] font-inter space-y-8">
@@ -758,6 +789,11 @@ export default function CheckoutPage() {
             <p className="text-right text-sm text-neutral-600">
               Envío: ${shippingCost}
             </p>
+            {descuentoFinal > 0 && (
+              <p className="text-right text-sm text-green-700">
+                Cupón aplicado: -${descuentoFinal}
+              </p>
+            )}
             <p className="text-right font-bold text-lg">Total: ${total}</p>
           </div>
 
