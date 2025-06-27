@@ -39,6 +39,8 @@ export default function HomePage() {
   const [showPromo, setShowPromo] = useState(false);
   const [showStickyNav, setShowStickyNav] = useState(false);
   const [timeDiscountPercent, setTimeDiscountPercent] = useState(0);
+const [activeTimeDiscountName, setActiveTimeDiscountName] = useState("");
+const [timeLeft, setTimeLeft] = useState("");
 
   const cardsRef = useRef(null);
 
@@ -201,25 +203,25 @@ export default function HomePage() {
           console.log("🔎 Descuentos activos encontrados:", snap.docs.length);
           const now = new Date();
           console.log("📦 Cargando descuentos horarios...");
-          for (const docSnap of snap.docs) {
-            const data = docSnap.data();
 
-            const start = data.startTime.toDate();
-            const end = data.endTime.toDate();
-            console.log("⏰ Descuento horario:", {
-              nombre: data.name,
-              start: start.toLocaleTimeString(),
-              end: end.toLocaleTimeString(),
-              ahora: now.toLocaleTimeString(),
-              estaDentro: now >= start && now <= end,
-            });
-            if (now >= start && now <= end) {
-              if (data.percentage > 0) {
-                setTimeDiscountPercent(data.percentage);
-                break; // aplicamos solo el primero válido
-              }
-            }
-          }
+          
+for (const docSnap of snap.docs) {
+  const data = docSnap.data();
+  const start = data.startTime.toDate();
+  const end = data.endTime.toDate();
+
+  if (now >= start && now <= end) {
+    if (data.percentage > 0) {
+      setTimeDiscountPercent(data.percentage);
+      setActiveTimeDiscountName(data.name); // 👈 nombre visible
+      const diff = end - now;
+      updateTimeLeft(diff);
+      startCountdown(end); // 👈 inicia cuenta regresiva
+      break;
+    }
+  }
+}
+
         } catch (err) {
           console.error("❌ Error al verificar descuentos por horario:", err);
         }
@@ -231,6 +233,25 @@ export default function HomePage() {
     };
     fetchMenu();
   }, []);
+function updateTimeLeft(ms) {
+  const totalSeconds = Math.floor(ms / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  setTimeLeft(`${minutes}m ${seconds}s`);
+}
+function startCountdown(endTime) {
+  const interval = setInterval(() => {
+    const now = new Date();
+    const diff = endTime - now;
+    if (diff <= 0) {
+      setTimeLeft("Finalizado");
+      setActiveTimeDiscountName("");
+      clearInterval(interval);
+    } else {
+      updateTimeLeft(diff);
+    }
+  }, 1000);
+}
 
   const drinksCategory = menu.find((cat) => cat.name === "Bebidas");
   const friesProduct = menu.find((cat) => cat.name === "Papas fritas")
@@ -298,6 +319,12 @@ export default function HomePage() {
           )}
         </button>
       </header>
+      {activeTimeDiscountName && timeLeft && (
+  <div className="bg-green-100 text-green-800 text-center py-2 px-4 font-semibold text-sm">
+    🕒 <span className="font-bold">{activeTimeDiscountName}</span> activo por {timeLeft}
+  </div>
+)}
+
       {newsMessage && (
         <div className="bg-blue-100 text-blue-800 text-center py-2 px-4">
           {newsMessage}
