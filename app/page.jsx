@@ -205,7 +205,7 @@ export default function HomePage() {
 
             const start = data.startTime.toDate();
             const end = data.endTime.toDate();
-console.log("⏰ Descuento horario encontrado:", {
+console.log("⏰ Descuento horario:", {
   nombre: data.name,
   start: start.toLocaleTimeString(),
   end: end.toLocaleTimeString(),
