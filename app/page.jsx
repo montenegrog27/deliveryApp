@@ -11,7 +11,8 @@ import {
   where,
   doc,
   Timestamp,
-} from "firebase/firestore";import { db } from "@/lib/firebase";
+} from "firebase/firestore";
+import { db } from "@/lib/firebase";
 import { Phone, Mail, MapPin, MessageCircle, LucideMail } from "lucide-react";
 import {
   FaFacebook,
@@ -38,7 +39,6 @@ export default function HomePage() {
   const [showPromo, setShowPromo] = useState(false);
   const [showStickyNav, setShowStickyNav] = useState(false);
   const [timeDiscountPercent, setTimeDiscountPercent] = useState(0);
-
 
   const cardsRef = useRef(null);
 
@@ -193,27 +193,29 @@ export default function HomePage() {
         const data = await res.json();
         setMenu(data);
         try {
-  const q = query(collection(db, "timediscounts"), where("active", "==", true));
-  const snap = await getDocs(q);
-  const now = new Date();
+          const q = query(
+            collection(db, "timediscounts"),
+            where("active", "==", true)
+          );
+          const snap = await getDocs(q);
+          const now = new Date();
 
-  for (const docSnap of snap.docs) {
-    const data = docSnap.data();
+          for (const docSnap of snap.docs) {
+            const data = docSnap.data();
 
-    const start = new Date(data.startTime);
-    const end = new Date(data.endTime);
+            const start = data.startTime.toDate();
+            const end = data.endTime.toDate();
 
-    if (now >= start && now <= end) {
-      if (data.percentage > 0) {
-        setTimeDiscountPercent(data.percentage);
-        break; // aplicamos solo el primero válido
-      }
-    }
-  }
-} catch (err) {
-  console.error("❌ Error al verificar descuentos por horario:", err);
-}
-
+            if (now >= start && now <= end) {
+              if (data.percentage > 0) {
+                setTimeDiscountPercent(data.percentage);
+                break; // aplicamos solo el primero válido
+              }
+            }
+          }
+        } catch (err) {
+          console.error("❌ Error al verificar descuentos por horario:", err);
+        }
       } catch (err) {
         console.error("❌ Error al obtener el menú:", err);
       } finally {
@@ -238,23 +240,18 @@ export default function HomePage() {
 
   const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
 
-  const basePrice =
-  selectedItem?.attributes.price || 0;
+  const basePrice = selectedItem?.attributes.price || 0;
 
-const discountPrice =
-  selectedItem?.attributes.hasDiscount
+  const discountPrice = selectedItem?.attributes.hasDiscount
     ? selectedItem.attributes.discountPrice
     : timeDiscountPercent > 0
     ? Math.round(basePrice * (1 - timeDiscountPercent / 100))
     : basePrice;
 
-const finalPrice =
-  discountPrice +
-  (selectedDrink?.attributes?.price || 0) +
-  (includeFries ? friesProduct?.attributes?.price || 0 : 0);
-
-
-
+  const finalPrice =
+    discountPrice +
+    (selectedDrink?.attributes?.price || 0) +
+    (includeFries ? friesProduct?.attributes?.price || 0 : 0);
 
   return (
     <div className="min-h-screen bg-[#FFF9F5] font-inter text-[#1A1A1A]">
