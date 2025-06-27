@@ -198,20 +198,21 @@ export default function HomePage() {
             where("active", "==", true)
           );
           const snap = await getDocs(q);
+          console.log("🔎 Descuentos activos encontrados:", snap.docs.length);
           const now = new Date();
-
+          console.log("📦 Cargando descuentos horarios...");
           for (const docSnap of snap.docs) {
             const data = docSnap.data();
 
             const start = data.startTime.toDate();
             const end = data.endTime.toDate();
-console.log("⏰ Descuento horario:", {
-  nombre: data.name,
-  start: start.toLocaleTimeString(),
-  end: end.toLocaleTimeString(),
-  ahora: now.toLocaleTimeString(),
-  estaDentro: now >= start && now <= end,
-});
+            console.log("⏰ Descuento horario:", {
+              nombre: data.name,
+              start: start.toLocaleTimeString(),
+              end: end.toLocaleTimeString(),
+              ahora: now.toLocaleTimeString(),
+              estaDentro: now >= start && now <= end,
+            });
             if (now >= start && now <= end) {
               if (data.percentage > 0) {
                 setTimeDiscountPercent(data.percentage);
