@@ -205,7 +205,13 @@ export default function HomePage() {
 
             const start = data.startTime.toDate();
             const end = data.endTime.toDate();
-
+console.log("⏰ Descuento horario encontrado:", {
+  nombre: data.name,
+  start: start.toLocaleTimeString(),
+  end: end.toLocaleTimeString(),
+  ahora: now.toLocaleTimeString(),
+  estaDentro: now >= start && now <= end,
+});
             if (now >= start && now <= end) {
               if (data.percentage > 0) {
                 setTimeDiscountPercent(data.percentage);
@@ -397,9 +403,14 @@ export default function HomePage() {
                                 Sin imagen
                               </div>
                             )}
-                            {item.attributes.hasDiscount && (
+                            {(item.attributes.hasDiscount ||
+                              timeDiscountPercent > 0) && (
                               <div className="absolute top-1 right-1 bg-green-600 text-white text-[11px] font-semibold px-2 py-0.5 rounded-full shadow-sm">
-                                -{item.attributes.discountPercent}%
+                                -
+                                {item.attributes.hasDiscount
+                                  ? item.attributes.discountPercent
+                                  : timeDiscountPercent}
+                                %
                               </div>
                             )}
                           </div>
@@ -418,6 +429,19 @@ export default function HomePage() {
                                   <>
                                     <span className="text-[#E00000] font-bold text-sm">
                                       ${item.attributes.discountPrice}
+                                    </span>
+                                    <span className="text-xs text-gray-500 line-through">
+                                      ${item.attributes.price}
+                                    </span>
+                                  </>
+                                ) : timeDiscountPercent > 0 ? (
+                                  <>
+                                    <span className="text-[#E00000] font-bold text-sm">
+                                      $
+                                      {Math.round(
+                                        item.attributes.price *
+                                          (1 - timeDiscountPercent / 100)
+                                      )}
                                     </span>
                                     <span className="text-xs text-gray-500 line-through">
                                       ${item.attributes.price}
