@@ -283,6 +283,126 @@ export async function POST(req) {
       message: incomingMessage,
     });
   }
+
+
+  if (type === "sticker") {
+  const phoneNormalized = phone.replace(/\D/g, "");
+  const mediaId = message.sticker?.id;
+  const mimeType = message.sticker?.mime_type || "image/webp";
+
+  if (!mediaId) return new Response("Sin media ID", { status: 200 });
+
+  try {
+    const resUrl = await fetch(
+      `https://graph.facebook.com/v19.0/${mediaId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.WHATSAPP_API_TOKEN}`,
+        },
+      }
+    );
+    const mediaMeta = await resUrl.json();
+    const mediaUrl = mediaMeta.url;
+
+    const resImage = await fetch(mediaUrl, {
+      headers: {
+        Authorization: `Bearer ${process.env.WHATSAPP_API_TOKEN}`,
+      },
+    });
+    const buffer = await resImage.arrayBuffer();
+    const base64 = Buffer.from(buffer).toString("base64");
+
+    const q = query(
+      collection(db, "orders"),
+      where("customer.phone", "==", phoneNormalized),
+      where("status", "!=", "delivered")
+    );
+    const snap = await getDocs(q);
+
+    let order = null;
+    let trackingId = `tracking_unknown_${phoneNormalized}_${Date.now()}`;
+    let customerName = null;
+
+    if (!snap.empty) {
+      const doc = snap.docs[0];
+      order = doc.data();
+      trackingId = order.trackingId;
+      customerName = order.customer?.name || null;
+    }
+
+    const incomingMessage = {
+      direction: "incoming",
+      tipo: "sticker",
+      message: `data:${mimeType};base64,${base64}`,
+    };
+
+    await upsertMessage({
+      phone: phoneNormalized,
+      name: customerName,
+      trackingId,
+      order,
+      message: incomingMessage,
+    });
+
+    return new Response("Sticker recibido", { status: 200 });
+  } catch (err) {
+    console.error("❌ Error procesando sticker:", err);
+    return new Response("Error sticker", { status: 500 });
+  }
+}
+
+
+
+if (type === "location") {
+  const phoneNormalized = phone.replace(/\D/g, "");
+  const { latitude, longitude, name, address } = message.location || {};
+
+  const q = query(
+    collection(db, "orders"),
+    where("customer.phone", "==", phoneNormalized),
+    where("status", "!=", "delivered")
+  );
+  const snap = await getDocs(q);
+
+  let order = null;
+  let trackingId = `tracking_unknown_${phoneNormalized}_${Date.now()}`;
+  let customerName = null;
+
+  if (!snap.empty) {
+    const doc = snap.docs[0];
+    order = doc.data();
+    trackingId = order.trackingId;
+    customerName = order.customer?.name || null;
+  }
+
+  const locationUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
+
+  const incomingMessage = {
+    direction: "incoming",
+    tipo: "ubicacion",
+    message: locationUrl,
+    lat: latitude,
+    lng: longitude,
+    name,
+    address,
+  };
+
+  await upsertMessage({
+    phone: phoneNormalized,
+    name: customerName,
+    trackingId,
+    order,
+    message: incomingMessage,
+  });
+
+  return new Response("Ubicación recibida", { status: 200 });
+}
+
+
+
+
+
+
   if (type === "image") {
     const phoneNormalized = phone.replace(/\D/g, "");
     const mediaId = message.image?.id;

@@ -200,9 +200,7 @@ const [timeLeft, setTimeLeft] = useState("");
             where("active", "==", true)
           );
           const snap = await getDocs(q);
-          console.log("🔎 Descuentos activos encontrados:", snap.docs.length);
           const now = new Date();
-          console.log("📦 Cargando descuentos horarios...");
 
           
 for (const docSnap of snap.docs) {
@@ -321,7 +319,7 @@ function startCountdown(endTime) {
       </header>
       {activeTimeDiscountName && timeLeft && (
   <div className="bg-green-100 text-green-800 text-center py-2 px-4 font-semibold text-sm">
-    🕒 <span className="font-bold">{activeTimeDiscountName}</span> activo por {timeLeft}
+    🕒 <span className="font-bold">{activeTimeDiscountName}</span> Termina en {timeLeft}
   </div>
 )}
 

@@ -92,6 +92,19 @@ export default function CheckoutPage() {
     }
   }, [orderMode]);
 
+  
+useEffect(() => {
+  if (
+    orderMode === "delivery" &&
+    customer.lat &&
+    customer.lng &&
+    customer.isValidAddress
+  ) {
+    calcularEnvio(customer);
+  }
+}, [customer.lat, customer.lng]);
+
+
   useEffect(() => {
     const fetchPaymentMethods = async () => {
       try {
@@ -170,16 +183,7 @@ export default function CheckoutPage() {
     0
   );
 
-  // let descuentoAplicado = 0;
 
-  // if (cuponData?.discountType === "amount") {
-  //   descuentoAplicado = cuponDescuento;
-  // } else {
-  //   descuentoAplicado = (subtotal * cuponDescuento) / 100;
-  // }
-
-  // const descuentoFinal = Math.min(descuentoAplicado, subtotal); // nunca mayor al subtotal
-  // const total = Math.max(0, subtotal - descuentoFinal + shippingCost);
 
   let descuentoAplicado = 0;
 
@@ -505,7 +509,7 @@ export default function CheckoutPage() {
                     };
                     setCustomer(updatedCustomer);
                     setDireccionConfirmada(true);
-                    calcularEnvio(updatedCustomer);
+                    // calcularEnvio(updatedCustomer);
                   }}
                   onChooseFromMap={() => setShowMapModal(true)}
                   setDireccionConfirmada={setDireccionConfirmada}

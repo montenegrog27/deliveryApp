@@ -76,7 +76,8 @@ export default function CartSidebar() {
                     {/* Detalles */}
                     <div className="flex flex-row items-center justify-between gap-3 w-full">
                       <div className="flex-1 min-w-0">
-                        <div className="text-base font-bold text-[#1A1A1A] truncate">
+                        {/* <div className="text-base font-bold text-[#1A1A1A] truncate"> */}
+<div className="text-base font-bold text-[#1A1A1A] truncate max-w-[150px]">
                           {item.attributes.name}
                         </div>
 
