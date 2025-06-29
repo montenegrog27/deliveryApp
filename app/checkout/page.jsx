@@ -92,18 +92,16 @@ export default function CheckoutPage() {
     }
   }, [orderMode]);
 
-  
-useEffect(() => {
-  if (
-    orderMode === "delivery" &&
-    customer.lat &&
-    customer.lng &&
-    customer.isValidAddress
-  ) {
-    calcularEnvio(customer);
-  }
-}, [customer.lat, customer.lng]);
-
+  useEffect(() => {
+    if (
+      orderMode === "delivery" &&
+      customer.lat &&
+      customer.lng &&
+      customer.isValidAddress
+    ) {
+      calcularEnvio(customer);
+    }
+  }, [customer.lat, customer.lng]);
 
   useEffect(() => {
     const fetchPaymentMethods = async () => {
@@ -183,8 +181,6 @@ useEffect(() => {
     0
   );
 
-
-
   let descuentoAplicado = 0;
 
   if (cuponData?.discountType === "amount") {
@@ -214,14 +210,6 @@ useEffect(() => {
         setLoading(false);
         return;
       }
-    }
-
-    if (!customer.phone || customer.phone.length < 10) {
-      setError(
-        "Por favor ingresá un número válido (sin el +54, solo el número)."
-      );
-      setLoading(false);
-      return;
     }
 
     if (!customer.name) {
@@ -507,7 +495,14 @@ useEffect(() => {
                       lng: loc.lng,
                       isValidAddress: loc.isValidAddress,
                     };
-                    setCustomer(updatedCustomer);
+                    setCustomer((prev) => ({
+                      ...prev,
+                      address: loc.address,
+                      lat: loc.lat,
+                      lng: loc.lng,
+                      isValidAddress: loc.isValidAddress,
+                    }));
+
                     setDireccionConfirmada(true);
                     // calcularEnvio(updatedCustomer);
                   }}

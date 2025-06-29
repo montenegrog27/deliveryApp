@@ -1,4 +1,3 @@
-
 import { db } from "@/lib/firebase";
 import {
   collection,
@@ -156,11 +155,9 @@ export async function POST(req) {
             : "✅ Pedido confirmado. Te avisaremos por acá cuando esté yendo el repartidor. ¡Gracias!";
 
         // await sendText(phoneNormalized, mensajeFinal);
-        await sendText(
-          phoneNormalized,
-          mensajeFinal);
+        await sendText(phoneNormalized, mensajeFinal);
 
-        if (order.paymentMethodId  === "transfer") {
+        if (order.paymentMethodId === "transfer") {
           await sendText(phoneNormalized, "ALIAS: 👇👇👇");
           await sendText(phoneNormalized, "MORDISCOBURGERS");
         }
@@ -284,33 +281,75 @@ export async function POST(req) {
     });
   }
 
-
   if (type === "sticker") {
-  const phoneNormalized = phone.replace(/\D/g, "");
-  const mediaId = message.sticker?.id;
-  const mimeType = message.sticker?.mime_type || "image/webp";
+    const phoneNormalized = phone.replace(/\D/g, "");
+    const mediaId = message.sticker?.id;
+    const mimeType = message.sticker?.mime_type || "image/webp";
 
-  if (!mediaId) return new Response("Sin media ID", { status: 200 });
+    if (!mediaId) return new Response("Sin media ID", { status: 200 });
 
-  try {
-    const resUrl = await fetch(
-      `https://graph.facebook.com/v19.0/${mediaId}`,
-      {
+    try {
+      const resUrl = await fetch(
+        `https://graph.facebook.com/v19.0/${mediaId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${process.env.WHATSAPP_API_TOKEN}`,
+          },
+        }
+      );
+      const mediaMeta = await resUrl.json();
+      const mediaUrl = mediaMeta.url;
+
+      const resImage = await fetch(mediaUrl, {
         headers: {
           Authorization: `Bearer ${process.env.WHATSAPP_API_TOKEN}`,
         },
-      }
-    );
-    const mediaMeta = await resUrl.json();
-    const mediaUrl = mediaMeta.url;
+      });
+      const buffer = await resImage.arrayBuffer();
+      const base64 = Buffer.from(buffer).toString("base64");
 
-    const resImage = await fetch(mediaUrl, {
-      headers: {
-        Authorization: `Bearer ${process.env.WHATSAPP_API_TOKEN}`,
-      },
-    });
-    const buffer = await resImage.arrayBuffer();
-    const base64 = Buffer.from(buffer).toString("base64");
+      const q = query(
+        collection(db, "orders"),
+        where("customer.phone", "==", phoneNormalized),
+        where("status", "!=", "delivered")
+      );
+      const snap = await getDocs(q);
+
+      let order = null;
+      let trackingId = `tracking_unknown_${phoneNormalized}_${Date.now()}`;
+      let customerName = null;
+
+      if (!snap.empty) {
+        const doc = snap.docs[0];
+        order = doc.data();
+        trackingId = order.trackingId;
+        customerName = order.customer?.name || null;
+      }
+
+      const incomingMessage = {
+        direction: "incoming",
+        tipo: "sticker",
+        message: `data:${mimeType};base64,${base64}`,
+      };
+
+      await upsertMessage({
+        phone: phoneNormalized,
+        name: customerName,
+        trackingId,
+        order,
+        message: incomingMessage,
+      });
+
+      return new Response("Sticker recibido", { status: 200 });
+    } catch (err) {
+      console.error("❌ Error procesando sticker:", err);
+      return new Response("Error sticker", { status: 500 });
+    }
+  }
+
+  if (type === "location") {
+    const phoneNormalized = phone.replace(/\D/g, "");
+    const { latitude, longitude, name, address } = message.location || {};
 
     const q = query(
       collection(db, "orders"),
@@ -330,10 +369,16 @@ export async function POST(req) {
       customerName = order.customer?.name || null;
     }
 
+    const locationUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
+
     const incomingMessage = {
       direction: "incoming",
-      tipo: "sticker",
-      message: `data:${mimeType};base64,${base64}`,
+      tipo: "ubicacion",
+      message: locationUrl,
+      lat: latitude,
+      lng: longitude,
+      name,
+      address,
     };
 
     await upsertMessage({
@@ -344,64 +389,8 @@ export async function POST(req) {
       message: incomingMessage,
     });
 
-    return new Response("Sticker recibido", { status: 200 });
-  } catch (err) {
-    console.error("❌ Error procesando sticker:", err);
-    return new Response("Error sticker", { status: 500 });
+    return new Response("Ubicación recibida", { status: 200 });
   }
-}
-
-
-
-if (type === "location") {
-  const phoneNormalized = phone.replace(/\D/g, "");
-  const { latitude, longitude, name, address } = message.location || {};
-
-  const q = query(
-    collection(db, "orders"),
-    where("customer.phone", "==", phoneNormalized),
-    where("status", "!=", "delivered")
-  );
-  const snap = await getDocs(q);
-
-  let order = null;
-  let trackingId = `tracking_unknown_${phoneNormalized}_${Date.now()}`;
-  let customerName = null;
-
-  if (!snap.empty) {
-    const doc = snap.docs[0];
-    order = doc.data();
-    trackingId = order.trackingId;
-    customerName = order.customer?.name || null;
-  }
-
-  const locationUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
-
-  const incomingMessage = {
-    direction: "incoming",
-    tipo: "ubicacion",
-    message: locationUrl,
-    lat: latitude,
-    lng: longitude,
-    name,
-    address,
-  };
-
-  await upsertMessage({
-    phone: phoneNormalized,
-    name: customerName,
-    trackingId,
-    order,
-    message: incomingMessage,
-  });
-
-  return new Response("Ubicación recibida", { status: 200 });
-}
-
-
-
-
-
 
   if (type === "image") {
     const phoneNormalized = phone.replace(/\D/g, "");
@@ -475,99 +464,82 @@ if (type === "location") {
   }
 
   if (type === "document") {
-  const phoneNormalized = phone.replace(/\D/g, "");
-  const mediaId = message.document?.id;
-  const mimeType = message.document?.mime_type || "application/pdf";
-  const filename = message.document?.filename || "archivo.pdf";
+    const phoneNormalized = phone.replace(/\D/g, "");
+    const mediaId = message.document?.id;
+    const mimeType = message.document?.mime_type || "application/pdf";
+    const filename = message.document?.filename || "archivo.pdf";
 
-  if (!mediaId) return new Response("Sin media ID", { status: 200 });
+    if (!mediaId) return new Response("Sin media ID", { status: 200 });
 
-  try {
-    // 1. Obtener URL de descarga del documento
-    const resUrl = await fetch(
-      `https://graph.facebook.com/v19.0/${mediaId}`,
-      {
+    try {
+      // 1. Obtener URL de descarga del documento
+      const resUrl = await fetch(
+        `https://graph.facebook.com/v19.0/${mediaId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${process.env.WHATSAPP_API_TOKEN}`,
+          },
+        }
+      );
+      const mediaMeta = await resUrl.json();
+      const mediaUrl = mediaMeta.url;
+
+      if (!mediaUrl) throw new Error("No se pudo obtener la URL del documento");
+
+      // 2. Descargar el documento (como base64 o guardás el link)
+      const resFile = await fetch(mediaUrl, {
         headers: {
           Authorization: `Bearer ${process.env.WHATSAPP_API_TOKEN}`,
         },
+      });
+      const fileBuffer = await resFile.arrayBuffer();
+      const base64File = Buffer.from(fileBuffer).toString("base64");
+
+      // 3. Buscar orden activa
+      const q = query(
+        collection(db, "orders"),
+        where("customer.phone", "==", phoneNormalized),
+        where("status", "!=", "delivered")
+      );
+      const snap = await getDocs(q);
+
+      let order = null;
+      let trackingId = `tracking_unknown_${phoneNormalized}_${Date.now()}`;
+      let customerName = null;
+
+      if (!snap.empty) {
+        const doc = snap.docs[0];
+        order = doc.data();
+        trackingId = order.trackingId;
+        customerName = order.customer?.name || null;
       }
-    );
-    const mediaMeta = await resUrl.json();
-    const mediaUrl = mediaMeta.url;
 
-    if (!mediaUrl) throw new Error("No se pudo obtener la URL del documento");
+      // 4. Guardar mensaje como tipo "documento"
+      const incomingMessage = {
+        direction: "incoming",
+        tipo: "documento",
+        filename,
+        mimeType,
+        message: `data:${mimeType};base64,${base64File}`,
+      };
 
-    // 2. Descargar el documento (como base64 o guardás el link)
-    const resFile = await fetch(mediaUrl, {
-      headers: {
-        Authorization: `Bearer ${process.env.WHATSAPP_API_TOKEN}`,
-      },
-    });
-    const fileBuffer = await resFile.arrayBuffer();
-    const base64File = Buffer.from(fileBuffer).toString("base64");
+      await upsertMessage({
+        phone: phoneNormalized,
+        name: customerName,
+        trackingId,
+        order,
+        message: incomingMessage,
+      });
 
-    // 3. Buscar orden activa
-    const q = query(
-      collection(db, "orders"),
-      where("customer.phone", "==", phoneNormalized),
-      where("status", "!=", "delivered")
-    );
-    const snap = await getDocs(q);
-
-    let order = null;
-    let trackingId = `tracking_unknown_${phoneNormalized}_${Date.now()}`;
-    let customerName = null;
-
-    if (!snap.empty) {
-      const doc = snap.docs[0];
-      order = doc.data();
-      trackingId = order.trackingId;
-      customerName = order.customer?.name || null;
+      return new Response("Documento recibido", { status: 200 });
+    } catch (err) {
+      console.error("❌ Error procesando documento:", err);
+      return new Response("Error documento", { status: 500 });
     }
-
-    // 4. Guardar mensaje como tipo "documento"
-    const incomingMessage = {
-      direction: "incoming",
-      tipo: "documento",
-      filename,
-      mimeType,
-      message: `data:${mimeType};base64,${base64File}`,
-    };
-
-    await upsertMessage({
-      phone: phoneNormalized,
-      name: customerName,
-      trackingId,
-      order,
-      message: incomingMessage,
-    });
-
-    return new Response("Documento recibido", { status: 200 });
-  } catch (err) {
-    console.error("❌ Error procesando documento:", err);
-    return new Response("Error documento", { status: 500 });
   }
-}
-
 
   return new Response("EVENT_RECEIVED", { status: 200 });
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // import { db } from "@/lib/firebase";
 // import {
