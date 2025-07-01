@@ -339,7 +339,14 @@ if (hora >= 3 && hora < 18) {
   }
 
   if (type === "sticker") {
-    const phoneNormalized = phone.replace(/\D/g, "");
+    // const phoneNormalized = phone.replace(/\D/g, "");
+    const phoneNormalized = typeof phone === "string" ? phone.replace(/\D/g, "") : null;
+
+if (!phoneNormalized) {
+  console.warn("📵 Webhook recibido sin número de teléfono válido");
+  return new Response("Sin teléfono válido", { status: 200 });
+}
+
     const mediaId = message.sticker?.id;
     console.log("📎 Sticker media_id recibido:", mediaId);
     const mimeType = message.sticker?.mime_type || "image/webp";
