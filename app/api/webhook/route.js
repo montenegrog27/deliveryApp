@@ -341,6 +341,7 @@ if (hora >= 3 && hora < 18) {
   if (type === "sticker") {
     const phoneNormalized = phone.replace(/\D/g, "");
     const mediaId = message.sticker?.id;
+    console.log("📎 Sticker media_id recibido:", mediaId);
     const mimeType = message.sticker?.mime_type || "image/webp";
 
     if (!mediaId) return new Response("Sin media ID", { status: 200 });
