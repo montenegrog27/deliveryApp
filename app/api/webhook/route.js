@@ -97,7 +97,7 @@ export async function POST(req) {
 const now = new Date();
 const hora = now.getHours();
 
-if (hora >= 3 && hora < 10) {
+if (hora >= 3 && hora < 18) {
   const phoneNormalized = phone.replace(/\D/g, "");
 
   // Enviar mensaje automático de fuera de horario
