@@ -409,7 +409,7 @@ export default function CheckoutPage() {
                 onClick={() => setOrderMode("takeaway")}
                 className={`flex-1 py-2 rounded-full font-bold text-sm ${
                   orderMode === "takeaway"
-                    ? "bg-green-100 text-green-800 shadow-inner"
+                    ? "text-red-100 bg-[#E00000] shadow-inner"
                     : "bg-gray-200 text-gray-600"
                 }`}
               >
@@ -421,7 +421,7 @@ export default function CheckoutPage() {
                 onClick={() => setOrderMode("delivery")}
                 className={`flex-1 py-2 rounded-full font-bold text-sm ${
                   orderMode === "delivery"
-                    ? "bg-blue-100 text-blue-800 shadow-inner"
+                    ? " text-red-100 bg-[#E00000] shadow-inner"
                     : "bg-gray-200 text-gray-600"
                 }`}
               >
