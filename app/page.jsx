@@ -521,8 +521,10 @@ function startCountdown(endTime) {
                       Email
                     </p>
                     <p>consultas@mordiscoburgers.com.ar</p>
+
                   </div>
                 </div>
+                    <p className="text-transparent">unmordiscopls@gmail.com</p>
 
                 <div className="flex items-center justify-start gap-6 mt-4">
                   <a
