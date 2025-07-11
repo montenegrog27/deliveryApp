@@ -95,9 +95,17 @@ export async function POST(req) {
 
   // 🕒 Verificación de horario
 const now = new Date();
-const hora = now.getHours();
+// const hora = now.getHours();
+const hora = Number(
+  new Intl.DateTimeFormat("es-AR", {
+    hour: "numeric",
+    hour12: false,
+    timeZone: "America/Argentina/Buenos_Aires",
+  }).format(new Date())
+);
 
-if (hora >= 3 && hora < 18) {
+
+if (hora >= 16 && hora < 18) {
   const phoneNormalized = phone.replace(/\D/g, "");
 
   // Enviar mensaje automático de fuera de horario
