@@ -504,7 +504,7 @@ export default function CheckoutPage() {
                   </span>
                   <input
                     type="tel"
-                    placeholder="Teléfono Ej: 3794123456"
+                    placeholder="Ej: 3794123456"
                     className="pl-12 w-full border border-neutral-300 px-4 py-2 rounded-md text-base"
                     value={customer.phone}
                     onChange={(e) => {
@@ -514,7 +514,7 @@ export default function CheckoutPage() {
                   />
                 </div>
                 <p className="text-xs text-gray-500 ml-2 -mt-3">
-                  (sin 0 ni 15)
+                  (Ingresá tu número sin 0 ni 15)
                 </p>
 
                 {orderMode === "takeaway" && (
@@ -649,7 +649,7 @@ export default function CheckoutPage() {
                     <button
                       onClick={validarCupon}
                       type="button"
-                      className="w-full bg-blue-600 text-white py-2 rounded-md text-sm"
+                      className="w-full bg-[#E00000] text-white py-2 rounded-md text-sm"
                     >
                       Validar cupón
                     </button>
