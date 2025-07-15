@@ -25,7 +25,7 @@ export default function CartSidebar() {
 
       {/* Sidebar */}
       <div
-        className={`fixed top-0 right-0 h-full w-[90%] sm:w-96 bg-[#FFF9F5] z-50 shadow-lg transform transition-transform duration-300 ease-in-out ${
+        className={`fixed top-0 right-0 h-full w-[95%] sm:w-99 bg-[#FFF9F5] z-50 shadow-lg transform transition-transform duration-300 ease-in-out ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
@@ -75,7 +75,7 @@ export default function CartSidebar() {
                     </div>
 
                     {/* Detalles */}
-                    <div className="flex flex-row items-center justify-between gap-3 w-full">
+                    <div className="flex flex-row items-center justify-between gap-1 w-full">
                       <div className="flex-1 min-w-0">
                         {/* <div className="text-base font-bold text-[#1A1A1A] truncate"> */}
                         <div className="text-base font-bold text-[#1A1A1A] leading-tight max-w-[150px] break-words line-clamp-2">
@@ -109,7 +109,7 @@ export default function CartSidebar() {
                       </div>
 
                       {/* Controles de cantidad */}
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-1">
                         <button
                           onClick={() => decreaseItem(item.id)}
                           disabled={item.quantity === 1}
@@ -147,7 +147,7 @@ export default function CartSidebar() {
                       {/* Botón Quitar */}
                       <button
                         onClick={() => setItemToRemove(item.uid)}
-                        className="text-xs rounded-full bg-red-500 px-2 py-2 text-white font-bold hover:underline ml-2"
+                        className="text-xs rounded-full bg-red-500 px-2 py-2 text-white font-bold hover:underline ml-"
                         title="Quitar"
                       >
                         <X />
