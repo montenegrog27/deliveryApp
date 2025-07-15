@@ -3,6 +3,7 @@ import { useCart } from "@/context/CartContext";
 import CartSidebar from "@/components/CartSidebar";
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { CheckCircle } from "lucide-react";
 import {
   collection,
   getDocs,
@@ -41,10 +42,28 @@ export default function HomePage() {
   const [timeDiscountPercent, setTimeDiscountPercent] = useState(0);
 const [activeTimeDiscountName, setActiveTimeDiscountName] = useState("");
 const [timeLeft, setTimeLeft] = useState("");
+const [showToast, setShowToast] = useState(false);
+const [toastMessage, setToastMessage] = useState("Producto agregado al carrito ");
 
   const cardsRef = useRef(null);
-
   const sectionRefs = useRef({});
+
+  const Toast = ({ show, message }) => (
+  <AnimatePresence>
+    {show && (
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        transition={{ duration: 0.3 }}
+        className="fixed top-6 right-6 bg-red-400 text-white flex items-center gap-2 py-2 px-4 rounded-lg shadow-xl z-50"
+      >
+        <CheckCircle className="w-5 h-5 text-white" />
+        <span className="text-sm font-medium">{message}</span>
+      </motion.div>
+    )}
+  </AnimatePresence>
+);
 
   const isLocalhost =
     typeof window !== "undefined" && window.location.hostname === "localhost";
@@ -351,6 +370,7 @@ function startCountdown(endTime) {
           />
         </section>
       )}
+<Toast show={showToast} message={toastMessage} />
 
       {/* CONTENIDO */}
       <main className="max-w-3xl mx-auto px-4 py-8 space-y-16">
@@ -619,15 +639,19 @@ function startCountdown(endTime) {
                           : null,
                         fries: includeFries,
                       };
-                      addItem({
-                        ...selectedItem,
-                        attributes: {
-                          ...selectedItem.attributes,
-                          price: finalPrice,
-                          note,
-                          extras,
-                        },
-                      });
+addItem({
+  ...selectedItem,
+  attributes: {
+    ...selectedItem.attributes,
+    price: finalPrice,
+    note,
+    extras,
+  },
+});
+setToastMessage("Producto agregado al carrito");
+setShowToast(true);
+setTimeout(() => setShowToast(false), 2000);
+
                       setSelectedItem(null);
                       setNote("");
                       setSelectedDrinkId("");

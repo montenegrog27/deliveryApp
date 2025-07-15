@@ -169,7 +169,7 @@ export default function CartSidebar() {
                 closeCart();
                 router.push("/checkout");
               }}
-              className="w-full bg-[#E00000] hover:bg-[#C40000] text-white py-2 rounded-full font-bold text-sm transition disabled:bg-gray-400"
+              className="w-full  bg-[#E00000] hover:bg-[#C40000] text-white py-4 rounded-full font-bold text-md transition disabled:bg-gray-400"
             >
               Continuar
             </button>
