@@ -43,26 +43,27 @@ export default function HomePage() {
 const [activeTimeDiscountName, setActiveTimeDiscountName] = useState("");
 const [timeLeft, setTimeLeft] = useState("");
 const [showToast, setShowToast] = useState(false);
-const [toastMessage, setToastMessage] = useState("Producto agregado al carrito ");
+const [toastMessage, setToastMessage] = useState("Producto agregado al carrito");
 
   const cardsRef = useRef(null);
   const sectionRefs = useRef({});
 
   const Toast = ({ show, message }) => (
-  <AnimatePresence>
-    {show && (
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -20 }}
-        transition={{ duration: 0.3 }}
-        className="fixed top-6 right-6 bg-red-400 text-white flex items-center gap-2 py-2 px-4 rounded-lg shadow-xl z-50"
-      >
-        <CheckCircle className="w-5 h-5 text-white" />
-        <span className="text-sm font-medium">{message}</span>
-      </motion.div>
-    )}
-  </AnimatePresence>
+<AnimatePresence>
+  {show && (
+    <motion.div
+      initial={{ opacity: 0, y: 100 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 100 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      className="fixed bottom-1/5 left-1/2 transform -translate-x-1/2 bg-[#E00000] text-white font-bold text-xl flex items-center gap-3 py-3 px-5 rounded-2xl shadow-2xl z-50"
+    >
+      <CheckCircle className="w-8 h-8 text-white " />
+      <span className="text-md font-bold">{message}</span>
+    </motion.div>
+  )}
+</AnimatePresence>
+
 );
 
   const isLocalhost =

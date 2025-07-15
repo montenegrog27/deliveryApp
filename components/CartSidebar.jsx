@@ -3,6 +3,7 @@ import { useCart } from "@/context/CartContext";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
+import { X } from "lucide-react";
 
 export default function CartSidebar() {
   const [itemToRemove, setItemToRemove] = useState(null);
@@ -34,7 +35,7 @@ export default function CartSidebar() {
             <h2 className="text-lg font-bold text-[#1A1A1A]">Tu pedido</h2>
             <button
               onClick={closeCart}
-              className="text-sm text-[#E00000] font-semibold hover:underline"
+              className="text-md bg-[#E00000] text-white px-3 py-2 rounded-xl font-semibold hover:underline"
             >
               Cerrar
             </button>
@@ -77,7 +78,7 @@ export default function CartSidebar() {
                     <div className="flex flex-row items-center justify-between gap-3 w-full">
                       <div className="flex-1 min-w-0">
                         {/* <div className="text-base font-bold text-[#1A1A1A] truncate"> */}
-<div className="text-base font-bold text-[#1A1A1A] truncate max-w-[150px]">
+                        <div className="text-base font-bold text-[#1A1A1A] truncate max-w-[150px]">
                           {item.attributes.name}
                         </div>
 
@@ -108,47 +109,49 @@ export default function CartSidebar() {
                       </div>
 
                       {/* Controles de cantidad */}
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => decreaseItem(item.id)}
-                          disabled={item.quantity === 1}
-                          className={`w-6 h-6 rounded-full text-black text-sm font-bold transition ${
-                            item.quantity === 1
-                              ? "bg-neutral-100 text-neutral-400 cursor-not-allowed"
-                              : "bg-neutral-200 hover:bg-neutral-300"
-                          }`}
-                        >
-                          –
-                        </button>
+<div className="flex items-center gap-3">
+  <button
+    onClick={() => decreaseItem(item.id)}
+    disabled={item.quantity === 1}
+    className={`w-8 h-8 rounded-full text-lg font-bold flex items-center justify-center transition-transform shadow-sm border
+      ${
+        item.quantity === 1
+          ? "bg-neutral-100 text-neutral-400 cursor-not-allowed border-neutral-200"
+          : "bg-white text-black hover:scale-105 border-neutral-300"
+      }`}
+  >
+    –
+  </button>
 
-                        <AnimatePresence mode="wait">
-                          <motion.span
-                            key={item.quantity}
-                            initial={{ scale: 0.8, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 1.2, opacity: 0 }}
-                            transition={{ duration: 0.2 }}
-                            className="text-sm font-medium w-4 text-center"
-                          >
-                            {item.quantity}
-                          </motion.span>
-                        </AnimatePresence>
+  <AnimatePresence mode="wait">
+    <motion.span
+      key={item.quantity}
+      initial={{ scale: 0.9, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      exit={{ scale: 1.1, opacity: 0 }}
+      transition={{ duration: 0.2 }}
+      className="text-base font-semibold w-6 text-center"
+    >
+      {item.quantity}
+    </motion.span>
+  </AnimatePresence>
 
-                        <button
-                          onClick={() => addItem(item)}
-                          className="w-6 h-6 rounded-full bg-neutral-200 text-black text-sm font-bold hover:bg-neutral-300"
-                        >
-                          +
-                        </button>
-                      </div>
+  <button
+    onClick={() => addItem(item)}
+    className="w-8 h-8 rounded-full bg-white text-black text-lg font-bold hover:scale-105 flex items-center justify-center transition-transform border border-neutral-300 shadow-sm"
+  >
+    +
+  </button>
+</div>
+
 
                       {/* Botón Quitar */}
                       <button
                         onClick={() => setItemToRemove(item.uid)}
-                        className="text-sm text-red-600 hover:underline ml-2"
+                        className="text-xs rounded-full bg-red-500 px-2 py-2 text-white font-bold hover:underline ml-2"
                         title="Quitar"
                       >
-                        ✕
+                        <X />
                       </button>
                     </div>
                   </motion.div>
@@ -200,7 +203,7 @@ export default function CartSidebar() {
               <div className="flex justify-center gap-4">
                 <button
                   onClick={() => setItemToRemove(null)}
-                  className="bg-neutral-200 hover:bg-neutral-300 text-black px-4 py-2 rounded-full font-semibold text-sm"
+                  className="bg-neutral-200 hover:bg-neutral-300 text-black px-12 py-3 rounded-2xl font-semibold text-sm"
                 >
                   No
                 </button>
@@ -209,7 +212,7 @@ export default function CartSidebar() {
                     removeItem(itemToRemove);
                     setItemToRemove(null);
                   }}
-                  className="bg-[#E00000] hover:bg-[#C40000] text-white px-4 py-2 rounded-full font-semibold text-sm"
+                  className="bg-[#E00000] hover:bg-[#C40000] text-white px-12 py-3 rounded-2xl font-semibold text-sm"
                 >
                   Sí
                 </button>

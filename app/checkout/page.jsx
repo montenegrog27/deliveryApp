@@ -513,7 +513,7 @@ export default function CheckoutPage() {
                     }}
                   />
                 </div>
-                <p className="text-xs text-gray-500 ml-12 -mt-3">
+                <p className="text-xs text-gray-500 ml-2 -mt-3">
                   (sin 0 ni 15)
                 </p>
 
