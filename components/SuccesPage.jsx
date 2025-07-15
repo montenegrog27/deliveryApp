@@ -218,7 +218,7 @@ export default function SuccessPage() {
     if (status === "ok") {
       const timeout = setTimeout(() => {
         router.push("/");
-      }, 6000);
+      }, 8000);
       return () => clearTimeout(timeout);
     }
   }, [status, router]);
@@ -242,14 +242,8 @@ export default function SuccessPage() {
           <>
             <h1 className="text-3xl font-extrabold text-[#E00000]">¡Pedido registrado! 🍔</h1>
 
-            <p className="text-base text-gray-700">
-              {orderMode === "takeaway"
-                ? "Podés pasar a retirar tu pedido en unos minutos. Te avisaremos cuando esté listo."
-                : "Te contactaremos para coordinar la entrega a domicilio."}
-            </p>
-
             {phone && (
-              <p className="text-sm text-neutral-600">
+              <p className="text-md text-neutral-600">
                 Te enviaremos un WhatsApp al <strong>{mostrarTelefono(phone)}</strong>{" "}
                 para confirmar y avisarte{" "}
                 {orderMode === "takeaway"
