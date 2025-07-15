@@ -132,7 +132,6 @@
 //   );
 // }
 
-
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -224,6 +223,12 @@ export default function SuccessPage() {
     }
   }, [status, router]);
 
+  // Función para mostrar el teléfono sin prefijo 549
+  const mostrarTelefono = (phone) => {
+    if (!phone) return "";
+    return phone.startsWith("549") ? phone.slice(3) : phone;
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center px-6 bg-[#FFF6F0] text-center">
       <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full space-y-4 text-[#1A1A1A] border-4 border-[#E00000]">
@@ -235,7 +240,7 @@ export default function SuccessPage() {
 
         {status === "ok" && (
           <>
-            <h1 className="text-3xl font-extrabold text-[#E00000]">¡Pedido confirmado! 🍔</h1>
+            <h1 className="text-3xl font-extrabold text-[#E00000]">¡Pedido registrado! 🍔</h1>
 
             <p className="text-base text-gray-700">
               {orderMode === "takeaway"
@@ -245,7 +250,11 @@ export default function SuccessPage() {
 
             {phone && (
               <p className="text-sm text-neutral-600">
-                Te enviaremos un WhatsApp al <strong>{phone}</strong> para confirmar y seguir el estado de tu pedido 📲
+                Te enviaremos un WhatsApp al <strong>{mostrarTelefono(phone)}</strong>{" "}
+                para confirmar y avisarte{" "}
+                {orderMode === "takeaway"
+                  ? "cuando el pedido esté listo."
+                  : "cuando lo enviamos."}
               </p>
             )}
 
