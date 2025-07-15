@@ -56,10 +56,10 @@ const [toastMessage, setToastMessage] = useState("Producto agregado al carrito")
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 100 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
-      className="fixed bottom-1/5 left-1/2 transform -translate-x-1/2 bg-[#E00000] text-white font-bold text-xl flex items-center gap-3 py-3 px-5 rounded-2xl shadow-2xl z-50"
+      className="fixed bottom-1/5 left-1/2 transform -translate-x-1/2 bg-[#E00000] text-white font-bold text-sm flex items-center gap-3 py-3 px-5 rounded-2xl shadow-2xl z-50"
     >
       <CheckCircle className="w-8 h-8 text-white " />
-      <span className="text-md font-bold">{message}</span>
+      <span className="text-sm font-bold">{message}</span>
     </motion.div>
   )}
 </AnimatePresence>
