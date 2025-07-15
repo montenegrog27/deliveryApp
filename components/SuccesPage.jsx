@@ -214,14 +214,14 @@ export default function SuccessPage() {
     confirmarPago();
   }, [ref]);
 
-  useEffect(() => {
-    if (status === "ok") {
-      const timeout = setTimeout(() => {
-        router.push("/");
-      }, 8000);
-      return () => clearTimeout(timeout);
-    }
-  }, [status, router]);
+  // useEffect(() => {
+  //   if (status === "ok") {
+  //     const timeout = setTimeout(() => {
+  //       router.push("/");
+  //     }, 8000);
+  //     return () => clearTimeout(timeout);
+  //   }
+  // }, [status, router]);
 
   // Función para mostrar el teléfono sin prefijo 549
   const mostrarTelefono = (phone) => {

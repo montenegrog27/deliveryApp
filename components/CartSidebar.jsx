@@ -60,7 +60,7 @@ export default function CartSidebar() {
                     className="flex gap-3 items-center"
                   >
                     {/* Imagen */}
-                    <div className="w-[90px] h-[72px] rounded-lg overflow-hidden bg-neutral-100">
+                    <div className="w-[70px] h-[52px] rounded-lg overflow-hidden bg-neutral-100">
                       {item.attributes.image ? (
                         <img
                           src={item.attributes.image}
@@ -78,7 +78,7 @@ export default function CartSidebar() {
                     <div className="flex flex-row items-center justify-between gap-3 w-full">
                       <div className="flex-1 min-w-0">
                         {/* <div className="text-base font-bold text-[#1A1A1A] truncate"> */}
-                        <div className="text-base font-bold text-[#1A1A1A] truncate max-w-[150px]">
+                        <div className="text-base font-bold text-[#1A1A1A] leading-tight max-w-[150px] break-words line-clamp-2">
                           {item.attributes.name}
                         </div>
 
@@ -109,41 +109,40 @@ export default function CartSidebar() {
                       </div>
 
                       {/* Controles de cantidad */}
-<div className="flex items-center gap-3">
-  <button
-    onClick={() => decreaseItem(item.id)}
-    disabled={item.quantity === 1}
-    className={`w-8 h-8 rounded-full text-lg font-bold flex items-center justify-center transition-transform shadow-sm border
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => decreaseItem(item.id)}
+                          disabled={item.quantity === 1}
+                          className={`w-8 h-8 rounded-full text-lg font-bold flex items-center justify-center transition-transform shadow-sm border
       ${
         item.quantity === 1
           ? "bg-neutral-100 text-neutral-400 cursor-not-allowed border-neutral-200"
           : "bg-white text-black hover:scale-105 border-neutral-300"
       }`}
-  >
-    –
-  </button>
+                        >
+                          –
+                        </button>
 
-  <AnimatePresence mode="wait">
-    <motion.span
-      key={item.quantity}
-      initial={{ scale: 0.9, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
-      exit={{ scale: 1.1, opacity: 0 }}
-      transition={{ duration: 0.2 }}
-      className="text-base font-semibold w-6 text-center"
-    >
-      {item.quantity}
-    </motion.span>
-  </AnimatePresence>
+                        <AnimatePresence mode="wait">
+                          <motion.span
+                            key={item.quantity}
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 1.1, opacity: 0 }}
+                            transition={{ duration: 0.2 }}
+                            className="text-base font-semibold w-6 text-center"
+                          >
+                            {item.quantity}
+                          </motion.span>
+                        </AnimatePresence>
 
-  <button
-    onClick={() => addItem(item)}
-    className="w-8 h-8 rounded-full bg-white text-black text-lg font-bold hover:scale-105 flex items-center justify-center transition-transform border border-neutral-300 shadow-sm"
-  >
-    +
-  </button>
-</div>
-
+                        <button
+                          onClick={() => addItem(item)}
+                          className="w-8 h-8 rounded-full bg-white text-black text-lg font-bold hover:scale-105 flex items-center justify-center transition-transform border border-neutral-300 shadow-sm"
+                        >
+                          +
+                        </button>
+                      </div>
 
                       {/* Botón Quitar */}
                       <button
