@@ -224,7 +224,7 @@ if (hora >= 16 && hora < 18) {
 
         if (order.paymentMethodId === "transfer") {
           await sendText(phoneNormalized, "ALIAS: 👇👇👇");
-          await sendText(phoneNormalized, "MORDISCOBURGERS");
+          await sendText(phoneNormalized, "MORDISCO.ARG");
         }
       }
     }
