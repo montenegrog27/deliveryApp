@@ -403,9 +403,9 @@ function startCountdown(endTime) {
               />
               <div ref={cardsRef} className="h-1 w-full bg-red-500" />
             </div> */}
-            {/* {showStickyNav && (
+            {showStickyNav && (
               <CategoryNav categories={menu} sectionRefs={sectionRefs} />
-            )}{" "} */}
+            )}{" "}
             {menu
               .slice()
               .sort((a, b) => (a.inOrder ?? 0) - (b.inOrder ?? 0))

@@ -9,7 +9,15 @@ import { useRef } from "react";
 import { Marker } from "react-map-gl/mapbox";
 import { FaLocationDot } from "react-icons/fa6";
 import { ArrowLeftFromLine } from "lucide-react";
-import { Description, Listbox, ListboxButton, ListboxOption, ListboxOptions, Switch, SwitchDescription } from "@headlessui/react";
+import {
+  Description,
+  Listbox,
+  ListboxButton,
+  ListboxOption,
+  ListboxOptions,
+  Switch,
+  SwitchDescription,
+} from "@headlessui/react";
 
 // Map importado solo del lado cliente, con fallback de carga
 const Map = dynamic(
@@ -159,7 +167,7 @@ export default function CheckoutPage() {
       if (!mejorSucursal || menorDistancia > maxDistanceKm) {
         setSelectedKitchenId(null);
         setShippingCost(0);
-        setError("No hay sucursales disponibles para delivery en tu zona.");
+        setError("Te pedimos disculpas, la dirección ingresada está fuera de nuestra zona de envíos.");
         return;
       }
 
@@ -235,6 +243,11 @@ export default function CheckoutPage() {
         setLoading(false);
         return;
       }
+    }
+    if (!selectedKitchenId) {
+      setError("No hay sucursales disponibles para delivery en tu zona.");
+      setLoading(false);
+      return;
     }
     if (
       orderMode === "takeaway" &&
@@ -522,20 +535,29 @@ export default function CheckoutPage() {
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Seleccioná la sucursal para retirar:
                     </label>
-<Listbox value={selectedKitchenId} onChange={setSelectedKitchenId}>
-  <div className="relative">
-    <ListboxButton className="w-full  border border-neutral-300 rounded-md px-4 py-2 text-left">
-      {selectedKitchenName || 'Seleccioná una sucursal'}
-    </ListboxButton>
-    <ListboxOptions className="absolute mt-1 w-full rounded-md bg-white shadow-lg z-10">
-      {branches.filter(b => b.takeaway).map((branch) => (
-        <ListboxOption key={branch.id} value={branch.id} className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
-          {branch.name} - {branch.address}
-        </ListboxOption>
-      ))}
-    </ListboxOptions>
-  </div>
-</Listbox>
+                    <Listbox
+                      value={selectedKitchenId}
+                      onChange={setSelectedKitchenId}
+                    >
+                      <div className="relative">
+                        <ListboxButton className="w-full  border border-neutral-300 rounded-md px-4 py-2 text-left">
+                          {selectedKitchenName || "Seleccioná una sucursal"}
+                        </ListboxButton>
+                        <ListboxOptions className="absolute mt-1 w-full rounded-md bg-white shadow-lg z-10">
+                          {branches
+                            .filter((b) => b.takeaway)
+                            .map((branch) => (
+                              <ListboxOption
+                                key={branch.id}
+                                value={branch.id}
+                                className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                              >
+                                {branch.name} - {branch.address}
+                              </ListboxOption>
+                            ))}
+                        </ListboxOptions>
+                      </div>
+                    </Listbox>
                   </div>
                 )}
 
@@ -560,6 +582,11 @@ export default function CheckoutPage() {
                       onChooseFromMap={() => setShowMapModal(true)}
                       setDireccionConfirmada={setDireccionConfirmada}
                     />
+                    {error && (
+                      <div className="bg-yellow-100 text-yellow-800 p-3 rounded-md text-sm mt-3">
+                        {error}
+                      </div>
+                    )}
                     <div className="flex gap-4 mt-2">
                       <input
                         type="text"
@@ -720,11 +747,9 @@ export default function CheckoutPage() {
                   ))}
                 </select>
 
-                
-
                 <button
                   onClick={handleSubmit}
-                  disabled={loading || cart.length === 0}
+                  disabled={loading || cart.length === 0 || !!error}
                   className="w-full bg-[#E00000] hover:bg-[#C40000] text-white py-3 rounded-full font-bold mt-4 disabled:bg-gray-300 transition"
                 >
                   {loading ? "Enviando pedido..." : "Confirmar y enviar"}
