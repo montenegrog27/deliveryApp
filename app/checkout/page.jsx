@@ -8,7 +8,7 @@ import dynamic from "next/dynamic";
 import { useRef } from "react";
 import { Marker } from "react-map-gl/mapbox";
 import { FaLocationDot } from "react-icons/fa6";
-import { ArrowLeftFromLine } from "lucide-react";
+import { ArrowLeft, ArrowLeftFromLine } from "lucide-react";
 import {
   Description,
   Listbox,
@@ -167,7 +167,9 @@ export default function CheckoutPage() {
       if (!mejorSucursal || menorDistancia > maxDistanceKm) {
         setSelectedKitchenId(null);
         setShippingCost(0);
-        setError("Te pedimos disculpas, la dirección ingresada está fuera de nuestra zona de envíos.");
+        setError(
+          "Te pedimos disculpas, la dirección ingresada está fuera de nuestra zona de envíos."
+        );
         return;
       }
 
@@ -462,21 +464,30 @@ export default function CheckoutPage() {
 
       {orderMode === null ? (
         <div className="space-y-4 text-center">
-          <p className="text-gray-600 text-lg font-medium">
+          <div className="w-full flex justify-start">
+            <button
+              type="button"
+              onClick={() => router.push("/")}
+              className="py-3 px-6 rounded-full font-bold text-sm bg-[#E00000] text-white"
+            >
+              <ArrowLeft />
+            </button>
+          </div>
+          <p className="text-gray-600 text-lg font-medium mb-10">
             ¿Cómo querés recibir tu pedido?
           </p>
           <div className="flex gap-2 justify-center">
             <button
               type="button"
               onClick={() => setOrderMode("takeaway")}
-              className="py-3 px-6 rounded-full font-bold text-sm bg-[#E00000] text-white"
+              className="py-3 px-6 w-48 rounded-full font-bold text-sm bg-[#E00000] text-white"
             >
               Para retirar
             </button>
             <button
               type="button"
               onClick={() => setOrderMode("delivery")}
-              className="py-3 px-6 rounded-full font-bold text-sm bg-[#E00000] text-white"
+              className="py-3 px-6 w-48 rounded-full font-bold text-sm bg-[#E00000] text-white"
             >
               Delivery
             </button>
