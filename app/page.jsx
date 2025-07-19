@@ -3,7 +3,7 @@ import { useCart } from "@/context/CartContext";
 import CartSidebar from "@/components/CartSidebar";
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, CirclePlus } from "lucide-react";
 import {
   collection,
   getDocs,
@@ -23,6 +23,7 @@ import {
 } from "react-icons/fa6";
 import CategoryNav from "@/components/CategoryNav";
 import CategoryCards from "@/components/CategoryCards";
+import IngredientNotes from "@/components/IngredientNotes";
 
 export default function HomePage() {
   const { addItem, toggleCart, cart } = useCart();
@@ -391,22 +392,23 @@ function startCountdown(endTime) {
           </div>
         ) : (
           <>
-            {/* <div ref={cardsRef}>
-              <CategoryCards
-                categories={menu}
-                onSelect={(id) => {
-                  const ref = sectionRefs.current[id];
-                  if (ref) {
-                    ref.scrollIntoView({ behavior: "smooth", block: "start" });
-                  }
-                }}
-              />
-              <div ref={cardsRef} className="h-1 w-full bg-red-500" />
-            </div> */}
+<section className="sticky  top-[60px] z-40 mb-0.5 pb-1 shadow-sm">
+  <CategoryCards
+    categories={menu}
+    onSelect={(id) => {
+      const ref = sectionRefs.current[id];
+      if (ref) {
+        ref.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }}
+  />
+</section>
+
+
             {showStickyNav && (
               <CategoryNav categories={menu} sectionRefs={sectionRefs} />
             )}{" "}
-            {menu
+            {/* {menu
               .slice()
               .sort((a, b) => (a.inOrder ?? 0) - (b.inOrder ?? 0))
               .map((cat) => {
@@ -426,102 +428,138 @@ function startCountdown(endTime) {
                       {cat.name}
                     </h2>
                     <ul className="space-y-4">
-                      {availableItems.map((item) => (
-                        <li
-                          key={item.id}
-                          onClick={() =>
-                            isOpen && !webClosed ? setSelectedItem(item) : null
-                          }
-                          className={`flex gap-4 items-center p-2 rounded-lg transition cursor-pointer hover:bg-neutral-100 ${
-                            !isOpen || webClosed
-                              ? "opacity-50 cursor-not-allowed"
-                              : ""
-                          }`}
-                        >
-                          <div className="relative w-[96px] h-[96px] rounded-lg overflow-hidden bg-neutral-100">
-                            {item.attributes.image ? (
-                              <img
-                                src={item.attributes.image}
-                                alt={item.attributes.name}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <div className="flex items-center justify-center h-full text-sm text-neutral-400">
-                                Sin imagen
-                              </div>
-                            )}
-                            {(item.attributes.hasDiscount ||
-                              timeDiscountPercent > 0) && (
-                              <div className="absolute top-1 right-1 bg-green-600 text-white text-[11px] font-semibold px-2 py-0.5 rounded-full shadow-sm">
-                                -
-                                {item.attributes.hasDiscount
-                                  ? item.attributes.discountPercent
-                                  : timeDiscountPercent}
-                                %
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex-1 flex flex-col min-w-0">
-                            <h3 className="text-base font-bold text-[#1A1A1A] truncate">
-                              {item.attributes.name}
-                            </h3>
-                            {item.attributes.description && (
-                              <p className="text-sm text-neutral-600 line-clamp-2">
-                                {item.attributes.description}
-                              </p>
-                            )}
-                            <div className="flex items-center justify-between mt-2">
-                              <div className="flex flex-col">
-                                {item.attributes.hasDiscount ? (
-                                  <>
-                                    <span className="text-[#E00000] font-bold text-sm">
-                                      ${item.attributes.discountPrice}
-                                    </span>
-                                    <span className="text-xs text-gray-500 line-through">
-                                      ${item.attributes.price}
-                                    </span>
-                                  </>
-                                ) : timeDiscountPercent > 0 ? (
-                                  <>
-                                    <span className="text-[#E00000] font-bold text-sm">
-                                      $
-                                      {Math.round(
-                                        item.attributes.price *
-                                          (1 - timeDiscountPercent / 100)
-                                      )}
-                                    </span>
-                                    <span className="text-xs text-gray-500 line-through">
-                                      ${item.attributes.price}
-                                    </span>
-                                  </>
-                                ) : (
-                                  <span className="text-[#E00000] font-bold text-sm">
-                                    ${item.attributes.price}
-                                  </span>
-                                )}
-                              </div>
+                      {availableItems.map((item) => ( */}
+                      {menu
+  .slice()
+  .sort((a, b) => (a.inOrder ?? 0) - (b.inOrder ?? 0))
+  .map((cat, index) => {
+    const availableItems =
+      cat.items?.filter((item) => item.attributes?.available) || [];
+    if (availableItems.length === 0) return null;
 
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  if (isOpen && !webClosed)
-                                    setSelectedItem(item);
-                                }}
-                                disabled={!isOpen || webClosed}
-                                className={`text-sm font-semibold px-4 py-1.5 rounded-full transition-all
-    ${
-      isOpen
-        ? "bg-[#E00000] hover:bg-[#C40000] text-white"
-        : "bg-gray-300 text-gray-500 cursor-not-allowed"
+    return (
+      <section
+        key={cat.id}
+        ref={(el) => {
+          sectionRefs.current[cat.id] = el;
+        }}
+        className={`space-y-6 ${index === 0 ? "bg-[#E00000] text-white rounded-xl p-4" : "-mt-10"}`}
+      >
+<h2
+  className={`text-2xl font-bold font-[BricolageExtraBold] ${
+    index === 0 ? "text-white" : "text-[#E00000]"
+  }`}
+>
+  {cat.name}
+</h2>
+
+        <ul className="space-y-1">
+{availableItems.map((item) => (
+  <li
+    key={item.id}
+    onClick={() =>
+      isOpen && !webClosed ? setSelectedItem(item) : null
     }
-  `}
-                              >
-                                Agregar
-                              </button>
-                            </div>
-                          </div>
-                        </li>
-                      ))}
+    className={`flex gap-4 items-center p- rounded-lg transition cursor-pointer hover:bg-neutral-100 ${
+      !isOpen || webClosed
+        ? "opacity-50 cursor-not-allowed"
+        : ""
+    }`}
+  >
+    <div className="relative w-[96px] h-[96px] rounded-lg overflow-hidden bg-neutral-100">
+      {item.attributes.image ? (
+        <img
+          src={item.attributes.image}
+          alt={item.attributes.name}
+          className="w-full h-full object-cover"
+        />
+      ) : (
+        <div className="flex items-center justify-center h-full text-sm text-neutral-400">
+          Sin imagen
+        </div>
+      )}
+      {(item.attributes.hasDiscount || timeDiscountPercent > 0) && (
+        <div className="absolute top-1 right-1 bg-green-600 text-white text-[11px] font-semibold px-2 py-0.5 rounded-full shadow-sm">
+          -
+          {item.attributes.hasDiscount
+            ? item.attributes.discountPercent
+            : timeDiscountPercent}
+          %
+        </div>
+      )}
+    </div>
+    <div className="flex-1 flex flex-col min-w-0">
+      {/* 🔴 Nombre: blanco si es la primera categoría */}
+      <h3
+        className={`text-base font-bold truncate ${
+          index === 0 ? "text-white" : "text-[#1A1A1A]"
+        }`}
+      >
+        {item.attributes.name}
+      </h3>
+
+      {/* 🔴 Descripción: blanco opaco si es la primera categoría */}
+      {item.attributes.description && (
+        <p
+          className={`text-sm line-clamp-2 ${
+            index === 0 ? "text-white/80" : "text-neutral-600"
+          }`}
+        >
+          {item.attributes.description}
+        </p>
+      )}
+
+      <div className="flex items-center justify-between mt-2">
+        <div className="flex flex-col">
+          {item.attributes.hasDiscount ? (
+            <>
+              <span className="text-[#E00000] font-bold text-sm">
+                ${item.attributes.discountPrice}
+              </span>
+              <span className="text-xs text-gray-500 line-through">
+                ${item.attributes.price}
+              </span>
+            </>
+          ) : timeDiscountPercent > 0 ? (
+            <>
+              <span className="text-[#E00000] font-bold text-sm">
+                $
+                {Math.round(
+                  item.attributes.price * (1 - timeDiscountPercent / 100)
+                )}
+              </span>
+              <span className="text-xs text-gray-500 line-through">
+                ${item.attributes.price}
+              </span>
+            </>
+          ) : (
+            <span className="text-[#E00000] font-bold text-sm">
+              ${item.attributes.price}
+            </span>
+          )}
+        </div>
+
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            if (isOpen && !webClosed) setSelectedItem(item);
+          }}
+          disabled={!isOpen || webClosed}
+          className={`text-sm font-semibold px- py- rounded-full transition-all
+            ${
+              isOpen
+                ? " hover:bg-[#C40000] bg-[#E00000]  text-white font-bold"
+                : "bg-gray-300 text-gray-500 cursor-not-allowed"
+            }
+          `}
+        >
+              <CirclePlus />
+        </button>
+      </div>
+    </div>
+  </li>
+))}
+
                     </ul>
                   </section>
                 );
@@ -608,7 +646,7 @@ function startCountdown(endTime) {
               )}
 
               {/* Observaciones */}
-              <div>
+              {/* <div>
                 <label className="block text-sm font-medium mt-5 mb-1 text-[#1A1A1A]">
                   Observaciones
                 </label>
@@ -618,7 +656,32 @@ function startCountdown(endTime) {
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
                 />
-              </div>
+              </div> */}
+
+
+<div>
+  <label className="block text-sm font-medium mt-5 mb-1 text-[#1A1A1A]">
+    Observaciones
+  </label>
+  <textarea
+    className="w-full border rounded p-2 text-base"
+    placeholder="Ej: sin lechuga, sin tomate..."
+    value={note}
+    onChange={(e) => setNote(e.target.value)}
+  />
+  {selectedItem && (
+    
+    <IngredientNotes
+      productId={selectedItem.id}
+      onAddNote={(newNote) => {
+        if (!note.includes(newNote)) {
+          setNote((prev) => (prev ? prev + ", " + newNote : newNote));
+        }
+      }}
+    />
+  )}
+</div>
+
 
               {/* Total */}
               <div className="text-right text-sm font-semibold text-[#1A1A1A]">

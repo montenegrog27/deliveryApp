@@ -4,24 +4,15 @@ const CategoryCards = forwardRef(({ categories, onSelect }, ref) => {
   return (
     <div
       ref={ref}
-      className="w-full overflow-x-auto px-4 py-4 scrollbar-hide flex gap-4"
+      className="w-full overflow-x-auto px-4 py-3 flex gap-3 scrollbar-hide"
     >
       {categories.map((cat) => (
         <button
           key={cat.id}
           onClick={() => onSelect(cat.id)}
-          className="min-w-[120px] flex flex-col items-center justify-center bg-white shadow-md rounded-xl p-3 hover:shadow-lg transition border border-neutral-200"
+          className="whitespace-nowrap bg-white text-[#1A1A1A] text-sm font-semibold px-4 py-2 rounded-full border border-neutral-300 shadow-sm hover:bg-neutral-100 active:scale-95 transition-all"
         >
-          {cat.image && (
-            <img
-              src={cat.image}
-              alt={cat.name}
-              className="w-14 h-14 object-cover rounded-full mb-2"
-            />
-          )}
-          <span className="text-sm font-semibold text-neutral-700 text-center">
-            {cat.name}
-          </span>
+          {cat.name}
         </button>
       ))}
     </div>

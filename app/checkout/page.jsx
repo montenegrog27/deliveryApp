@@ -38,6 +38,7 @@ export default function CheckoutPage() {
   const router = useRouter();
   const { cart, clearCart } = useCart();
 
+
   const [customer, setCustomer] = useState({
     name: "",
     phone: "",

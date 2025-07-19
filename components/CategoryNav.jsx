@@ -9,7 +9,7 @@ const handleClick = (id) => {
 
 
   return (
-    <div className="sticky top-[70px] z-40 bg-[#FFF9F5] py-2 px-4 overflow-x-auto flex gap-3 border-b shadow-sm scrollbar-hide">
+    <div className="sticky top-[70px z-40 bg-[#FFF9F5] py-2 px-4 overflow-x-auto flex gap-3 border-b shadow-sm scrollbar-hide">
       {categories.map((cat) => (
         <button
           key={cat.id}
