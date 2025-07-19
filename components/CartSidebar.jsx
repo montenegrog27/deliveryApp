@@ -21,11 +21,11 @@ export default function CartSidebar() {
   return (
     <>
       {/* Overlay */}
-      <div className="fixed inset-0 bg-black/50 z-40" onClick={closeCart} />
+      <div className="fixed inset-0 bg-black/50 z-90" onClick={closeCart} />
 
       {/* Sidebar */}
       <div
-        className={`fixed top-0 right-0 h-full w-[95%] sm:w-99 bg-[#FFF9F5] z-50 shadow-lg transform transition-transform duration-300 ease-in-out ${
+        className={`fixed top-0 right-0 h-full w-[95%] sm:w-99 bg-[#FFF9F5] z-100 shadow-lg transform transition-transform duration-300 ease-in-out ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
@@ -187,7 +187,7 @@ export default function CartSidebar() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center"
+            className="fixed inset-0 bg-black/50 z-100 flex items-center justify-center"
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
