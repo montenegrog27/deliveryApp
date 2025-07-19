@@ -392,7 +392,7 @@ function startCountdown(endTime) {
           </div>
         ) : (
           <>
-<section className="sticky  top-[60px] z-40 mb-0.5 pb-1 shadow-sm">
+<section className="sticky bg-white w-screen -ml-4 z-90  top-[60px] z- mb-0.5 pb-1 shadow-sm">
   <CategoryCards
     categories={menu}
     onSelect={(id) => {

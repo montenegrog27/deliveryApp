@@ -4,7 +4,7 @@ const CategoryCards = forwardRef(({ categories, onSelect }, ref) => {
   return (
     <div
       ref={ref}
-      className="w-full overflow-x-auto px-4 py-3 flex gap-3 scrollbar-hide"
+        className="w-full overflow-x-auto px-4 py-1 flex gap-3 scrollbar-hidden"
     >
       {categories.map((cat) => (
         <button

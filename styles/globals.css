@@ -40,3 +40,15 @@
 .animate-bounce-soft {
   animation: bounce-soft 2s infinite ease-in-out;
 }
+
+
+
+/* Oculta scroll horizontal sin afectar el scroll funcional */
+.scrollbar-hidden {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+}
+
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}
