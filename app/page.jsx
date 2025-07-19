@@ -464,7 +464,7 @@ function startCountdown(endTime) {
     onClick={() =>
       isOpen && !webClosed ? setSelectedItem(item) : null
     }
-    className={`flex  p-1 gap-4 items-center p- rounded-lg transition cursor-pointer hover:bg-neutral-100 ${
+    className={`flex  p-1 gap-4 items-center bg-neutral-100 p- rounded-lg transition cursor-pointer hover:bg-neutral-100 ${
       !isOpen || webClosed
         ? "opacity-50 cursor-not-allowed"
         : ""
@@ -496,7 +496,7 @@ function startCountdown(endTime) {
       {/* 🔴 Nombre: blanco si es la primera categoría */}
       <h3
         className={`text-base font-bold truncate ${
-          index === 0 ? "text-white" : "text-[#1A1A1A]"
+          index === 0 ? "text-black" : "text-[#1A1A1A]"
         }`}
       >
         {item.attributes.name}
@@ -506,7 +506,7 @@ function startCountdown(endTime) {
       {item.attributes.description && (
         <p
           className={`text-sm line-clamp-2 ${
-            index === 0 ? "text-white/80" : "text-neutral-600"
+            index === 0 ? "text-neutral-800" : "text-neutral-600"
           }`}
         >
           {item.attributes.description}
@@ -526,7 +526,7 @@ function startCountdown(endTime) {
       </span>
       <span
         className={`text-xs line-through ${
-          index === 0 ? "text-white/80" : "text-gray-500"
+          index === 0 ? "text-neutral-800" : "text-gray-500"
         }`}
       >
         ${item.attributes.price}
@@ -536,7 +536,7 @@ function startCountdown(endTime) {
     <>
       <span
         className={`font-bold text-sm ${
-          index === 0 ? "text-white" : "text-[#E00000]"
+          index === 0 ? "text-neutral-800" : "text-[#E00000]"
         }`}
       >
         $
@@ -555,7 +555,7 @@ function startCountdown(endTime) {
   ) : (
     <span
       className={`font-bold text-md ${
-        index === 0 ? "text-white" : "text-[#E00000]"
+        index === 0 ? "text-[#E00000]" : "text-[#E00000]"
       }`}
     >
       ${item.attributes.price}
