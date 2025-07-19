@@ -16,6 +16,7 @@ import {
 import { db } from "@/lib/firebase";
 import { Phone, Mail, MapPin, MessageCircle, LucideMail } from "lucide-react";
 import {
+  FaCirclePlus,
   FaFacebook,
   FaInstagram,
   FaMailchimp,
@@ -375,7 +376,7 @@ function startCountdown(endTime) {
 <Toast show={showToast} message={toastMessage} />
 
       {/* CONTENIDO */}
-      <main className="max-w-3xl mx-auto px-4 py-8 space-y-16">
+      <main className="max-w-3xl mx-auto px-4 pb-8 pt-3 space-y-16">
         {loading ? (
           <div className="flex flex-col items-center justify-center mt-50">
             <motion.img
@@ -392,21 +393,24 @@ function startCountdown(endTime) {
           </div>
         ) : (
           <>
-<section className="sticky bg-white w-screen -ml-4 z-90  top-[60px] z- mb-0.5 pb-1 shadow-sm">
-  <CategoryCards
-    categories={menu}
-    onSelect={(id) => {
-      const ref = sectionRefs.current[id];
-      if (ref) {
-        ref.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
-    }}
-  />
+<section className="sticky bg-[#FFF9F5] w-screen -ml-4 z-90  top-[60px] z- mb-1 pb-1">
+<CategoryCards
+  categories={menu}
+  onSelect={(id) => {
+    const ref = sectionRefs.current[id];
+    if (ref) {
+      const yOffset = -120; // puede ser -70 o lo que mida tu sticky header
+      const y = ref.getBoundingClientRect().top + window.pageYOffset + yOffset;
+      window.scrollTo({ top: y, behavior: "smooth" });
+    }
+  }}
+/>
 </section>
 
 
             {showStickyNav && (
-              <CategoryNav categories={menu} sectionRefs={sectionRefs} />
+              <CategoryNav
+              categories={menu} sectionRefs={sectionRefs} />
             )}{" "}
             {/* {menu
               .slice()
@@ -443,7 +447,7 @@ function startCountdown(endTime) {
         ref={(el) => {
           sectionRefs.current[cat.id] = el;
         }}
-        className={`space-y-6 ${index === 0 ? "bg-[#E00000] text-white rounded-xl p-4" : "-mt-10"}`}
+        className={`space-y-6 ${index === 0 ? "bg-[#E00000] text-white rounded-xl -mx-1 p-4 my-2" : "mt-4"}`}
       >
 <h2
   className={`text-2xl font-bold font-[BricolageExtraBold] ${
@@ -460,7 +464,7 @@ function startCountdown(endTime) {
     onClick={() =>
       isOpen && !webClosed ? setSelectedItem(item) : null
     }
-    className={`flex gap-4 items-center p- rounded-lg transition cursor-pointer hover:bg-neutral-100 ${
+    className={`flex  p-1 gap-4 items-center p- rounded-lg transition cursor-pointer hover:bg-neutral-100 ${
       !isOpen || webClosed
         ? "opacity-50 cursor-not-allowed"
         : ""
@@ -510,34 +514,55 @@ function startCountdown(endTime) {
       )}
 
       <div className="flex items-center justify-between mt-2">
-        <div className="flex flex-col">
-          {item.attributes.hasDiscount ? (
-            <>
-              <span className="text-[#E00000] font-bold text-sm">
-                ${item.attributes.discountPrice}
-              </span>
-              <span className="text-xs text-gray-500 line-through">
-                ${item.attributes.price}
-              </span>
-            </>
-          ) : timeDiscountPercent > 0 ? (
-            <>
-              <span className="text-[#E00000] font-bold text-sm">
-                $
-                {Math.round(
-                  item.attributes.price * (1 - timeDiscountPercent / 100)
-                )}
-              </span>
-              <span className="text-xs text-gray-500 line-through">
-                ${item.attributes.price}
-              </span>
-            </>
-          ) : (
-            <span className="text-[#E00000] font-bold text-sm">
-              ${item.attributes.price}
-            </span>
-          )}
-        </div>
+<div className="flex flex-col">
+  {item.attributes.hasDiscount ? (
+    <>
+      <span
+        className={`font-bold text-sm ${
+          index === 0 ? "text-black" : "text-[#E00000]"
+        }`}
+      >
+        ${item.attributes.discountPrice}
+      </span>
+      <span
+        className={`text-xs line-through ${
+          index === 0 ? "text-white/80" : "text-gray-500"
+        }`}
+      >
+        ${item.attributes.price}
+      </span>
+    </>
+  ) : timeDiscountPercent > 0 ? (
+    <>
+      <span
+        className={`font-bold text-sm ${
+          index === 0 ? "text-white" : "text-[#E00000]"
+        }`}
+      >
+        $
+        {Math.round(
+          item.attributes.price * (1 - timeDiscountPercent / 100)
+        )}
+      </span>
+      <span
+        className={`text-xs line-through ${
+          index === 0 ? "text-white/80" : "text-gray-500"
+        }`}
+      >
+        ${item.attributes.price}
+      </span>
+    </>
+  ) : (
+    <span
+      className={`font-bold text-md ${
+        index === 0 ? "text-white" : "text-[#E00000]"
+      }`}
+    >
+      ${item.attributes.price}
+    </span>
+  )}
+</div>
+
 
         <button
           onClick={(e) => {
@@ -548,12 +573,12 @@ function startCountdown(endTime) {
           className={`text-sm font-semibold px- py- rounded-full transition-all
             ${
               isOpen
-                ? " hover:bg-[#C40000] bg-[#E00000]  text-white font-bold"
+                ? "  text-white font-bold"
                 : "bg-gray-300 text-gray-500 cursor-not-allowed"
             }
           `}
         >
-              <CirclePlus />
+              <FaCirclePlus className="text-[#E00000] w-6 h-6 " />
         </button>
       </div>
     </div>
@@ -669,7 +694,7 @@ function startCountdown(endTime) {
     value={note}
     onChange={(e) => setNote(e.target.value)}
   />
-  {selectedItem && (
+  {/* {selectedItem && (
     
     <IngredientNotes
       productId={selectedItem.id}
@@ -679,7 +704,7 @@ function startCountdown(endTime) {
         }
       }}
     />
-  )}
+  )} */}
 </div>
 
 
