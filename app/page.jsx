@@ -578,7 +578,11 @@ function startCountdown(endTime) {
             }
           `}
         >
-              <FaCirclePlus className="text-[#E00000] w-6 h-6 " />
+              <FaCirclePlus
+  className={`w-6 h-6 ${
+    index === 0 ? "text-white" : "text-[#E00000]"
+  }`}
+/>
         </button>
       </div>
     </div>
