@@ -580,7 +580,7 @@ function startCountdown(endTime) {
         >
               <FaCirclePlus
   className={`w-6 h-6 ${
-    index === 0 ? "text-white" : "text-[#E00000]"
+    index === 0 ? "text-[#E00000]" : "text-[#E00000]"
   }`}
 />
         </button>
