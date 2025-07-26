@@ -42,31 +42,33 @@ export default function HomePage() {
   const [showPromo, setShowPromo] = useState(false);
   const [showStickyNav, setShowStickyNav] = useState(false);
   const [timeDiscountPercent, setTimeDiscountPercent] = useState(0);
-const [activeTimeDiscountName, setActiveTimeDiscountName] = useState("");
-const [timeLeft, setTimeLeft] = useState("");
-const [showToast, setShowToast] = useState(false);
-const [toastMessage, setToastMessage] = useState("Producto agregado al carrito");
+  const [activeTimeDiscountName, setActiveTimeDiscountName] = useState("");
+  const [timeLeft, setTimeLeft] = useState("");
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState(
+    "Producto agregado al carrito"
+  );
+  const [selectedFixedExtras, setSelectedFixedExtras] = useState([]);
 
   const cardsRef = useRef(null);
   const sectionRefs = useRef({});
 
   const Toast = ({ show, message }) => (
-<AnimatePresence>
-  {show && (
-    <motion.div
-      initial={{ opacity: 0, y: 100 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 100 }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
-      className="fixed bottom-1/5 left-1/2 transform -translate-x-1/2 bg-[#E00000] text-white font-bold text-sm flex items-center gap-3 py-3 px-5 rounded-2xl shadow-2xl z-50"
-    >
-      <CheckCircle className="w-8 h-8 text-white " />
-      <span className="text-sm font-bold">{message}</span>
-    </motion.div>
-  )}
-</AnimatePresence>
-
-);
+    <AnimatePresence>
+      {show && (
+        <motion.div
+          initial={{ opacity: 0, y: 100 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 100 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+          className="fixed bottom-1/5 left-1/2 transform -translate-x-1/2 bg-[#E00000] text-white font-bold text-sm flex items-center gap-3 py-3 px-5 rounded-2xl shadow-2xl z-50"
+        >
+          <CheckCircle className="w-8 h-8 text-white " />
+          <span className="text-sm font-bold">{message}</span>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
 
   const isLocalhost =
     typeof window !== "undefined" && window.location.hostname === "localhost";
@@ -224,24 +226,22 @@ const [toastMessage, setToastMessage] = useState("Producto agregado al carrito")
           const snap = await getDocs(q);
           const now = new Date();
 
-          
-for (const docSnap of snap.docs) {
-  const data = docSnap.data();
-  const start = data.startTime.toDate();
-  const end = data.endTime.toDate();
+          for (const docSnap of snap.docs) {
+            const data = docSnap.data();
+            const start = data.startTime.toDate();
+            const end = data.endTime.toDate();
 
-  if (now >= start && now <= end) {
-    if (data.percentage > 0) {
-      setTimeDiscountPercent(data.percentage);
-      setActiveTimeDiscountName(data.name); // 👈 nombre visible
-      const diff = end - now;
-      updateTimeLeft(diff);
-      startCountdown(end); // 👈 inicia cuenta regresiva
-      break;
-    }
-  }
-}
-
+            if (now >= start && now <= end) {
+              if (data.percentage > 0) {
+                setTimeDiscountPercent(data.percentage);
+                setActiveTimeDiscountName(data.name); // 👈 nombre visible
+                const diff = end - now;
+                updateTimeLeft(diff);
+                startCountdown(end); // 👈 inicia cuenta regresiva
+                break;
+              }
+            }
+          }
         } catch (err) {
           console.error("❌ Error al verificar descuentos por horario:", err);
         }
@@ -253,25 +253,25 @@ for (const docSnap of snap.docs) {
     };
     fetchMenu();
   }, []);
-function updateTimeLeft(ms) {
-  const totalSeconds = Math.floor(ms / 1000);
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = totalSeconds % 60;
-  setTimeLeft(`${minutes}m ${seconds}s`);
-}
-function startCountdown(endTime) {
-  const interval = setInterval(() => {
-    const now = new Date();
-    const diff = endTime - now;
-    if (diff <= 0) {
-      setTimeLeft("Finalizado");
-      setActiveTimeDiscountName("");
-      clearInterval(interval);
-    } else {
-      updateTimeLeft(diff);
-    }
-  }, 1000);
-}
+  function updateTimeLeft(ms) {
+    const totalSeconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    setTimeLeft(`${minutes}m ${seconds}s`);
+  }
+  function startCountdown(endTime) {
+    const interval = setInterval(() => {
+      const now = new Date();
+      const diff = endTime - now;
+      if (diff <= 0) {
+        setTimeLeft("Finalizado");
+        setActiveTimeDiscountName("");
+        clearInterval(interval);
+      } else {
+        updateTimeLeft(diff);
+      }
+    }, 1000);
+  }
 
   const drinksCategory = menu.find((cat) => cat.name === "Bebidas");
   const friesProduct = menu.find((cat) => cat.name === "Papas fritas")
@@ -296,10 +296,21 @@ function startCountdown(endTime) {
     ? Math.round(basePrice * (1 - timeDiscountPercent / 100))
     : basePrice;
 
+  // const finalPrice =
+  //   discountPrice +
+  //   (selectedDrink?.attributes?.price || 0) +
+  //   (includeFries ? friesProduct?.attributes?.price || 0 : 0);
+
+  const fixedExtrasTotal = selectedFixedExtras.reduce(
+    (acc, extra) => acc + (extra?.price || 0),
+    0
+  );
+
   const finalPrice =
     discountPrice +
     (selectedDrink?.attributes?.price || 0) +
-    (includeFries ? friesProduct?.attributes?.price || 0 : 0);
+    (includeFries ? friesProduct?.attributes?.price || 0 : 0) +
+    fixedExtrasTotal;
 
   return (
     <div className="min-h-screen bg-[#FFF9F5] font-inter text-[#1A1A1A]">
@@ -340,10 +351,11 @@ function startCountdown(endTime) {
         </button>
       </header>
       {activeTimeDiscountName && timeLeft && (
-  <div className="bg-green-100 text-green-800 text-center py-2 px-4 font-semibold text-sm">
-    🕒 <span className="font-bold">{activeTimeDiscountName}</span> Termina en {timeLeft}
-  </div>
-)}
+        <div className="bg-green-100 text-green-800 text-center py-2 px-4 font-semibold text-sm">
+          🕒 <span className="font-bold">{activeTimeDiscountName}</span> Termina
+          en {timeLeft}
+        </div>
+      )}
 
       {newsMessage && (
         <div className="bg-blue-100 text-blue-800 text-center py-2 px-4">
@@ -373,7 +385,7 @@ function startCountdown(endTime) {
           />
         </section>
       )}
-<Toast show={showToast} message={toastMessage} />
+      <Toast show={showToast} message={toastMessage} />
 
       {/* CONTENIDO */}
       <main className="max-w-3xl mx-auto px-4 pb-8 pt-3 space-y-16">
@@ -393,24 +405,24 @@ function startCountdown(endTime) {
           </div>
         ) : (
           <>
-<section className="sticky bg-[#FFF9F5] w-screen -ml-4 z-90  top-[60px] z- mb-1 pb-1">
-<CategoryCards
-  categories={menu}
-  onSelect={(id) => {
-    const ref = sectionRefs.current[id];
-    if (ref) {
-      const yOffset = -120; // puede ser -70 o lo que mida tu sticky header
-      const y = ref.getBoundingClientRect().top + window.pageYOffset + yOffset;
-      window.scrollTo({ top: y, behavior: "smooth" });
-    }
-  }}
-/>
-</section>
-
-
+            <section className="sticky bg-[#FFF9F5] w-screen -ml-4 z-90  top-[60px] z- mb-1 pb-1">
+              <CategoryCards
+                categories={menu}
+                onSelect={(id) => {
+                  const ref = sectionRefs.current[id];
+                  if (ref) {
+                    const yOffset = -120; // puede ser -70 o lo que mida tu sticky header
+                    const y =
+                      ref.getBoundingClientRect().top +
+                      window.pageYOffset +
+                      yOffset;
+                    window.scrollTo({ top: y, behavior: "smooth" });
+                  }
+                }}
+              />
+            </section>
             {showStickyNav && (
-              <CategoryNav
-              categories={menu} sectionRefs={sectionRefs} />
+              <CategoryNav categories={menu} sectionRefs={sectionRefs} />
             )}{" "}
             {/* {menu
               .slice()
@@ -433,162 +445,181 @@ function startCountdown(endTime) {
                     </h2>
                     <ul className="space-y-4">
                       {availableItems.map((item) => ( */}
-                      {menu
-  .slice()
-  .sort((a, b) => (a.inOrder ?? 0) - (b.inOrder ?? 0))
-  .map((cat, index) => {
-    const availableItems =
-      cat.items?.filter((item) => item.attributes?.available) || [];
-    if (availableItems.length === 0) return null;
+            {menu
+              .slice()
+              .sort((a, b) => (a.inOrder ?? 0) - (b.inOrder ?? 0))
+              .map((cat, index) => {
+                const availableItems =
+                  cat.items?.filter((item) => item.attributes?.available) || [];
+                if (availableItems.length === 0) return null;
 
-    return (
-      <section
-        key={cat.id}
-        ref={(el) => {
-          sectionRefs.current[cat.id] = el;
-        }}
-        className={`space-y-6 ${index === 0 ? "bg-[#E00000] text-white rounded-xl -mx-1 p-4 my-2" : "mt-4"}`}
-      >
-<h2
-  className={`text-2xl font-bold font-[BricolageExtraBold] ${
-    index === 0 ? "text-white" : "text-[#E00000]"
-  }`}
->
-  {cat.name}
-</h2>
+                return (
+                  <section
+                    key={cat.id}
+                    ref={(el) => {
+                      sectionRefs.current[cat.id] = el;
+                    }}
+                    className={`space-y-6 ${
+                      index === 0
+                        ? "bg-[#E00000] text-white rounded-xl -mx-1 p-4 my-2"
+                        : "mt-4"
+                    }`}
+                  >
+                    <h2
+                      className={`text-2xl font-bold font-[BricolageExtraBold] ${
+                        index === 0 ? "text-white" : "text-[#E00000]"
+                      }`}
+                    >
+                      {cat.name}
+                    </h2>
 
-        <ul className="space-y-1">
-{availableItems.map((item) => (
-  <li
-    key={item.id}
-    onClick={() =>
-      isOpen && !webClosed ? setSelectedItem(item) : null
-    }
-    className={`flex  p-1 gap-4 items-center bg-neutral-100 p- rounded-lg transition cursor-pointer hover:bg-neutral-100 ${
-      !isOpen || webClosed
-        ? "opacity-50 cursor-not-allowed"
-        : ""
-    }`}
-  >
-    <div className="relative w-[96px] h-[96px] rounded-lg overflow-hidden bg-neutral-100">
-      {item.attributes.image ? (
-        <img
-          src={item.attributes.image}
-          alt={item.attributes.name}
-          className="w-full h-full object-cover"
-        />
-      ) : (
-        <div className="flex items-center justify-center h-full text-sm text-neutral-400">
-          Sin imagen
-        </div>
-      )}
-      {(item.attributes.hasDiscount || timeDiscountPercent > 0) && (
-        <div className="absolute top-1 right-1 bg-green-600 text-white text-[11px] font-semibold px-2 py-0.5 rounded-full shadow-sm">
-          -
-          {item.attributes.hasDiscount
-            ? item.attributes.discountPercent
-            : timeDiscountPercent}
-          %
-        </div>
-      )}
-    </div>
-    <div className="flex-1 flex flex-col min-w-0">
-      {/* 🔴 Nombre: blanco si es la primera categoría */}
-      <h3
-        className={`text-base font-bold truncate ${
-          index === 0 ? "text-black" : "text-[#1A1A1A]"
-        }`}
-      >
-        {item.attributes.name}
-      </h3>
+                    <ul className="space-y-1">
+                      {availableItems.map((item) => (
+                        <li
+                          key={item.id}
+                          onClick={() =>
+                            isOpen && !webClosed ? setSelectedItem(item) : null
+                          }
+                          className={`flex  p-1 gap-4 items-center bg-neutral-100 p- rounded-lg transition cursor-pointer hover:bg-neutral-100 ${
+                            !isOpen || webClosed
+                              ? "opacity-50 cursor-not-allowed"
+                              : ""
+                          }`}
+                        >
+                          <div className="relative w-[96px] h-[96px] rounded-lg overflow-hidden bg-neutral-100">
+                            {item.attributes.image ? (
+                              <img
+                                src={item.attributes.image}
+                                alt={item.attributes.name}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="flex items-center justify-center h-full text-sm text-neutral-400">
+                                Sin imagen
+                              </div>
+                            )}
+                            {(item.attributes.hasDiscount ||
+                              timeDiscountPercent > 0) && (
+                              <div className="absolute top-1 right-1 bg-green-600 text-white text-[11px] font-semibold px-2 py-0.5 rounded-full shadow-sm">
+                                -
+                                {item.attributes.hasDiscount
+                                  ? item.attributes.discountPercent
+                                  : timeDiscountPercent}
+                                %
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex-1 flex flex-col min-w-0">
+                            {/* 🔴 Nombre: blanco si es la primera categoría */}
+                            <h3
+                              className={`text-base font-bold truncate ${
+                                index === 0 ? "text-black" : "text-[#1A1A1A]"
+                              }`}
+                            >
+                              {item.attributes.name}
+                            </h3>
 
-      {/* 🔴 Descripción: blanco opaco si es la primera categoría */}
-      {item.attributes.description && (
-        <p
-          className={`text-sm line-clamp-2 ${
-            index === 0 ? "text-neutral-800" : "text-neutral-600"
-          }`}
-        >
-          {item.attributes.description}
-        </p>
-      )}
+                            {/* 🔴 Descripción: blanco opaco si es la primera categoría */}
+                            {item.attributes.description && (
+                              <p
+                                className={`text-sm line-clamp-2 ${
+                                  index === 0
+                                    ? "text-neutral-800"
+                                    : "text-neutral-600"
+                                }`}
+                              >
+                                {item.attributes.description}
+                              </p>
+                            )}
 
-      <div className="flex items-center justify-between mt-2">
-<div className="flex flex-col">
-  {item.attributes.hasDiscount ? (
-    <>
-      <span
-        className={`font-bold text-sm ${
-          index === 0 ? "text-black" : "text-[#E00000]"
-        }`}
-      >
-        ${item.attributes.discountPrice}
-      </span>
-      <span
-        className={`text-xs line-through ${
-          index === 0 ? "text-neutral-800" : "text-gray-500"
-        }`}
-      >
-        ${item.attributes.price}
-      </span>
-    </>
-  ) : timeDiscountPercent > 0 ? (
-    <>
-      <span
-        className={`font-bold text-sm ${
-          index === 0 ? "text-neutral-800" : "text-[#E00000]"
-        }`}
-      >
-        $
-        {Math.round(
-          item.attributes.price * (1 - timeDiscountPercent / 100)
-        )}
-      </span>
-      <span
-        className={`text-xs line-through ${
-          index === 0 ? "text-white/80" : "text-gray-500"
-        }`}
-      >
-        ${item.attributes.price}
-      </span>
-    </>
-  ) : (
-    <span
-      className={`font-bold text-md ${
-        index === 0 ? "text-[#E00000]" : "text-[#E00000]"
-      }`}
-    >
-      ${item.attributes.price}
-    </span>
-  )}
-</div>
+                            <div className="flex items-center justify-between mt-2">
+                              <div className="flex flex-col">
+                                {item.attributes.hasDiscount ? (
+                                  <>
+                                    <span
+                                      className={`font-bold text-sm ${
+                                        index === 0
+                                          ? "text-black"
+                                          : "text-[#E00000]"
+                                      }`}
+                                    >
+                                      ${item.attributes.discountPrice}
+                                    </span>
+                                    <span
+                                      className={`text-xs line-through ${
+                                        index === 0
+                                          ? "text-neutral-800"
+                                          : "text-gray-500"
+                                      }`}
+                                    >
+                                      ${item.attributes.price}
+                                    </span>
+                                  </>
+                                ) : timeDiscountPercent > 0 ? (
+                                  <>
+                                    <span
+                                      className={`font-bold text-sm ${
+                                        index === 0
+                                          ? "text-neutral-800"
+                                          : "text-[#E00000]"
+                                      }`}
+                                    >
+                                      $
+                                      {Math.round(
+                                        item.attributes.price *
+                                          (1 - timeDiscountPercent / 100)
+                                      )}
+                                    </span>
+                                    <span
+                                      className={`text-xs line-through ${
+                                        index === 0
+                                          ? "text-white/80"
+                                          : "text-gray-500"
+                                      }`}
+                                    >
+                                      ${item.attributes.price}
+                                    </span>
+                                  </>
+                                ) : (
+                                  <span
+                                    className={`font-bold text-md ${
+                                      index === 0
+                                        ? "text-[#E00000]"
+                                        : "text-[#E00000]"
+                                    }`}
+                                  >
+                                    ${item.attributes.price}
+                                  </span>
+                                )}
+                              </div>
 
-
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            if (isOpen && !webClosed) setSelectedItem(item);
-          }}
-          disabled={!isOpen || webClosed}
-          className={`text-sm font-semibold px- py- rounded-full transition-all
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (isOpen && !webClosed)
+                                    setSelectedItem(item);
+                                }}
+                                disabled={!isOpen || webClosed}
+                                className={`text-sm font-semibold px- py- rounded-full transition-all
             ${
               isOpen
                 ? "  text-white font-bold"
                 : "bg-gray-300 text-gray-500 cursor-not-allowed"
             }
           `}
-        >
-              <FaCirclePlus
-  className={`w-6 h-6 ${
-    index === 0 ? "text-[#E00000]" : "text-[#E00000]"
-  }`}
-/>
-        </button>
-      </div>
-    </div>
-  </li>
-))}
-
+                              >
+                                <FaCirclePlus
+                                  className={`w-6 h-6 ${
+                                    index === 0
+                                      ? "text-[#E00000]"
+                                      : "text-[#E00000]"
+                                  }`}
+                                />
+                              </button>
+                            </div>
+                          </div>
+                        </li>
+                      ))}
                     </ul>
                   </section>
                 );
@@ -609,10 +640,9 @@ function startCountdown(endTime) {
                       Email
                     </p>
                     <p>consultas@mordiscoburgers.com.ar</p>
-
                   </div>
                 </div>
-                    <p className="text-transparent">unmordiscopls@gmail.com</p>
+                <p className="text-transparent">unmordiscopls@gmail.com</p>
 
                 <div className="flex items-center justify-start gap-6 mt-4">
                   <a
@@ -674,43 +704,34 @@ function startCountdown(endTime) {
                 </p>
               )}
 
-              {/* Observaciones */}
-              {/* <div>
+              <div>
                 <label className="block text-sm font-medium mt-5 mb-1 text-[#1A1A1A]">
                   Observaciones
                 </label>
                 <textarea
                   className="w-full border rounded p-2 text-base"
-                  placeholder="Ej: sin lechuga, sin tomate.."
+                  placeholder="Ej: sin lechuga, sin tomate..."
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
                 />
-              </div> */}
-
-
-<div>
-  <label className="block text-sm font-medium mt-5 mb-1 text-[#1A1A1A]">
-    Observaciones
-  </label>
-  <textarea
-    className="w-full border rounded p-2 text-base"
-    placeholder="Ej: sin lechuga, sin tomate..."
-    value={note}
-    onChange={(e) => setNote(e.target.value)}
-  />
-  {/* {selectedItem && (
-    
-    <IngredientNotes
-      productId={selectedItem.id}
-      onAddNote={(newNote) => {
-        if (!note.includes(newNote)) {
-          setNote((prev) => (prev ? prev + ", " + newNote : newNote));
-        }
-      }}
-    />
-  )} */}
-</div>
-
+                {selectedItem && (
+                  <IngredientNotes
+                    productId={selectedItem.id}
+                    currentNote={note}
+                    onAddNote={(newNote) => {
+                      setNote((prev) => {
+                        const notes = prev.split(", ").filter(Boolean);
+                        if (notes.includes(newNote)) {
+                          return notes.filter((n) => n !== newNote).join(", ");
+                        } else {
+                          return [...notes, newNote].join(", ");
+                        }
+                      });
+                    }}
+                    onExtrasChange={(extras) => setSelectedFixedExtras(extras)}
+                  />
+                )}
+              </div>
 
               {/* Total */}
               <div className="text-right text-sm font-semibold text-[#1A1A1A]">
@@ -731,19 +752,27 @@ function startCountdown(endTime) {
                             }
                           : null,
                         fries: includeFries,
+                          additions: selectedFixedExtras, // 👈 esto faltaba
                       };
-addItem({
-  ...selectedItem,
-  attributes: {
-    ...selectedItem.attributes,
-    price: finalPrice,
-    note,
-    extras,
-  },
-});
-setToastMessage("Producto agregado al carrito");
-setShowToast(true);
-setTimeout(() => setShowToast(false), 2000);
+                      const extrasObservacion = selectedFixedExtras
+                        .map((e) => `+ ${e.name}`)
+                        .join(", ");
+                      const notaFinal = [note.trim(), extrasObservacion]
+                        .filter(Boolean)
+                        .join(" | ");
+
+                      addItem({
+                        ...selectedItem,
+                        attributes: {
+                          ...selectedItem.attributes,
+                          price: finalPrice,
+                          note: notaFinal, // 👈 aquí usamos la nota combinada
+                          extras,
+                        },
+                      });
+                      setToastMessage("Producto agregado al carrito");
+                      setShowToast(true);
+                      setTimeout(() => setShowToast(false), 2000);
 
                       setSelectedItem(null);
                       setNote("");

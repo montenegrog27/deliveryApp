@@ -1,12 +1,7 @@
-// pages/api/recipes.js
 import { db } from "@/lib/firebase";
 import { collection, getDocs } from "firebase/firestore";
 
-export default async function handler(req, res) {
-  if (req.method !== "GET") {
-    return res.status(405).json({ error: "Método no permitido" });
-  }
-
+export const GET = async () => {
   try {
     const snapshot = await getDocs(collection(db, "recipes"));
     const recipes = snapshot.docs.map((doc) => ({
@@ -14,9 +9,14 @@ export default async function handler(req, res) {
       ...doc.data(),
     }));
 
-    return res.status(200).json(recipes);
+    return new Response(JSON.stringify(recipes), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
   } catch (error) {
     console.error("❌ Error al obtener recetas:", error);
-    return res.status(500).json({ error: "Error al obtener recetas" });
+    return new Response("Error al obtener recetas", { status: 500 });
   }
-}
+};

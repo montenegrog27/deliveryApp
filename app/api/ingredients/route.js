@@ -1,20 +1,20 @@
 import { db } from "@/lib/firebase";
 import { collection, getDocs } from "firebase/firestore";
 
-export default async function handler(req, res) {
-  if (req.method !== "GET") {
-    return res.status(405).json({ error: "Método no permitido" });
-  }
-
+export const GET = async () => {
   try {
     const snapshot = await getDocs(collection(db, "ingredients"));
     const ingredients = snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data(),
     }));
-    res.status(200).json(ingredients);
+
+    return new Response(JSON.stringify(ingredients), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
   } catch (error) {
     console.error("❌ Error al obtener ingredientes:", error);
-    res.status(500).json({ error: "Error al obtener ingredientes" });
+    return new Response("Error al obtener ingredientes", { status: 500 });
   }
-}
+};
