@@ -177,7 +177,7 @@ useEffect(() => {
       )}
 
       {/* Extras fijos */}
-      <div className="w-full mt-6">
+      {/* <div className="w-full mt-6">
         <p className="text-sm font-medium text-[#1A1A1A] mb-2">Agregar extras</p>
         <div className="flex flex-wrap gap-2">
           {extrasFijos.map((extra) => {
@@ -214,10 +214,10 @@ useEffect(() => {
             );
           })}
         </div>
-      </div>
+      </div> */}
 
       {/* Dropdown bebidas */}
-      {bebidas.length > 0 && (
+      {/* {bebidas.length > 0 && (
         <div className="w-full mt-6">
           <p className="text-sm font-medium text-[#1A1A1A] mb-2">
             Agregar bebida
@@ -238,7 +238,7 @@ useEffect(() => {
             ))}
           </select>
         </div>
-      )}
+      )} */}
     </div>
   );
 }
