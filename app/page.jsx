@@ -26,6 +26,29 @@ import CategoryNav from "@/components/CategoryNav";
 import CategoryCards from "@/components/CategoryCards";
 import IngredientNotes from "@/components/IngredientNotes";
 
+
+  const Toast = ({ show, message }) => (
+    <AnimatePresence>
+      {show && (
+        <motion.div
+          initial={{ opacity: 0, y: 100 }}
+          animate={{ opacity: 0.9, y: 0 }}
+          exit={{ opacity: 0, y: 100 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+          // className="fixed bottom-1/5 left-1/2 transform -translate-x-1/2 bg-[#E00000] text-white font-bold text-sm flex items-center gap-3 py-3 px-5 rounded-2xl shadow-2xl z-50"
+  className="fixed bottom-1/5 left-1/2 transform -translate-x-1/2 
+             w-[90%] max-w-[600px] bg-[#E00000] text-white 
+             py-3 px-5 rounded-2xl shadow-2xl z-50
+             flex items-center justify-center gap-3 text-center"
+>
+  <CheckCircle className="w-6 h-6 text-white" />
+  <span className="text-sm font-bold">{message}</span>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+
+
 export default function HomePage() {
   const { addItem, toggleCart, cart } = useCart();
   const [menu, setMenu] = useState([]);
@@ -53,22 +76,7 @@ export default function HomePage() {
   const cardsRef = useRef(null);
   const sectionRefs = useRef({});
 
-  const Toast = ({ show, message }) => (
-    <AnimatePresence>
-      {show && (
-        <motion.div
-          initial={{ opacity: 0, y: 100 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 100 }}
-          transition={{ duration: 0.4, ease: "easeOut" }}
-          className="fixed bottom-1/5 left-1/2 transform -translate-x-1/2 bg-[#E00000] text-white font-bold text-sm flex items-center gap-3 py-3 px-5 rounded-2xl shadow-2xl z-50"
-        >
-          <CheckCircle className="w-8 h-8 text-white " />
-          <span className="text-sm font-bold">{message}</span>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
+
 
   const isLocalhost =
     typeof window !== "undefined" && window.location.hostname === "localhost";
