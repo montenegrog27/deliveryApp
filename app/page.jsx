@@ -750,44 +750,125 @@ export default function HomePage() {
               <div className="space-y-2">
                 <div className="w-full flex justify-center items-center">
                   <button
-                    onClick={() => {
-                      const extras = {
-                        drink: selectedDrink
-                          ? {
-                              id: selectedDrink.id,
-                              name: selectedDrink.attributes.name,
-                              price: selectedDrink.attributes.price,
-                            }
-                          : null,
-                        fries: includeFries,
-                          additions: selectedFixedExtras, // 👈 esto faltaba
-                      };
-                      const extrasObservacion = selectedFixedExtras
-                        .map((e) => `+ ${e.name}`)
-                        .join(", ");
-                      const notaFinal = [note.trim(), extrasObservacion]
-                        .filter(Boolean)
-                        .join(" | ");
+                    // onClick={() => {
+                    //   const extras = {
+                    //     drink: selectedDrink
+                    //       ? {
+                    //           id: selectedDrink.id,
+                    //           name: selectedDrink.attributes.name,
+                    //           price: selectedDrink.attributes.price,
+                    //         }
+                    //       : null,
+                    //     fries: includeFries,
+                    //       additions: selectedFixedExtras, // 👈 esto faltaba
+                    //   };
+                    //   const extrasObservacion = selectedFixedExtras
+                    //     .map((e) => `+ ${e.name}`)
+                    //     .join(", ");
+                    //   const notaFinal = [note.trim(), extrasObservacion]
+                    //     .filter(Boolean)
+                    //     .join(" | ");
 
-                      addItem({
-                        ...selectedItem,
-                        attributes: {
-                          ...selectedItem.attributes,
-                          price: finalPrice,
-                          note: notaFinal, // 👈 aquí usamos la nota combinada
-                          extras,
-                        },
-                      });
-                      setToastMessage("Producto agregado al carrito");
-                      setShowToast(true);
-                      setTimeout(() => setShowToast(false), 2000);
+                    //   addItem({
+                    //     ...selectedItem,
+                    //     attributes: {
+                    //       ...selectedItem.attributes,
+                    //       price: finalPrice,
+                    //       note: notaFinal, // 👈 aquí usamos la nota combinada
+                    //       extras,
+                    //     },
+                    //   });
+                    //   setToastMessage("Producto agregado al carrito");
+                    //   setShowToast(true);
+                    //   setTimeout(() => setShowToast(false), 2000);
 
-                      setSelectedItem(null);
-                      setNote("");
-                      setSelectedDrinkId("");
-                      setIncludeFries(false);
-                      setShowDrinkDropdown(false);
-                    }}
+                    //   setSelectedItem(null);
+                    //   setNote("");
+                    //   setSelectedDrinkId("");
+                    //   setIncludeFries(false);
+                    //   setShowDrinkDropdown(false);
+                    // }}
+                    onClick={async () => {
+  try {
+    const productSnap = await getDoc(doc(db, "products", selectedItem.id));
+    if (!productSnap.exists()) throw new Error("Producto no encontrado");
+
+    const productData = productSnap.data();
+
+    let comboItems = [];
+
+    if (productData.isCombo && Array.isArray(productData.comboItems)) {
+      for (const sub of productData.comboItems) {
+        const subSnap = await getDoc(doc(db, "products", sub.productId));
+        if (!subSnap.exists()) continue;
+
+        const subData = subSnap.data();
+
+        comboItems.push({
+          id: sub.productId,
+          name: subData.name,
+          quantity: sub.quantity,
+          medallones: subData.medallones || 0,
+          isBurger: subData.isBurger || false,
+          size: subData.size || "",
+          productType: subData.productType || "",
+        });
+      }
+    }
+
+    const extras = {
+      drink: selectedDrink
+        ? {
+            id: selectedDrink.id,
+            name: selectedDrink.attributes.name,
+            price: selectedDrink.attributes.price,
+          }
+        : null,
+      fries: includeFries,
+      additions: selectedFixedExtras,
+    };
+
+    const extrasObservacion = selectedFixedExtras
+      .map((e) => `+ ${e.name}`)
+      .join(", ");
+
+    const notaFinal = [note.trim(), extrasObservacion]
+      .filter(Boolean)
+      .join(" | ");
+
+    addItem({
+      ...selectedItem,
+      attributes: {
+        ...selectedItem.attributes,
+        price: finalPrice,
+        note: notaFinal,
+        extras,
+        isBurger: productData.isBurger || false,
+        medallones: productData.medallones || 0,
+        size: productData.size || "",
+        productType: productData.productType || "",
+        isCombo: productData.isCombo || false,
+        comboItems: comboItems.length > 0 ? comboItems : undefined,
+      },
+    });
+
+    setToastMessage("Producto agregado al carrito");
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 2000);
+
+    setSelectedItem(null);
+    setNote("");
+    setSelectedDrinkId("");
+    setIncludeFries(false);
+    setShowDrinkDropdown(false);
+  } catch (err) {
+    console.error("❌ Error al agregar producto al carrito:", err);
+    setToastMessage("Error al agregar el producto");
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 2000);
+  }
+}}
+
                     className="w-[50%] bg-[#E00000] hover:bg-[#C40000] text-white py-3 rounded-full font-bold text-sm"
                   >
                     Agregar al pedido
