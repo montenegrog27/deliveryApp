@@ -292,6 +292,10 @@ export default function CheckoutPage() {
         discountPrice: item.discountPrice || item.attributes.price,
         note: item.attributes.note || "", // ✅ incluir observaciones
         extras: item.attributes.extras || null, //
+  medallones: item.attributes.medallones || 0,
+  isBurger: item.attributes.isBurger || false,
+  size: item.attributes.size || "",
+  productType: item.attributes.productType || "",
       })),
       shippingCost,
       kitchenId: selectedKitchenId,
