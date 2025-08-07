@@ -217,13 +217,13 @@ if (hora >= 16 && hora < 18) {
         const mensajeFinal =
           order.delivery === false
             ? "✅ Pedido confirmado. Te avisaremos por acá cuando esté listo para retirarlo. ¡Gracias!"
-            : "✅ Pedido confirmado. Te avisaremos por acá cuando esté yendo el repartidor. ¡Gracias!";
-
+            // : "✅ Pedido confirmado. Te avisaremos por acá cuando esté yendo el repartidor. ¡Gracias!";
+    : "✅ Pedido confirmado. Te avisaremos por acá cuando esté yendo el repartidor. ¡Gracias!\nALIAS: 👇👇👇";
         // await sendText(phoneNormalized, mensajeFinal);
         await sendText(phoneNormalized, mensajeFinal);
 
         if (order.paymentMethodId === "transfer") {
-          await sendText(phoneNormalized, "ALIAS: 👇👇👇");
+          // await sendText(phoneNormalized, "ALIAS: 👇👇👇");
           await sendText(phoneNormalized, "MORDISCO.ARG");
         }
       }
