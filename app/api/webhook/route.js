@@ -91,70 +91,64 @@ export async function POST(req) {
   const type = message?.type;
   const phone = message?.from;
 
-
-
   // 🕒 Verificación de horario
-const now = new Date();
-// const hora = now.getHours();
-const hora = Number(
-  new Intl.DateTimeFormat("es-AR", {
-    hour: "numeric",
-    hour12: false,
-    timeZone: "America/Argentina/Buenos_Aires",
-  }).format(new Date())
-);
-
-
-if (hora >= 16 && hora < 18) {
-  const phoneNormalized = phone.replace(/\D/g, "");
-
-  // Enviar mensaje automático de fuera de horario
-  await sendText(
-    phoneNormalized,
-    "Hola, en este momento estamos cerrados, pero por cualquier consulta o reclamo podés escribirnos acá:"
+  const now = new Date();
+  // const hora = now.getHours();
+  const hora = Number(
+    new Intl.DateTimeFormat("es-AR", {
+      hour: "numeric",
+      hour12: false,
+      timeZone: "America/Argentina/Buenos_Aires",
+    }).format(new Date())
   );
 
-  // Enviar contacto de reclamos
-  await fetch(
-    `https://graph.facebook.com/v19.0/${process.env.WHATSAPP_PHONE_NUMBER_ID}/messages`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.WHATSAPP_API_TOKEN}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        messaging_product: "whatsapp",
-        to: phoneNormalized,
-        type: "contacts",
-        contacts: [
-          {
-            name: {
-              formatted_name: "Mordisco Reclamos",
-              first_name: "Reclamos",
-              last_name: "Mordisco",
-            },
-            phones: [
-              {
-                phone: "5493794054555", // <-- cambiá este número si querés otro
-                type: "CELL",
-                wa_id: "5493794054555",
+  if (hora >= 16 && hora < 18) {
+    const phoneNormalized = phone.replace(/\D/g, "");
+
+    // Enviar mensaje automático de fuera de horario
+    await sendText(
+      phoneNormalized,
+      "Hola, en este momento estamos cerrados, pero por cualquier consulta o reclamo podés escribirnos acá:"
+    );
+
+    // Enviar contacto de reclamos
+    await fetch(
+      `https://graph.facebook.com/v19.0/${process.env.WHATSAPP_PHONE_NUMBER_ID}/messages`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${process.env.WHATSAPP_API_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          messaging_product: "whatsapp",
+          to: phoneNormalized,
+          type: "contacts",
+          contacts: [
+            {
+              name: {
+                formatted_name: "Mordisco Reclamos",
+                first_name: "Reclamos",
+                last_name: "Mordisco",
               },
-            ],
-            org: {
-              company: "Mordisco",
+              phones: [
+                {
+                  phone: "5493794054555", // <-- cambiá este número si querés otro
+                  type: "CELL",
+                  wa_id: "5493794054555",
+                },
+              ],
+              org: {
+                company: "Mordisco",
+              },
             },
-          },
-        ],
-      }),
-    }
-  );
+          ],
+        }),
+      }
+    );
 
-  return new Response("Mensaje automático fuera de horario", { status: 200 });
-}
-
-
-
+    return new Response("Mensaje automático fuera de horario", { status: 200 });
+  }
 
   if (!message || !type || !phone)
     return new Response("Sin mensaje válido", { status: 200 });
@@ -214,16 +208,48 @@ if (hora >= 16 && hora < 18) {
         });
         baseMessage.message = "✅ Pedido confirmado por el cliente.";
 
-        const mensajeFinal =
-          order.delivery === false
-            ? "✅ Pedido confirmado. Te avisaremos por acá cuando esté listo para retirarlo. ¡Gracias!"
-            // : "✅ Pedido confirmado. Te avisaremos por acá cuando esté yendo el repartidor. ¡Gracias!";
-    : "✅ Pedido confirmado. Te avisaremos por acá cuando esté yendo el repartidor. ¡Gracias!\nALIAS: 👇👇👇";
+        // const mensajeFinal =
+        //   order.delivery === false
+        //     ? "✅ Pedido confirmado. Te avisaremos por acá cuando esté listo para retirarlo. ¡Gracias!"
+        //     : "✅ Pedido confirmado. Te avisaremos por acá cuando esté yendo el repartidor. ¡Gracias!";
+
+        // // await sendText(phoneNormalized, mensajeFinal);
         // await sendText(phoneNormalized, mensajeFinal);
+
+        // if (order.paymentMethodId === "transfer") {
+        //   await sendText(phoneNormalized, "ALIAS: 👇👇👇");
+        //   await sendText(phoneNormalized, "MORDISCO.ARG");
+        // }
+
+        let mensajeFinal = "";
+        const esTransferencia = order.paymentMethodId === "transfer";
+        const esDelivery = order.delivery === true;
+
+        if (esTransferencia) {
+          // Si el pago es por transferencia
+          if (esDelivery) {
+            mensajeFinal =
+              "✅ Pedido confirmado. Te avisaremos por acá cuando esté yendo el repartidor. ¡Gracias!\nALIAS: 👇👇👇";
+          } else {
+            mensajeFinal =
+              "✅ Pedido confirmado. Te avisaremos por acá cuando esté listo para retirarlo. ¡Gracias!\nALIAS: 👇👇👇";
+          }
+        } else {
+          // Si el pago no es por transferencia
+          if (esDelivery) {
+            mensajeFinal =
+              "✅ Pedido confirmado. Te avisaremos por acá cuando esté yendo el repartidor. ¡Gracias!";
+          } else {
+            mensajeFinal =
+              "✅ Pedido confirmado. Te avisaremos por acá cuando esté listo para retirarlo. ¡Gracias!";
+          }
+        }
+
+        // Enviar el mensaje de confirmación
         await sendText(phoneNormalized, mensajeFinal);
 
-        if (order.paymentMethodId === "transfer") {
-          // await sendText(phoneNormalized, "ALIAS: 👇👇👇");
+        // Si es transferencia, enviar el alias en otro mensaje
+        if (esTransferencia) {
           await sendText(phoneNormalized, "MORDISCO.ARG");
         }
       }
@@ -348,12 +374,13 @@ if (hora >= 16 && hora < 18) {
 
   if (type === "sticker") {
     // const phoneNormalized = phone.replace(/\D/g, "");
-    const phoneNormalized = typeof phone === "string" ? phone.replace(/\D/g, "") : null;
+    const phoneNormalized =
+      typeof phone === "string" ? phone.replace(/\D/g, "") : null;
 
-if (!phoneNormalized) {
-  console.warn("📵 Webhook recibido sin número de teléfono válido");
-  return new Response("Sin teléfono válido", { status: 200 });
-}
+    if (!phoneNormalized) {
+      console.warn("📵 Webhook recibido sin número de teléfono válido");
+      return new Response("Sin teléfono válido", { status: 200 });
+    }
 
     const mediaId = message.sticker?.id;
     console.log("📎 Sticker media_id recibido:", mediaId);
