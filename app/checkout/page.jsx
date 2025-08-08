@@ -38,7 +38,6 @@ export default function CheckoutPage() {
   const router = useRouter();
   const { cart, clearCart } = useCart();
 
-
   const [customer, setCustomer] = useState({
     name: "",
     phone: "",
@@ -284,19 +283,53 @@ export default function CheckoutPage() {
         ...customer,
         phone: formattedPhone,
       },
-      cart: cart.map((item) => ({
-        id: item.id,
-        name: item.attributes.name, // ✅ nombre del producto
-        quantity: item.quantity,
-        price: item.attributes.price,
-        discountPrice: item.discountPrice || item.attributes.price,
-        note: item.attributes.note || "", // ✅ incluir observaciones
-        extras: item.attributes.extras || null, //
-  medallones: item.attributes.medallones || 0,
-  isBurger: item.attributes.isBurger || false,
-  size: item.attributes.size || "",
-  productType: item.attributes.productType || "",
-      })),
+      // cart: cart.map((item) => ({
+      //   id: item.id,
+      //   name: item.attributes.name, // ✅ nombre del producto
+      //   quantity: item.quantity,
+      //   price: item.attributes.price,
+      //   discountPrice: item.discountPrice || item.attributes.price,
+      //   note: item.attributes.note || "", // ✅ incluir observaciones
+      //   extras: item.attributes.extras || null, //
+      //   medallones: item.attributes.medallones || 0,
+      //   isBurger: item.attributes.isBurger || false,
+      //   size: item.attributes.size || "",
+      //   productType: item.attributes.productType || "",
+      // })),
+
+      cart: cart.map((item) => {
+    const base = {
+      id: item.id,
+      name: item.attributes.name,
+      quantity: item.quantity,
+      price: item.attributes.price,
+      discountPrice: item.discountPrice || item.attributes.price,
+      note: item.attributes.note || "",
+      extras: item.attributes.extras || null,
+
+      // <- estos campos para productos “simples”
+      medallones: item.attributes.medallones || 0,
+      isBurger: item.attributes.isBurger || false,
+      size: item.attributes.size || "",
+      productType: item.attributes.productType || "",
+    };
+
+    // <- conservar estructura de combo
+    if (item.attributes.isCombo) {
+      base.isCombo = true;
+      base.comboItems = (item.attributes.comboItems || []).map((ci) => ({
+        productId: ci.id || ci.productId,
+        name: ci.name || "",
+        quantity: ci.quantity || 1,
+        isBurger: !!ci.isBurger,
+        medallones: ci.medallones || 0,
+        size: ci.size || "",
+        productType: ci.productType || "",
+      }));
+    }
+
+    return base;
+  }),
       shippingCost,
       kitchenId: selectedKitchenId,
       paymentMethod: selectedPaymentMethod,
