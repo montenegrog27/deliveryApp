@@ -120,7 +120,7 @@ export async function POST(req) {
     }).format(new Date())
   );
 
-  if (hora >= 16 && hora < 18) {
+  if (hora >= 3 && hora < 16) {
     const phoneNormalized = phone.replace(/\D/g, "");
 
     // Enviar mensaje automático de fuera de horario
