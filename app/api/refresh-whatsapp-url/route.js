@@ -1,4 +1,4 @@
-import { bucket } from "@/lib/admin";
+import { bucket } from "@/lib/firebase-admin";
 
 export async function POST(req) {
   try {
