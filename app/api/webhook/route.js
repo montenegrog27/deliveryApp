@@ -42,29 +42,40 @@ async function sendText(to, body) {
 
 
 // 💡 PONER ARRIBA DE upsertMessage
+// recorte para no pasarte 1MiB (mantiene últimos N y reemplaza base64 legacy)
 function trimOrders(orders, maxPerOrder = 200) {
   return (orders || []).map((o) => {
-    // 1) “Desinfla” mensajes legacy que tengan base64 embebido
     const sanitized = (o.messages || []).map((m) => {
       if (typeof m?.message === "string" && m.message.startsWith("data:")) {
         return { ...m, message: "[adjunto migrado]" };
       }
       return m;
     });
-
-    // 2) Quedate con los últimos N mensajes por orden
     return { ...o, messages: sanitized.slice(-maxPerOrder) };
   });
 }
 
+function removeUndefinedDeep(obj) {
+  if (Array.isArray(obj)) return obj.map(removeUndefinedDeep);
+  if (obj && typeof obj === "object") {
+    const out = {};
+    for (const [k, v] of Object.entries(obj)) {
+      if (v === undefined) continue; // Firestore no acepta undefined
+      out[k] = removeUndefinedDeep(v);
+    }
+    return out;
+  }
+  return obj;
+}
+
 
 async function upsertMessage({ phone, name, trackingId, order, message }) {
-  const chatRef = doc(db, "whatsapp_chats", phone); // ojo: phone debe venir normalizado
+  const chatRef = doc(db, "whatsapp_chats", phone); // phone debe venir normalizado
   const chatSnap = await getDoc(chatRef);
   const timestamp = new Date();
   const nuevoMensaje = { ...message, timestamp, read: false };
 
-  let orders = chatSnap.exists() ? chatSnap.data().orders || [] : [];
+  let orders = chatSnap.exists() ? (chatSnap.data().orders || []) : [];
   const index = orders.findIndex((o) => o.trackingId === trackingId);
 
   if (index !== -1) {
@@ -80,27 +91,22 @@ async function upsertMessage({ phone, name, trackingId, order, message }) {
     });
   }
 
-  // 💡 recorte para no exceder 1 MiB
+  // 1) recorte/legacy
   orders = trimOrders(orders, 200);
 
-  await setDoc(
-    chatRef,
-    { phone, name, updatedAt: serverTimestamp(), orders },
-    { merge: true }
-  );
+  // 2) quitar undefined
+  const docData = removeUndefinedDeep({
+    phone,
+    name: name ?? null, // si no tenés nombre, mejor null
+    updatedAt: serverTimestamp(),
+    orders,
+  });
 
-  try {
-    await fetch(
-      "https://mordisco-ws-production.up.railway.app/notify-whatsapp",
-      {
-        method: "POST",
-      }
-    );
-    console.log("📣 Notificación WebSocket enviada");
-  } catch (e) {
-    console.error("⚠️ Error notificando WebSocket:", e.message);
-  }
+  await setDoc(chatRef, docData, { merge: true });
+
+  // notify WS...
 }
+
 
 export async function POST(req) {
   const body = await req.json();
