@@ -19,6 +19,7 @@
     "@tailwindcss/postcss": "^4.1.4",
     "@turf/turf": "^7.2.0",
     "firebase": "^11.7.1",
+    "firebase-admin": "^13.4.0",
     "framer-motion": "^12.12.2",
     "gsap": "^3.13.0",
     "lucide-react": "^0.513.0",
