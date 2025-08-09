@@ -40,6 +40,24 @@ async function sendText(to, body) {
   }
 }
 
+
+// 💡 PONER ARRIBA DE upsertMessage
+function trimOrders(orders, maxPerOrder = 200) {
+  return (orders || []).map((o) => {
+    // 1) “Desinfla” mensajes legacy que tengan base64 embebido
+    const sanitized = (o.messages || []).map((m) => {
+      if (typeof m?.message === "string" && m.message.startsWith("data:")) {
+        return { ...m, message: "[adjunto migrado]" };
+      }
+      return m;
+    });
+
+    // 2) Quedate con los últimos N mensajes por orden
+    return { ...o, messages: sanitized.slice(-maxPerOrder) };
+  });
+}
+
+
 async function upsertMessage({ phone, name, trackingId, order, message }) {
   const chatRef = doc(db, "whatsapp_chats", phone); // ojo: phone debe venir normalizado
   const chatSnap = await getDoc(chatRef);
