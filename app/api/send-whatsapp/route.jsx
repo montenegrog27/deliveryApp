@@ -12,6 +12,8 @@ export async function POST(req) {
       trackingId: rawId,
       customerName,
       branchName,
+      templateName,
+      orderText, // ✅ agregar
       totalAmount,
     } = body;
 
@@ -28,24 +30,46 @@ export async function POST(req) {
       : `tracking_${rawId}`;
     const trackingUrl = `https://mordisco.app/tracking/${trackingId}`;
 
+    // const payload = {
+    //   messaging_product: "whatsapp",
+    //   to,
+    //   type: "template",
+    //   template: {
+    //     name: "confirmacion_pedido",
+    //     language: { code: "es_AR" },
+    //     components: [
+    //       {
+    //         type: "body",
+    //         parameters: [
+    //           { type: "text", text: customerName },
+    //           { type: "text", text: totalAmount.toString() },
+    //         ],
+    //       },
+    //     ],
+    //   },
+    // };
+
+
     const payload = {
-      messaging_product: "whatsapp",
-      to,
-      type: "template",
-      template: {
-        name: "confirmacion_pedido",
-        language: { code: "es_AR" },
-        components: [
-          {
-            type: "body",
-            parameters: [
-              { type: "text", text: customerName },
-              { type: "text", text: totalAmount.toString() },
-            ],
-          },
+  messaging_product: "whatsapp",
+  to,
+  type: "template",
+  template: {
+    name: templateName, // usar el nombre recibido
+    language: { code: "es_AR" },
+    components: [
+      {
+        type: "body",
+        parameters: [
+          { type: "text", text: customerName },   // {{1}}
+          { type: "text", text: orderText },       // {{2}} ← el detalle aquí
+          { type: "text", text: totalAmount.toString() }, // {{3}}
         ],
       },
-    };
+    ],
+  },
+};
+
 
     const res = await fetch(
       `https://graph.facebook.com/v19.0/${process.env.WHATSAPP_PHONE_NUMBER_ID}/messages`,

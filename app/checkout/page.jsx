@@ -368,18 +368,43 @@ export default function CheckoutPage() {
       }
       console.log("orderPayload.cart[0].price", orderPayload.cart[0].price);
 
+      const orderText = cart
+  .map((item) => {
+    const name = item.attributes.name;
+    const qty = item.quantity;
+    return `${qty} x ${name}`;
+  })
+  .join("\n");
+
+
+      // await fetch("/api/send-whatsapp", {
+      //   method: "POST",
+      //   headers: { "Content-Type": "application/json" },
+      //   body: JSON.stringify({
+      //     phone: formattedPhone,
+      //     trackingId: ref,
+      //     customerName: customer.name,
+      //     templateName: "confirmar_pedido",
+      //     branchName: "Santa Fe 1583",
+      //     totalAmount: total,
+      //   }),
+      // });
+
+
       await fetch("/api/send-whatsapp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          phone: formattedPhone,
-          trackingId: ref,
-          customerName: customer.name,
-          templateName: "confirmar_pedido",
-          branchName: "Santa Fe 1583",
-          totalAmount: total,
-        }),
-      });
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    phone: formattedPhone,
+    trackingId: ref,
+    customerName: customer.name,
+    orderText, 
+    templateName: "confirmacion_pedido_detallado", 
+    branchName: selectedKitchenName || "Sucursal",
+    totalAmount: total,
+  }),
+});
+
 
       console.log("📦 Enviando WhatsApp con:", {
         phone: formattedPhone,

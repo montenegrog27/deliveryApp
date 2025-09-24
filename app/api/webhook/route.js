@@ -102,53 +102,53 @@ export async function POST(req) {
     }).format(new Date())
   );
 
-  if (hora >= 16 && hora < 18) {
-    const phoneNormalized = phone.replace(/\D/g, "");
+  // if (hora >= 16 && hora < 18) {
+  //   const phoneNormalized = phone.replace(/\D/g, "");
 
-    // Enviar mensaje automático de fuera de horario
-    await sendText(
-      phoneNormalized,
-      "Hola, en este momento estamos cerrados, pero por cualquier consulta o reclamo podés escribirnos acá:"
-    );
+  //   // Enviar mensaje automático de fuera de horario
+  //   await sendText(
+  //     phoneNormalized,
+  //     "Hola, en este momento estamos cerrados, pero por cualquier consulta o reclamo podés escribirnos acá:"
+  //   );
 
-    // Enviar contacto de reclamos
-    await fetch(
-      `https://graph.facebook.com/v19.0/${process.env.WHATSAPP_PHONE_NUMBER_ID}/messages`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${process.env.WHATSAPP_API_TOKEN}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          messaging_product: "whatsapp",
-          to: phoneNormalized,
-          type: "contacts",
-          contacts: [
-            {
-              name: {
-                formatted_name: "Mordisco Reclamos",
-                first_name: "Reclamos",
-                last_name: "Mordisco",
-              },
-              phones: [
-                {
-                  phone: "5493794054555", // <-- cambiá este número si querés otro
-                  type: "CELL",
-                  wa_id: "5493794054555",
-                },
-              ],
-              org: {
-                company: "Mordisco",
-              },
-            },
-          ],
-        }),
-      }
-    );
+  //   // Enviar contacto de reclamos
+  //   await fetch(
+  //     `https://graph.facebook.com/v19.0/${process.env.WHATSAPP_PHONE_NUMBER_ID}/messages`,
+  //     {
+  //       method: "POST",
+  //       headers: {
+  //         Authorization: `Bearer ${process.env.WHATSAPP_API_TOKEN}`,
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({
+  //         messaging_product: "whatsapp",
+  //         to: phoneNormalized,
+  //         type: "contacts",
+  //         contacts: [
+  //           {
+  //             name: {
+  //               formatted_name: "Mordisco Reclamos",
+  //               first_name: "Reclamos",
+  //               last_name: "Mordisco",
+  //             },
+  //             phones: [
+  //               {
+  //                 phone: "5493794054555", // <-- cambiá este número si querés otro
+  //                 type: "CELL",
+  //                 wa_id: "5493794054555",
+  //               },
+  //             ],
+  //             org: {
+  //               company: "Mordisco",
+  //             },
+  //           },
+  //         ],
+  //       }),
+  //     }
+  //   );
 
-    return new Response("Mensaje automático fuera de horario", { status: 200 });
-  }
+  //   return new Response("Mensaje automático fuera de horario", { status: 200 });
+  // }
 
   if (!message || !type || !phone)
     return new Response("Sin mensaje válido", { status: 200 });
