@@ -157,7 +157,7 @@ export default function HomePage() {
         if (rawData.webClose === true) {
           setWebClosed(true);
           setIsOpen(false);
-          setMensajeHorario("Actualmente cerrado por mantenimiento.");
+          setMensajeHorario("Actualmente cerrado por demoras, volvemos en 15 min.");
           return;
         }
         setWebClosed(false);
