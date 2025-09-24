@@ -12,7 +12,6 @@ export async function POST(req) {
       trackingId: rawId,
       customerName,
       branchName,
-      templateName,
       orderText, // ✅ agregar
       totalAmount,
     } = body;
@@ -55,7 +54,7 @@ export async function POST(req) {
   to,
   type: "template",
   template: {
-    name: templateName, // usar el nombre recibido
+    name: "confirmacion_pedido_detallado", // usar el nombre recibido
     language: { code: "es_AR" },
     components: [
       {
