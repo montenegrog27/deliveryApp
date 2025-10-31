@@ -321,11 +321,12 @@ export default function HomePage() {
     fixedExtrasTotal;
 
   return (
-    <div className="min-h-screen bg-[#FFF9F5] font-inter text-[#1A1A1A]">
+    <div className="min-h-screen bg-black font-inter text-[#1A1A1A]">
       {/* HEADER */}
       <header
         className={`sticky top-0 z-50 px-4 py-3 flex items-center justify-between border-b ${
-          showPromo ? "bg-[#E00000]" : "bg-[#FFF9F5]/90 backdrop-blur-md"
+          // showPromo ? "bg-[#E00000]" : "bg-[#FFF9F5]/90 backdrop-blur-md"
+          showPromo ? "bg-[#E00000]" : "bg-black backdrop-blur-md"
         }`}
       >
         <img
@@ -413,7 +414,8 @@ export default function HomePage() {
           </div>
         ) : (
           <>
-            <section className="sticky bg-[#FFF9F5] w-screen -ml-4 z-90  top-[60px] z- mb-1 pb-1">
+            {/* <section className="sticky bg-black w-screen -ml-4 z-90  top-[60px] z- mb-1 pb-1">
+
               <CategoryCards
                 categories={menu}
                 onSelect={(id) => {
@@ -428,31 +430,10 @@ export default function HomePage() {
                   }
                 }}
               />
-            </section>
+            </section> */}
             {showStickyNav && (
               <CategoryNav categories={menu} sectionRefs={sectionRefs} />
             )}{" "}
-            {/* {menu
-              .slice()
-              .sort((a, b) => (a.inOrder ?? 0) - (b.inOrder ?? 0))
-              .map((cat) => {
-                const availableItems =
-                  cat.items?.filter((item) => item.attributes?.available) || [];
-                if (availableItems.length === 0) return null;
-
-                return (
-                  <section
-                    key={cat.id}
-                    ref={(el) => {
-                      sectionRefs.current[cat.id] = el;
-                    }}
-                    className="space-y-6"
-                  >
-                    <h2 className="text-2xl font-bold text-[#E00000] font-[BricolageExtraBold]">
-                      {cat.name}
-                    </h2>
-                    <ul className="space-y-4">
-                      {availableItems.map((item) => ( */}
             {menu
               .slice()
               .sort((a, b) => (a.inOrder ?? 0) - (b.inOrder ?? 0))
@@ -469,13 +450,15 @@ export default function HomePage() {
                     }}
                     className={`space-y-6 ${
                       index === 0
-                        ? "bg-[#E00000] text-white rounded-xl -mx-1 p-4 my-2"
+                        // ? "bg-[#E00000] text-white rounded-xl -mx-1 p-4 my-2"
+                        ? "bg-red-600 text-white rounded-xl -mx-1 p-4 my-2"
+
                         : "mt-4"
                     }`}
                   >
                     <h2
                       className={`text-2xl font-bold font-[BricolageExtraBold] ${
-                        index === 0 ? "text-white" : "text-[#E00000]"
+                        index === 0 ? "text-black" : "text-[#E00000]"
                       }`}
                     >
                       {cat.name}
@@ -488,13 +471,13 @@ export default function HomePage() {
                           onClick={() =>
                             isOpen && !webClosed ? setSelectedItem(item) : null
                           }
-                          className={`flex  p-1 gap-4 items-center bg-neutral-100 p- rounded-lg transition cursor-pointer hover:bg-neutral-100 ${
+                          className={`flex  p-1 gap-4 items-center bg-black p- rounded-lg transition cursor-pointer hover:bg-neutral-100 ${
                             !isOpen || webClosed
                               ? "opacity-50 cursor-not-allowed"
                               : ""
                           }`}
                         >
-                          <div className="relative w-[96px] h-[96px] rounded-lg overflow-hidden bg-neutral-100">
+                          <div className="relative w-[96px] h-[96px] rounded-lg overflow-hidden bg-black">
                             {item.attributes.image ? (
                               <img
                                 src={item.attributes.image}
@@ -521,7 +504,7 @@ export default function HomePage() {
                             {/* 🔴 Nombre: blanco si es la primera categoría */}
                             <h3
                               className={`text-base font-bold truncate ${
-                                index === 0 ? "text-black" : "text-[#1A1A1A]"
+                                index === 0 ? "text-gray-100" : "text-gray-100"
                               }`}
                             >
                               {item.attributes.name}
@@ -532,8 +515,8 @@ export default function HomePage() {
                               <p
                                 className={`text-sm line-clamp-2 ${
                                   index === 0
-                                    ? "text-neutral-800"
-                                    : "text-neutral-600"
+                                    ? "text-neutral-200"
+                                    : "text-neutral-200"
                                 }`}
                               >
                                 {item.attributes.description}
