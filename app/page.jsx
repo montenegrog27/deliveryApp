@@ -261,12 +261,21 @@ export default function HomePage() {
     };
     fetchMenu();
   }, []);
-  function updateTimeLeft(ms) {
-    const totalSeconds = Math.floor(ms / 1000);
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
-    setTimeLeft(`${minutes}m ${seconds}s`);
-  }
+function updateTimeLeft(ms) {
+  const totalSeconds = Math.floor(ms / 1000);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  let formatted = "";
+
+  if (hours > 0) formatted += `${hours}h `;
+  if (minutes > 0 || hours > 0) formatted += `${minutes}m `;
+  formatted += `${seconds}s`;
+
+  setTimeLeft(formatted.trim());
+}
+
   function startCountdown(endTime) {
     const interval = setInterval(() => {
       const now = new Date();
@@ -376,24 +385,16 @@ export default function HomePage() {
           {mensajeHorario}
         </div>
       )}
-      {showPromo && (
-        <section
-          className="relative bg-[#E00000] -mt-25 text-white px-6 py-8 flex items-center justify-between rounded-br-3xl rounded-bl-[25%]"
-          style={{ height: "50vh" }}
-        >
-          <div className="max-w-md min-w-[200px] -mr-15  space-y-2 ">
-            <h1 className="text-3xl font-extrabold leading-tight font-[BricolageExtraBold]">
-              MES APERTURA
-            </h1>
-            <p className="text-sm text-white/90">¡Sorpresas todos los días!</p>
-          </div>
-          <img
-            src="https://res.cloudinary.com/dsbrnqc5z/image/upload/v1749238288/DSC03746_1_-removebg-preview_hzef4r.png"
-            alt="Hamburguesa promo"
-            className="w-[550px] ml-10 sm:w-52 lg:w-64 drop-shadow-xls"
-          />
-        </section>
-      )}
+{showPromo && (
+  <section className="relative -mt-25 rounded-br-3xl rounded-bl-[25%] overflow-hidden" style={{ height: "50vh" }}>
+<img
+  src="https://res.cloudinary.com/dsbrnqc5z/image/upload/v1762211756/Gemini_Generated_Image_6g06976g06976g06_scco4y.png"
+  alt="Cyber Mordisco"
+  className="w-full h-full object-cover"
+/>
+  </section>
+)}
+
       <Toast show={showToast} message={toastMessage} />
 
       {/* CONTENIDO */}
