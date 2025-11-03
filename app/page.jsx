@@ -475,7 +475,7 @@ export default function HomePage() {
                             )}
                             {(item.attributes.hasDiscount ||
                               timeDiscountPercent > 0) && (
-                              <div className="absolute top-1 right-1 bg-green-600 text-black text-[11px] font-semibold px-2 py-0.5 rounded-full shadow-sm">
+                              <div className="absolute top-1 right-1 bg-green-600 text-white text-[11px] font-semibold px-2 py-0.5 rounded-full shadow-sm">
                                 -
                                 {item.attributes.hasDiscount
                                   ? item.attributes.discountPercent
@@ -535,7 +535,7 @@ export default function HomePage() {
                                     <span
                                       className={`font-bold text-sm ${
                                         index === 0
-                                          ? "text-neutral-200"
+                                          ? "text-[#E00000]"
                                           : "text-[#E00000]"
                                       }`}
                                     >
