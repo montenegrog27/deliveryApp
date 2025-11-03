@@ -321,12 +321,12 @@ export default function HomePage() {
     fixedExtrasTotal;
 
   return (
-    <div className="min-h-screen bg-black font-inter text-[#1A1A1A]">
+    <div className="min-h-screen bg-[#FFF9F5] font-inter text-[#1A1A1A]">
       {/* HEADER */}
       <header
         className={`sticky top-0 z-50 px-4 py-3 flex items-center justify-between border-b ${
-          // showPromo ? "bg-[#E00000]" : "bg-[#FFF9F5]/90 backdrop-blur-md"
-          showPromo ? "bg-[#E00000]" : "bg-black backdrop-blur-md"
+          showPromo ? "bg-[#E00000]" : "bg-[#FFF9F5]/90 backdrop-blur-md"
+          // showPromo ? "bg-[#E00000]" : "bg-black backdrop-blur-md"
         }`}
       >
         <img
@@ -414,23 +414,7 @@ export default function HomePage() {
           </div>
         ) : (
           <>
-            {/* <section className="sticky bg-black w-screen -ml-4 z-90  top-[60px] z- mb-1 pb-1">
 
-              <CategoryCards
-                categories={menu}
-                onSelect={(id) => {
-                  const ref = sectionRefs.current[id];
-                  if (ref) {
-                    const yOffset = -120; // puede ser -70 o lo que mida tu sticky header
-                    const y =
-                      ref.getBoundingClientRect().top +
-                      window.pageYOffset +
-                      yOffset;
-                    window.scrollTo({ top: y, behavior: "smooth" });
-                  }
-                }}
-              />
-            </section> */}
             {showStickyNav && (
               <CategoryNav categories={menu} sectionRefs={sectionRefs} />
             )}{" "}
@@ -450,15 +434,15 @@ export default function HomePage() {
                     }}
                     className={`space-y-6 ${
                       index === 0
-                        // ? "bg-[#E00000] text-white rounded-xl -mx-1 p-4 my-2"
-                        ? "bg-red-600 text-white rounded-xl -mx-1 p-4 my-2"
+                        ? "bg-[#E00000] text-black rounded-xl -mx-1 p-4 my-2"
+                        // ? "bg-red-600 text-white rounded-xl -mx-1 p-4 my-2"
 
                         : "mt-4"
                     }`}
                   >
                     <h2
                       className={`text-2xl font-bold font-[BricolageExtraBold] ${
-                        index === 0 ? "text-black" : "text-[#E00000]"
+                        index === 0 ? "text-gray-100" : "text-[#E00000]"
                       }`}
                     >
                       {cat.name}
@@ -471,13 +455,13 @@ export default function HomePage() {
                           onClick={() =>
                             isOpen && !webClosed ? setSelectedItem(item) : null
                           }
-                          className={`flex  p-1 gap-4 items-center bg-black p- rounded-lg transition cursor-pointer hover:bg-neutral-100 ${
+                          className={`flex  p-1 gap-4 items-center bg-[#FFF9F5] p- rounded-lg transition cursor-pointer hover:bg-neutral-100 ${
                             !isOpen || webClosed
                               ? "opacity-50 cursor-not-allowed"
                               : ""
                           }`}
                         >
-                          <div className="relative w-[96px] h-[96px] rounded-lg overflow-hidden bg-black">
+                          <div className="relative w-[96px] h-[96px] rounded-lg overflow-hidden bg-[#FFF9F5]">
                             {item.attributes.image ? (
                               <img
                                 src={item.attributes.image}
@@ -491,7 +475,7 @@ export default function HomePage() {
                             )}
                             {(item.attributes.hasDiscount ||
                               timeDiscountPercent > 0) && (
-                              <div className="absolute top-1 right-1 bg-green-600 text-white text-[11px] font-semibold px-2 py-0.5 rounded-full shadow-sm">
+                              <div className="absolute top-1 right-1 bg-green-600 text-black text-[11px] font-semibold px-2 py-0.5 rounded-full shadow-sm">
                                 -
                                 {item.attributes.hasDiscount
                                   ? item.attributes.discountPercent
@@ -504,7 +488,7 @@ export default function HomePage() {
                             {/* 🔴 Nombre: blanco si es la primera categoría */}
                             <h3
                               className={`text-base font-bold truncate ${
-                                index === 0 ? "text-gray-100" : "text-gray-100"
+                                index === 0 ? "text-gray-900" : "text-gray-900"
                               }`}
                             >
                               {item.attributes.name}
@@ -515,8 +499,8 @@ export default function HomePage() {
                               <p
                                 className={`text-sm line-clamp-2 ${
                                   index === 0
-                                    ? "text-neutral-200"
-                                    : "text-neutral-200"
+                                    ? "text-gray-900"
+                                    : "text-gray-700"
                                 }`}
                               >
                                 {item.attributes.description}
@@ -530,7 +514,7 @@ export default function HomePage() {
                                     <span
                                       className={`font-bold text-sm ${
                                         index === 0
-                                          ? "text-black"
+                                          ? "text-white"
                                           : "text-[#E00000]"
                                       }`}
                                     >
@@ -551,7 +535,7 @@ export default function HomePage() {
                                     <span
                                       className={`font-bold text-sm ${
                                         index === 0
-                                          ? "text-neutral-800"
+                                          ? "text-neutral-200"
                                           : "text-[#E00000]"
                                       }`}
                                     >
