@@ -26,28 +26,26 @@ import CategoryNav from "@/components/CategoryNav";
 import CategoryCards from "@/components/CategoryCards";
 import IngredientNotes from "@/components/IngredientNotes";
 
-
-  const Toast = ({ show, message }) => (
-    <AnimatePresence>
-      {show && (
-        <motion.div
-          initial={{ opacity: 0, y: 100 }}
-          animate={{ opacity: 0.9, y: 0 }}
-          exit={{ opacity: 0, y: 100 }}
-          transition={{ duration: 0.4, ease: "easeOut" }}
-          // className="fixed bottom-1/5 left-1/2 transform -translate-x-1/2 bg-[#E00000] text-white font-bold text-sm flex items-center gap-3 py-3 px-5 rounded-2xl shadow-2xl z-50"
-  className="fixed bottom-1/5 left-1/2 transform -translate-x-1/2 
+const Toast = ({ show, message }) => (
+  <AnimatePresence>
+    {show && (
+      <motion.div
+        initial={{ opacity: 0, y: 100 }}
+        animate={{ opacity: 0.9, y: 0 }}
+        exit={{ opacity: 0, y: 100 }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
+        // className="fixed bottom-1/5 left-1/2 transform -translate-x-1/2 bg-[#E00000] text-white font-bold text-sm flex items-center gap-3 py-3 px-5 rounded-2xl shadow-2xl z-50"
+        className="fixed bottom-1/5 left-1/2 transform -translate-x-1/2 
              w-[90%] max-w-[600px] bg-[#E00000] text-white 
              py-3 px-5 rounded-2xl shadow-2xl z-50
              flex items-center justify-center gap-3 text-center"
->
-  <CheckCircle className="w-6 h-6 text-white" />
-  <span className="text-sm font-bold">{message}</span>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
-
+      >
+        <CheckCircle className="w-6 h-6 text-white" />
+        <span className="text-sm font-bold">{message}</span>
+      </motion.div>
+    )}
+  </AnimatePresence>
+);
 
 export default function HomePage() {
   const { addItem, toggleCart, cart } = useCart();
@@ -68,15 +66,15 @@ export default function HomePage() {
   const [activeTimeDiscountName, setActiveTimeDiscountName] = useState("");
   const [timeLeft, setTimeLeft] = useState("");
   const [showToast, setShowToast] = useState(false);
+const [loadingExtras, setLoadingExtras] = useState(false);
   const [toastMessage, setToastMessage] = useState(
     "Producto agregado al carrito"
   );
   const [selectedFixedExtras, setSelectedFixedExtras] = useState([]);
+  const [availableExtras, setAvailableExtras] = useState([]);
 
   const cardsRef = useRef(null);
   const sectionRefs = useRef({});
-
-
 
   const isLocalhost =
     typeof window !== "undefined" && window.location.hostname === "localhost";
@@ -157,7 +155,9 @@ export default function HomePage() {
         if (rawData.webClose === true) {
           setWebClosed(true);
           setIsOpen(false);
-          setMensajeHorario("Actualmente cerrado por demoras, volvemos en 15 min.");
+          setMensajeHorario(
+            "Actualmente cerrado por demoras, volvemos en 15 min."
+          );
           return;
         }
         setWebClosed(false);
@@ -226,6 +226,17 @@ export default function HomePage() {
         if (!res.ok) throw new Error(await res.text());
         const data = await res.json();
         setMenu(data);
+
+        // 🔽 TRAEMOS EXTRAS FIJOS
+        const extrasSnap = await getDocs(
+          query(collection(db, "productExtras"), where("active", "==", true))
+        );
+        const extrasData = extrasSnap.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setAvailableExtras(extrasData);
+
         try {
           const q = query(
             collection(db, "timeDiscounts"),
@@ -261,20 +272,20 @@ export default function HomePage() {
     };
     fetchMenu();
   }, []);
-function updateTimeLeft(ms) {
-  const totalSeconds = Math.floor(ms / 1000);
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
+  function updateTimeLeft(ms) {
+    const totalSeconds = Math.floor(ms / 1000);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
 
-  let formatted = "";
+    let formatted = "";
 
-  if (hours > 0) formatted += `${hours}h `;
-  if (minutes > 0 || hours > 0) formatted += `${minutes}m `;
-  formatted += `${seconds}s`;
+    if (hours > 0) formatted += `${hours}h `;
+    if (minutes > 0 || hours > 0) formatted += `${minutes}m `;
+    formatted += `${seconds}s`;
 
-  setTimeLeft(formatted.trim());
-}
+    setTimeLeft(formatted.trim());
+  }
 
   function startCountdown(endTime) {
     const interval = setInterval(() => {
@@ -296,12 +307,6 @@ function updateTimeLeft(ms) {
   const selectedDrink =
     drinksCategory?.items.find((item) => item.id === selectedDrinkId) || null;
 
-  // const finalPrice =
-  //   (selectedItem?.attributes.discountPrice ||
-  //     selectedItem?.attributes.price ||
-  //     0) +
-  //   (selectedDrink?.attributes?.price || 0) +
-  //   (includeFries ? friesProduct?.attributes?.price || 0 : 0);
 
   const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
 
@@ -312,11 +317,6 @@ function updateTimeLeft(ms) {
     : timeDiscountPercent > 0
     ? Math.round(basePrice * (1 - timeDiscountPercent / 100))
     : basePrice;
-
-  // const finalPrice =
-  //   discountPrice +
-  //   (selectedDrink?.attributes?.price || 0) +
-  //   (includeFries ? friesProduct?.attributes?.price || 0 : 0);
 
   const fixedExtrasTotal = selectedFixedExtras.reduce(
     (acc, extra) => acc + (extra?.price || 0),
@@ -385,15 +385,18 @@ function updateTimeLeft(ms) {
           {mensajeHorario}
         </div>
       )}
-{showPromo && (
-  <section className="relative -mt-25 rounded-br-3xl rounded-bl-[25%] overflow-hidden" style={{ height: "50vh" }}>
-<img
-  src="https://res.cloudinary.com/dsbrnqc5z/image/upload/v1762211756/Gemini_Generated_Image_6g06976g06976g06_scco4y.png"
-  alt="Cyber Mordisco"
-  className="w-full h-full object-cover"
-/>
-  </section>
-)}
+      {showPromo && (
+        <section
+          className="relative -mt-25 rounded-br-3xl rounded-bl-[25%] overflow-hidden"
+          style={{ height: "50vh" }}
+        >
+          <img
+            src="https://res.cloudinary.com/dsbrnqc5z/image/upload/v1762211756/Gemini_Generated_Image_6g06976g06976g06_scco4y.png"
+            alt="Cyber Mordisco"
+            className="w-full h-full object-cover"
+          />
+        </section>
+      )}
 
       <Toast show={showToast} message={toastMessage} />
 
@@ -415,7 +418,6 @@ function updateTimeLeft(ms) {
           </div>
         ) : (
           <>
-
             {showStickyNav && (
               <CategoryNav categories={menu} sectionRefs={sectionRefs} />
             )}{" "}
@@ -436,9 +438,9 @@ function updateTimeLeft(ms) {
                     className={`space-y-6 ${
                       index === 0
                         ? "bg-[#E00000] text-black rounded-xl -mx-1 p-4 my-2"
-                        // ? "bg-red-600 text-white rounded-xl -mx-1 p-4 my-2"
+                        : // ? "bg-red-600 text-white rounded-xl -mx-1 p-4 my-2"
 
-                        : "mt-4"
+                          "mt-4"
                     }`}
                   >
                     <h2
@@ -679,6 +681,17 @@ function updateTimeLeft(ms) {
                   {selectedItem.attributes.description}
                 </p>
               )}
+      {loadingExtras ? (
+        // 🔁 LOADER mientras cargan los extras
+        <div className="flex justify-center items-center py-8">
+          <img
+            src="https://res.cloudinary.com/dsbrnqc5z/image/upload/v1744757019/Recurso_40_zti0fq.svg"
+            alt="Cargando extras"
+            className="h-12 w-auto animate-spin"
+          />
+        </div>
+      ) : (
+
 
               <div>
                 <label className="block text-sm font-medium mt-5 mb-1 text-[#1A1A1A]">
@@ -705,9 +718,14 @@ function updateTimeLeft(ms) {
                       });
                     }}
                     onExtrasChange={(extras) => setSelectedFixedExtras(extras)}
+                    extrasList={availableExtras.filter((extra) =>
+                      extra.productTypes?.includes(
+                        selectedItem.attributes.productType
+                      )
+                    )}
                   />
                 )}
-              </div>
+              </div>)}
 
               {/* Total */}
               <div className="text-right text-sm font-semibold text-[#1A1A1A]">
@@ -718,125 +736,98 @@ function updateTimeLeft(ms) {
               <div className="space-y-2">
                 <div className="w-full flex justify-center items-center">
                   <button
-                    // onClick={() => {
-                    //   const extras = {
-                    //     drink: selectedDrink
-                    //       ? {
-                    //           id: selectedDrink.id,
-                    //           name: selectedDrink.attributes.name,
-                    //           price: selectedDrink.attributes.price,
-                    //         }
-                    //       : null,
-                    //     fries: includeFries,
-                    //       additions: selectedFixedExtras, // 👈 esto faltaba
-                    //   };
-                    //   const extrasObservacion = selectedFixedExtras
-                    //     .map((e) => `+ ${e.name}`)
-                    //     .join(", ");
-                    //   const notaFinal = [note.trim(), extrasObservacion]
-                    //     .filter(Boolean)
-                    //     .join(" | ");
-
-                    //   addItem({
-                    //     ...selectedItem,
-                    //     attributes: {
-                    //       ...selectedItem.attributes,
-                    //       price: finalPrice,
-                    //       note: notaFinal, // 👈 aquí usamos la nota combinada
-                    //       extras,
-                    //     },
-                    //   });
-                    //   setToastMessage("Producto agregado al carrito");
-                    //   setShowToast(true);
-                    //   setTimeout(() => setShowToast(false), 2000);
-
-                    //   setSelectedItem(null);
-                    //   setNote("");
-                    //   setSelectedDrinkId("");
-                    //   setIncludeFries(false);
-                    //   setShowDrinkDropdown(false);
-                    // }}
                     onClick={async () => {
-  try {
-    const productSnap = await getDoc(doc(db, "products", selectedItem.id));
-    if (!productSnap.exists()) throw new Error("Producto no encontrado");
+                      try {
+                        const productSnap = await getDoc(
+                          doc(db, "products", selectedItem.id)
+                        );
+                        if (!productSnap.exists())
+                          throw new Error("Producto no encontrado");
 
-    const productData = productSnap.data();
+                        const productData = productSnap.data();
 
-    let comboItems = [];
+                        let comboItems = [];
 
-    if (productData.isCombo && Array.isArray(productData.comboItems)) {
-      for (const sub of productData.comboItems) {
-        const subSnap = await getDoc(doc(db, "products", sub.productId));
-        if (!subSnap.exists()) continue;
+                        if (
+                          productData.isCombo &&
+                          Array.isArray(productData.comboItems)
+                        ) {
+                          for (const sub of productData.comboItems) {
+                            const subSnap = await getDoc(
+                              doc(db, "products", sub.productId)
+                            );
+                            if (!subSnap.exists()) continue;
 
-        const subData = subSnap.data();
+                            const subData = subSnap.data();
 
-        comboItems.push({
-          id: sub.productId,
-          name: subData.name,
-          quantity: sub.quantity,
-          medallones: subData.medallones || 0,
-          isBurger: subData.isBurger || false,
-          size: subData.size || "",
-          productType: subData.productType || "",
-        });
-      }
-    }
+                            comboItems.push({
+                              id: sub.productId,
+                              name: subData.name,
+                              quantity: sub.quantity,
+                              medallones: subData.medallones || 0,
+                              isBurger: subData.isBurger || false,
+                              size: subData.size || "",
+                              productType: subData.productType || "",
+                            });
+                          }
+                        }
 
-    const extras = {
-      drink: selectedDrink
-        ? {
-            id: selectedDrink.id,
-            name: selectedDrink.attributes.name,
-            price: selectedDrink.attributes.price,
-          }
-        : null,
-      fries: includeFries,
-      additions: selectedFixedExtras,
-    };
+                        const extras = {
+                          drink: selectedDrink
+                            ? {
+                                id: selectedDrink.id,
+                                name: selectedDrink.attributes.name,
+                                price: selectedDrink.attributes.price,
+                              }
+                            : null,
+                          fries: includeFries,
+                          additions: selectedFixedExtras,
+                        };
 
-    const extrasObservacion = selectedFixedExtras
-      .map((e) => `+ ${e.name}`)
-      .join(", ");
+                        const extrasObservacion = selectedFixedExtras
+                          .map((e) => `+ ${e.name}`)
+                          .join(", ");
 
-    const notaFinal = [note.trim(), extrasObservacion]
-      .filter(Boolean)
-      .join(" | ");
+                        const notaFinal = [note.trim(), extrasObservacion]
+                          .filter(Boolean)
+                          .join(" | ");
 
-    addItem({
-      ...selectedItem,
-      attributes: {
-        ...selectedItem.attributes,
-        price: finalPrice,
-        note: notaFinal,
-        extras,
-        isBurger: productData.isBurger || false,
-        medallones: productData.medallones || 0,
-        size: productData.size || "",
-        productType: productData.productType || "",
-        isCombo: productData.isCombo || false,
-        comboItems: comboItems.length > 0 ? comboItems : undefined,
-      },
-    });
+                        addItem({
+                          ...selectedItem,
+                          attributes: {
+                            ...selectedItem.attributes,
+                            price: finalPrice,
+                            note: notaFinal,
+                            extras,
+                            isBurger: productData.isBurger || false,
+                            medallones: productData.medallones || 0,
+                            size: productData.size || "",
+                            productType: productData.productType || "",
+                            isCombo: productData.isCombo || false,
+                            comboItems:
+                              comboItems.length > 0 ? comboItems : undefined,
+                          },
+                        });
 
-    setToastMessage("Producto agregado al carrito");
-    setShowToast(true);
-    setTimeout(() => setShowToast(false), 2000);
+                        setToastMessage("Producto agregado al carrito");
+                        setShowToast(true);
+                        setTimeout(() => setShowToast(false), 2000);
 
-    setSelectedItem(null);
-    setNote("");
-    setSelectedDrinkId("");
-    setIncludeFries(false);
-    setShowDrinkDropdown(false);
-  } catch (err) {
-    console.error("❌ Error al agregar producto al carrito:", err);
-    setToastMessage("Error al agregar el producto");
-    setShowToast(true);
-    setTimeout(() => setShowToast(false), 2000);
-  }
-}}
-
+                        setSelectedItem(null);
+                        setNote("");
+                        setSelectedDrinkId("");
+                        setIncludeFries(false);
+                        setShowDrinkDropdown(false);
+                      } catch (err) {
+                        console.error(
+                          "❌ Error al agregar producto al carrito:",
+                          err
+                        );
+                        setToastMessage("Error al agregar el producto");
+                        setShowToast(true);
+                        setTimeout(() => setShowToast(false), 2000);
+                      }
+                    }}
                     className="w-[50%] bg-[#E00000] hover:bg-[#C40000] text-white py-3 rounded-full font-bold text-sm"
                   >
                     Agregar al pedido

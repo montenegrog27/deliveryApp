@@ -298,38 +298,38 @@ export default function CheckoutPage() {
       // })),
 
       cart: cart.map((item) => {
-    const base = {
-      id: item.id,
-      name: item.attributes.name,
-      quantity: item.quantity,
-      price: item.attributes.price,
-      discountPrice: item.discountPrice || item.attributes.price,
-      note: item.attributes.note || "",
-      extras: item.attributes.extras || null,
+        const base = {
+          id: item.id,
+          name: item.attributes.name,
+          quantity: item.quantity,
+          price: item.attributes.price,
+          discountPrice: item.discountPrice || item.attributes.price,
+          note: item.attributes.note || "",
+          extras: item.attributes.extras || null,
 
-      // <- estos campos para productos “simples”
-      medallones: item.attributes.medallones || 0,
-      isBurger: item.attributes.isBurger || false,
-      size: item.attributes.size || "",
-      productType: item.attributes.productType || "",
-    };
+          // <- estos campos para productos “simples”
+          medallones: item.attributes.medallones || 0,
+          isBurger: item.attributes.isBurger || false,
+          size: item.attributes.size || "",
+          productType: item.attributes.productType || "",
+        };
 
-    // <- conservar estructura de combo
-    if (item.attributes.isCombo) {
-      base.isCombo = true;
-      base.comboItems = (item.attributes.comboItems || []).map((ci) => ({
-        productId: ci.id || ci.productId,
-        name: ci.name || "",
-        quantity: ci.quantity || 1,
-        isBurger: !!ci.isBurger,
-        medallones: ci.medallones || 0,
-        size: ci.size || "",
-        productType: ci.productType || "",
-      }));
-    }
+        // <- conservar estructura de combo
+        if (item.attributes.isCombo) {
+          base.isCombo = true;
+          base.comboItems = (item.attributes.comboItems || []).map((ci) => ({
+            productId: ci.id || ci.productId,
+            name: ci.name || "",
+            quantity: ci.quantity || 1,
+            isBurger: !!ci.isBurger,
+            medallones: ci.medallones || 0,
+            size: ci.size || "",
+            productType: ci.productType || "",
+          }));
+        }
 
-    return base;
-  }),
+        return base;
+      }),
       shippingCost,
       kitchenId: selectedKitchenId,
       paymentMethod: selectedPaymentMethod,
@@ -369,42 +369,26 @@ export default function CheckoutPage() {
       console.log("orderPayload.cart[0].price", orderPayload.cart[0].price);
 
       const orderText = cart
-  .map((item) => {
-    const name = item.attributes.name;
-    const qty = item.quantity;
-    return `${qty} x ${name}`;
-  })
-  .join("\n");
-
-
-      // await fetch("/api/send-whatsapp", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify({
-      //     phone: formattedPhone,
-      //     trackingId: ref,
-      //     customerName: customer.name,
-      //     templateName: "confirmar_pedido",
-      //     branchName: "Santa Fe 1583",
-      //     totalAmount: total,
-      //   }),
-      // });
-
+        .map((item) => {
+          const name = item.attributes.name;
+          const qty = item.quantity;
+          return `${qty} x ${name}`;
+        })
+        .join("\n");
 
       await fetch("/api/send-whatsapp", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    phone: formattedPhone,
-    trackingId: ref,
-    customerName: customer.name,
-    orderText, 
-    templateName: "confirmacion_pedido_detallado", 
-    branchName: selectedKitchenName || "Sucursal",
-    totalAmount: total,
-  }),
-});
-
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          phone: formattedPhone,
+          trackingId: ref,
+          customerName: customer.name,
+          orderText,
+          templateName: "confirmacion_pedido_detallado",
+          branchName: selectedKitchenName || "Sucursal",
+          totalAmount: total,
+        }),
+      });
 
       console.log("📦 Enviando WhatsApp con:", {
         phone: formattedPhone,
