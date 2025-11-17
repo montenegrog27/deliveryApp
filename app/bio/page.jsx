@@ -38,13 +38,13 @@ export default function BioPageMordisco() {
 
           {/* WhatsApp */}
           <a
-            href="https://wa.me/5493794055152"
+            href="https://wa.me/5493794054555"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-center gap-3 w-full border border-[#E00000] text-[#E00000] font-semibold py-3 rounded-xl hover:bg-[#E00000]/10 transition"
           >
             <FaWhatsapp className="w-5 h-5" />
-            Whatsapp de reclamos
+            Whatsapp de consultas y reclamos
           </a>
 
           {/* Instagram */}
