@@ -8,7 +8,7 @@ const bricolageLight = localFont({ src: "../public/font/BricolageGrotesque-Extra
 export default function Modal({ onClose }) {
   return (
     <motion.div
-      className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 overscroll-contain"
+      className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -21,12 +21,14 @@ export default function Modal({ onClose }) {
         transition={{ type: "spring", bounce: 0.3 }}
       >
         <h2 className={`${bricolage.className} text-3xl text-[#ED1C24] mb-4`}>
-          ¡Listo! Ya estas participando, 
-          ¡Nos vemos dentro de poco!
+          ¡Gracias por participar!
         </h2>
-        <p className={`${bricolageLight.className} text-[#1A1A1A] mb-6`}>
-          ¡Muchas gracias! :)
+        <p className={`${bricolageLight.className} text-[#1A1A1A] mb-4`}>
+          Tu código de descuento es:
         </p>
+        <div className="bg-red-100 border border-red-400 rounded-lg py-2 px-4 text-xl font-mono text-red-600 mb-6">
+          NOSENCANTAESCUCHARTE
+        </div>
         <button
           onClick={onClose}
           className="bg-[#ED1C24] text-white py-2 px-6 rounded-lg font-semibold hover:bg-[#d3131a] transition-colors text-base"
@@ -37,5 +39,3 @@ export default function Modal({ onClose }) {
     </motion.div>
   );
 }
-
-
