@@ -61,7 +61,7 @@ export default function BioPageMordisco() {
         </div>
 
         {/* Footer */}
-        <footer className="mt-8 text-xs text-gray-400 text-center">
+        <footer className="mt-8 text-xs text-gray-300 text-center">
           Powered by <strong>Kablam</strong>
         </footer>
       </div>
