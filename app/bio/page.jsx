@@ -50,7 +50,7 @@ export default function BioPageMordisco() {
 
           {/* Instagram */}
           <a
-            href="https://mordiscoburgers.com.ar/encuesta"
+            href="https://mordiscoburgers.com.ar/encuestaBio"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-center gap-2 w-full border border-[#E00000] text-[#E00000] font-semibold py-3 rounded-xl hover:bg-[#E00000]/10 transition"
