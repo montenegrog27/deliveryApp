@@ -53,10 +53,10 @@ export default function BioPageMordisco() {
             href="https://mordiscoburgers.com.ar/encuesta"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center gap-3 w-full border border-[#E00000] text-[#E00000] font-semibold py-3 rounded-xl hover:bg-[#E00000]/10 transition"
+            className="flex items-center justify-center gap-2 w-full border border-[#E00000] text-[#E00000] font-semibold py-3 rounded-xl hover:bg-[#E00000]/10 transition"
           > 
             <FaClipboardCheck  className="w-5 h-5" />
-            Encuesta (Obtené tu cupón de descuento!)
+            Encuesta (Te regalamos un cupón!)
           </a>
         </div>
 
