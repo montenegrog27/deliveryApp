@@ -391,8 +391,8 @@ const [loadingExtras, setLoadingExtras] = useState(false);
           style={{ height: "50vh" }}
         >
           <img
-            src="https://res.cloudinary.com/dsbrnqc5z/image/upload/v1762211756/Gemini_Generated_Image_6g06976g06976g06_scco4y.png"
-            alt="Cyber Mordisco"
+            src="https://res.cloudinary.com/dsbrnqc5z/image/upload/v1763597355/Gemini_Generated_Image_e9xmc7e9xmc7e9xm_yxpm77.png"
+            alt="portada Mordisco"
             className="w-full h-full object-cover"
           />
         </section>
