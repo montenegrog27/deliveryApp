@@ -1,6 +1,7 @@
 "use client";
 
 import { FaInstagram, FaWhatsapp, FaShoppingCart } from "react-icons/fa";
+import { FaClipboardCheck } from "react-icons/fa6";
 
 export default function BioPageMordisco() {
   return (
@@ -49,13 +50,13 @@ export default function BioPageMordisco() {
 
           {/* Instagram */}
           <a
-            href="https://instagram.com/mordisco.hamburguesas"
+            href="https://mordiscoburgers.com.ar/encuesta"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-center gap-3 w-full border border-[#E00000] text-[#E00000] font-semibold py-3 rounded-xl hover:bg-[#E00000]/10 transition"
-          >
-            <FaInstagram className="w-5 h-5" />
-            Instagram
+          > 
+            <FaClipboardCheck  className="w-5 h-5" />
+            Encuesta (Obtené tu cupón de descuento!)
           </a>
         </div>
 
