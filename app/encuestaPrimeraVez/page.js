@@ -229,9 +229,9 @@ export default function CustomerFeedbackWizard() {
             className="text-center space-y-4"
           >
             <h2 className={`${bricolage.className} text-3xl text-[#ED1C24]`}>
-              ¡Gracias por tu feedback!
+              ¡Gracias por responder a todo! Nos encanta escucharte! 
             </h2>
-            <p
+            {/* <p
               className={`${bricolageLight.className} text-[#1A1A1A] text-base sm:text-lg`}
             >
               Tu código de descuento es:
@@ -243,7 +243,7 @@ export default function CustomerFeedbackWizard() {
               className={`${bricolageLight.className} text-[#1A1A1A] text-base sm:text-lg`}
             >
               "Valido hasta el 27-11"
-            </p>
+            </p> */}
           </motion.div>
         )}
       </AnimatePresence>
