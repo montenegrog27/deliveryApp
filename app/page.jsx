@@ -665,13 +665,22 @@ const [loadingExtras, setLoadingExtras] = useState(false);
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-100 bg-black/50 flex items-center justify-center px-4"
           >
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="bg-white rounded-xl w-full max-w-md p-6 shadow-xl space-y-4 text-left"
-            >
+<motion.div
+  initial={{ scale: 0.95, opacity: 0 }}
+  animate={{ scale: 1, opacity: 1 }}
+  exit={{ scale: 0.95, opacity: 0 }}
+  transition={{ duration: 0.2 }}
+  className="
+    bg-white rounded-t-2xl md:rounded-xl 
+    w-full max-w-md 
+    p-6 shadow-xl space-y-4 text-left
+      
+    max-h-[85vh]        /* 🔥 Altura máxima visible en móvil */
+    overflow-y-auto     /* 🔥 Scroll interno */
+    overscroll-contain  /* Evita que scrollee el fondo */
+  "
+>
+
               <h3 className="text-xl font-bold text-[#1A1A1A]">
                 {selectedItem.attributes.name}
               </h3>
