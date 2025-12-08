@@ -31,53 +31,53 @@ export async function POST(req) {
 
 
     // Sanitizar orderText para cumplir las reglas de WhatsApp Template Messages
-let cleanOrderText = orderText
-  ?.replace(/\n+/g, " • ")    // reemplaza ENTERs por viñetas
-  ?.replace(/\t+/g, " ")      // quita tabs
-  ?.replace(/\s{4,}/g, " ")   // evita espacios excesivos (más de 4 seguidos)
-  ?.trim();                   // elimina espacios al principio y al final
+// let cleanOrderText = orderText
+//   ?.replace(/\n+/g, " • ")    // reemplaza ENTERs por viñetas
+//   ?.replace(/\t+/g, " ")      // quita tabs
+//   ?.replace(/\s{4,}/g, " ")   // evita espacios excesivos (más de 4 seguidos)
+//   ?.trim();                   // elimina espacios al principio y al final
 
-
-
-    // const payload = {
-    //   messaging_product: "whatsapp",
-    //   to,
-    //   type: "template",
-    //   template: {
-    //     name: "confirmacion_pedido",
-    //     language: { code: "es_AR" },
-    //     components: [
-    //       {
-    //         type: "body",
-    //         parameters: [
-    //           { type: "text", text: customerName },
-    //           { type: "text", text: totalAmount.toString() },
-    //         ],
-    //       },
-    //     ],
-    //   },
-    // };
 
 
     const payload = {
-  messaging_product: "whatsapp",
-  to,
-  type: "template",
-  template: {
-    name: "confirmacion_pedido_detallado", // usar el nombre recibido
-    language: { code: "es_AR" },
-    components: [
-      {
-        type: "body",
-        parameters: [
-          { type: "text", text: customerName },   // {{1}}
-          { type: "text", text: cleanOrderText },       // {{2}} ← el detalle aquí
-          { type: "text", text: totalAmount.toString() }, // {{3}}
+      messaging_product: "whatsapp",
+      to,
+      type: "template",
+      template: {
+        name: "confirmacion_pedido",
+        language: { code: "es_AR" },
+        components: [
+          {
+            type: "body",
+            parameters: [
+              { type: "text", text: customerName },
+              { type: "text", text: totalAmount.toString() },
+            ],
+          },
         ],
       },
-    ],
-  },
-};
+    };
+
+
+//     const payload = {
+//   messaging_product: "whatsapp",
+//   to,
+//   type: "template",
+//   template: {
+//     name: "confirmacion_pedido_detallado", // usar el nombre recibido
+//     language: { code: "es_AR" },
+//     components: [
+//       {
+//         type: "body",
+//         parameters: [
+//           { type: "text", text: customerName },   // {{1}}
+//           { type: "text", text: cleanOrderText },       // {{2}} ← el detalle aquí
+//           { type: "text", text: totalAmount.toString() }, // {{3}}
+//         ],
+//       },
+//     ],
+//   },
+// };
 
 
     const res = await fetch(
