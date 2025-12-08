@@ -29,6 +29,16 @@ export async function POST(req) {
       : `tracking_${rawId}`;
     const trackingUrl = `https://mordisco.app/tracking/${trackingId}`;
 
+
+    // Sanitizar orderText para cumplir las reglas de WhatsApp Template Messages
+let cleanOrderText = orderText
+  ?.replace(/\n+/g, " • ")    // reemplaza ENTERs por viñetas
+  ?.replace(/\t+/g, " ")      // quita tabs
+  ?.replace(/\s{4,}/g, " ")   // evita espacios excesivos (más de 4 seguidos)
+  ?.trim();                   // elimina espacios al principio y al final
+
+
+
     // const payload = {
     //   messaging_product: "whatsapp",
     //   to,
@@ -61,7 +71,7 @@ export async function POST(req) {
         type: "body",
         parameters: [
           { type: "text", text: customerName },   // {{1}}
-          { type: "text", text: orderText },       // {{2}} ← el detalle aquí
+          { type: "text", text: cleanOrderText },       // {{2}} ← el detalle aquí
           { type: "text", text: totalAmount.toString() }, // {{3}}
         ],
       },
