@@ -48,7 +48,7 @@ export default function BioPageMordisco() {
             Whatsapp de consultas y reclamos
           </a>
 
-          {/* Instagram */}
+          {/* Instagram
           <a
             href="https://mordiscoburgers.com.ar/encuestaBio"
             target="_blank"
@@ -57,7 +57,7 @@ export default function BioPageMordisco() {
           > 
             <FaClipboardCheck  className="w-5 h-5" />
             Encuesta (Te regalamos un cupón!)
-          </a>
+          </a> */}
         </div>
 
         {/* Footer */}
