@@ -19,7 +19,6 @@ import {
   SwitchDescription,
 } from "@headlessui/react";
 
-// Map importado solo del lado cliente, con fallback de carga
 const Map = dynamic(
   () => import("react-map-gl/mapbox").then((mod) => mod.Map),
   {
