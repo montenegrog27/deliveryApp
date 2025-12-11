@@ -19,17 +19,17 @@ import {
   SwitchDescription,
 } from "@headlessui/react";
 
-const Map = dynamic(
-  () => import("react-map-gl/mapbox").then((mod) => mod.Map),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="h-[400px] w-full flex items-center justify-center bg-gray-100">
-        <p className="text-sm text-gray-500">Cargando mapa...</p>
-      </div>
-    ),
-  }
-);
+// const Map = dynamic(
+//   () => import("react-map-gl/mapbox").then((mod) => mod.Map),
+//   {
+//     ssr: false,
+//     loading: () => (
+//       <div className="h-[400px] w-full flex items-center justify-center bg-gray-100">
+//         <p className="text-sm text-gray-500">Cargando mapa...</p>
+//       </div>
+//     ),
+//   }
+// );
 
 export default function CheckoutPage() {
   const debounceTimeout = useRef(null);
@@ -282,19 +282,6 @@ export default function CheckoutPage() {
         ...customer,
         phone: formattedPhone,
       },
-      // cart: cart.map((item) => ({
-      //   id: item.id,
-      //   name: item.attributes.name, // ✅ nombre del producto
-      //   quantity: item.quantity,
-      //   price: item.attributes.price,
-      //   discountPrice: item.discountPrice || item.attributes.price,
-      //   note: item.attributes.note || "", // ✅ incluir observaciones
-      //   extras: item.attributes.extras || null, //
-      //   medallones: item.attributes.medallones || 0,
-      //   isBurger: item.attributes.isBurger || false,
-      //   size: item.attributes.size || "",
-      //   productType: item.attributes.productType || "",
-      // })),
 
       cart: cart.map((item) => {
         const base = {
@@ -594,12 +581,20 @@ export default function CheckoutPage() {
                     </label>
                     <Listbox
                       value={selectedKitchenId}
-                      onChange={setSelectedKitchenId}
+                      onChange={(value) => {
+                        setSelectedKitchenId(value);
+
+                        const branch = branches.find((b) => b.id === value);
+                        if (branch) {
+                          setSelectedKitchenName(branch.name);
+                        }
+                      }}
                     >
                       <div className="relative">
-                        <ListboxButton className="w-full  border border-neutral-300 rounded-md px-4 py-2 text-left">
+                        <ListboxButton className="w-full border border-neutral-300 rounded-md px-4 py-2 text-left">
                           {selectedKitchenName || "Seleccioná una sucursal"}
                         </ListboxButton>
+
                         <ListboxOptions className="absolute mt-1 w-full rounded-md bg-white shadow-lg z-10">
                           {branches
                             .filter((b) => b.takeaway)
