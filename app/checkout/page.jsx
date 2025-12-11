@@ -573,7 +573,6 @@ export default function CheckoutPage() {
                 <p className="text-xs text-gray-500 ml-2 -mt-3">
                   (Ingresá tu número sin 0 ni 15)
                 </p>
-
                 {orderMode === "takeaway" && (
                   <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-700 mb-1">
