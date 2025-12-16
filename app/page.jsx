@@ -272,6 +272,10 @@ const [loadingExtras, setLoadingExtras] = useState(false);
     };
     fetchMenu();
   }, []);
+
+
+
+  
   function updateTimeLeft(ms) {
     const totalSeconds = Math.floor(ms / 1000);
     const hours = Math.floor(totalSeconds / 3600);
@@ -334,7 +338,7 @@ const [loadingExtras, setLoadingExtras] = useState(false);
       {/* HEADER */}
       <header
         className={`sticky top-0 z-50 px-4 py-3 flex items-center justify-between border-b ${
-          showPromo ? "bg-[#E00000]" : "bg-[#FFF9F5]/90 backdrop-blur-md"
+          showPromo ? "bg-[#2f6e42]" : "bg-[#FFF9F5]/90 backdrop-blur-md"
           // showPromo ? "bg-[#E00000]" : "bg-black backdrop-blur-md"
         }`}
       >
@@ -351,7 +355,7 @@ const [loadingExtras, setLoadingExtras] = useState(false);
         <button
           onClick={toggleCart}
           className={`relative flex items-center gap-2 px-4 py-2 rounded-full font-bold transition hover:scale-105 ${
-            showPromo ? "bg-white text-[#E00000]" : "bg-[#E00000] text-white"
+            showPromo ? "bg-yellow-400 text-[#2f6e42]" : "bg-[#E00000] text-white"
           }`}
         >
           <span>Mi pedido</span>
@@ -387,11 +391,14 @@ const [loadingExtras, setLoadingExtras] = useState(false);
       )}
       {showPromo && (
         <section
-          className="relative -mt-25 rounded-br-3xl rounded-bl-[25%] overflow-hidden"
-          style={{ height: "50vh" }}
+          // className="relative -mt-25 rounded-br-3xl rounded-bl-[25%] overflow-hidden"
+          className="relative -mt- rounded-br-3xl rounded-bl-[25%] overflow-hidden"
+          style={{ height: "60vh" }}
         >
           <img
-            src="https://res.cloudinary.com/dsbrnqc5z/image/upload/v1763598203/Gemini_Generated_Image_i33tyci33tyci33t_wlqa6u.png"
+            // src="https://res.cloudinary.com/dsbrnqc5z/image/upload/v1763598203/Gemini_Generated_Image_i33tyci33tyci33t_wlqa6u.png"
+              src="https://res.cloudinary.com/dsbrnqc5z/image/upload/v1765911868/Gemini_Generated_Image_gwm28fgwm28fgwm2_1_s6plqw.png"
+
             alt="portada Mordisco"
             className="w-full h-full object-cover"
           />
@@ -401,7 +408,7 @@ const [loadingExtras, setLoadingExtras] = useState(false);
       <Toast show={showToast} message={toastMessage} />
 
       {/* CONTENIDO */}
-      <main className="max-w-3xl mx-auto px-4 pb-8 pt-3 space-y-16">
+      <main className="max-w-3xl mx-auto px-4  pb-8 pt-3 space-y-16">
         {loading ? (
           <div className="flex flex-col items-center justify-center mt-50">
             <motion.img
@@ -437,7 +444,7 @@ const [loadingExtras, setLoadingExtras] = useState(false);
                     }}
                     className={`space-y-6 ${
                       index === 0
-                        ? "bg-[#E00000] text-black rounded-xl -mx-1 p-4 my-2"
+                        ? "bg-[#2f6e42] text-black rounded-xl -mx-1 p-4 my-2"
                         : // ? "bg-red-600 text-white rounded-xl -mx-1 p-4 my-2"
 
                           "mt-4"

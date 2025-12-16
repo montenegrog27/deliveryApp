@@ -79,3 +79,32 @@
     transform: translateY(100vh);
   }
 }
+
+
+
+body.christmas-theme {
+  background: url('/images/snow-pattern.svg'), #f8f8f8;
+  background-size: cover;
+  color: #1A1A1A;
+}
+
+.christmas-header {
+  background-color: #C1121F !important;
+  background-image: linear-gradient(to right, #C1121F, #990000);
+  color: white !important;
+}
+
+.christmas-card {
+  border: 2px solid #D4AF37;
+  background-color: #ffffffcc;
+  backdrop-filter: blur(2px);
+}
+
+.christmas-badge {
+  background-color: #D4AF37;
+  color: #fff;
+  font-weight: bold;
+  font-size: 11px;
+  border-radius: 9999px;
+  padding: 0.2rem 0.5rem;
+}
