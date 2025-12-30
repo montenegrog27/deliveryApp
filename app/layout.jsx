@@ -5,7 +5,6 @@ import "../styles/globals.css";
 import { CartProvider } from "@/context/CartContext";
 import Script from "next/script";
 import { Inter } from "next/font/google";
-import Snowfall from "@/components/Snowfall";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -49,7 +48,6 @@ export default function RootLayout({ children }) {
       </head>
 
       <body className={inter.className}>
-          <Snowfall /> {/* ❄️ EFECTO NIEVE */}
         {/* Google Tag Manager (noscript) */}
         {process.env.NODE_ENV === "production" && (
           <>

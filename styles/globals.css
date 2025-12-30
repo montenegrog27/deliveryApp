@@ -53,32 +53,6 @@
   display: none; /* Chrome, Safari */
 }
 
-.snowflake {
-  position: fixed;
-  top: -10px;
-  z-index: 2147483647;
-  color: skyblue;
-  user-select: none;
-  pointer-events: none;
-  animation-name: snowfall;
-  animation-timing-function: linear;
-  animation-iteration-count: infinite;
-  animation-duration: 10s;
-  font-size: 20px;
-}
-
-.snowflake::before {
-  content: "❄";
-}
-
-@keyframes snowfall {
-  0% {
-    transform: translateY(0);
-  }
-  100% {
-    transform: translateY(100vh);
-  }
-}
 
 
 
