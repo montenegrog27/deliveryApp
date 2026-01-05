@@ -483,7 +483,7 @@ const [loadingExtras, setLoadingExtras] = useState(false);
                                 Sin imagen
                               </div>
                             )}
-                            {(item.attributes.hasDiscount ||
+                            {/* {(item.attributes.hasDiscount ||
                               timeDiscountPercent > 0) && (
                               <div className="absolute top-1 right-1 bg-green-600 text-white text-[11px] font-semibold px-2 py-0.5 rounded-full shadow-sm">
                                 -
@@ -492,13 +492,13 @@ const [loadingExtras, setLoadingExtras] = useState(false);
                                   : timeDiscountPercent}
                                 %
                               </div>
-                            )}
+                            )} */}
 
-                            {/* {(item.attributes.hasDiscount || timeDiscountPercent > 0) && (
+                            {(item.attributes.hasDiscount || timeDiscountPercent > 0) && (
   <div className="absolute top-1 right-1 bg-green-600 text-white text-[11px] font-semibold px-2 py-0.5 rounded-full shadow-sm">
     DESCUENTO
   </div>
-)} */}
+)}
 
 
 
