@@ -338,8 +338,8 @@ const [loadingExtras, setLoadingExtras] = useState(false);
       {/* HEADER */}
       <header
         className={`sticky top-0 z-50 px-4 py-3 flex items-center justify-between border-b ${
-          showPromo ? "bg-[#2f6e42]" : "bg-[#FFF9F5]/90 backdrop-blur-md"
-          // showPromo ? "bg-[#E00000]" : "bg-black backdrop-blur-md"
+          // showPromo ? "bg-[#2f6e42]" : "bg-[#FFF9F5]/90 backdrop-blur-md"
+          showPromo ? "bg-[#E00000]" : "bg-black backdrop-blur-md"
         }`}
       >
         <img
@@ -355,7 +355,7 @@ const [loadingExtras, setLoadingExtras] = useState(false);
         <button
           onClick={toggleCart}
           className={`relative flex items-center gap-2 px-4 py-2 rounded-full font-bold transition hover:scale-105 ${
-            showPromo ? "bg-yellow-400 text-[#2f6e42]" : "bg-[#E00000] text-white"
+            showPromo ? "text-[#E00000] bg-white" : "bg-[#E00000] text-white"
           }`}
         >
           <span>Mi pedido</span>
@@ -396,8 +396,8 @@ const [loadingExtras, setLoadingExtras] = useState(false);
           style={{ height: "60vh" }}
         >
           <img
-            // src="https://res.cloudinary.com/dsbrnqc5z/image/upload/v1763598203/Gemini_Generated_Image_i33tyci33tyci33t_wlqa6u.png"
-              src="https://res.cloudinary.com/dsbrnqc5z/image/upload/v1765911868/Gemini_Generated_Image_gwm28fgwm28fgwm2_1_s6plqw.png"
+            src="https://res.cloudinary.com/dsbrnqc5z/image/upload/v1763598203/Gemini_Generated_Image_i33tyci33tyci33t_wlqa6u.png"
+              // src="https://res.cloudinary.com/dsbrnqc5z/image/upload/v1765911868/Gemini_Generated_Image_gwm28fgwm28fgwm2_1_s6plqw.png"
 
             alt="portada Mordisco"
             className="w-full h-full object-cover"
@@ -444,7 +444,7 @@ const [loadingExtras, setLoadingExtras] = useState(false);
                     }}
                     className={`space-y-6 ${
                       index === 0
-                        ? "bg-[#2f6e42] text-black rounded-xl -mx-1 p-4 my-2"
+                        ? "bg-[#E00000] text-black rounded-xl -mx-1 p-4 my-2"
                         : // ? "bg-red-600 text-white rounded-xl -mx-1 p-4 my-2"
 
                           "mt-4"
