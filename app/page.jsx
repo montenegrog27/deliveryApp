@@ -533,7 +533,7 @@ const [loadingExtras, setLoadingExtras] = useState(false);
                                     <span
                                       className={`font-bold text-sm ${
                                         index === 0
-                                          ? "text-white"
+                                          ? "text-[#E00000]"
                                           : "text-[#E00000]"
                                       }`}
                                     >
