@@ -186,12 +186,12 @@ if (mejorSucursal.id === "godoyCruz") {
 }
 
 
-      if (menorDistancia > freeShippingRadius) {
-        const extraKm = Math.ceil(menorDistancia - freeShippingRadius);
-        costoEnvio += extraKm * pricePerKm;
-      } else {
-        costoEnvio = 0;
-      }
+      // if (menorDistancia > freeShippingRadius) {
+      //   const extraKm = Math.ceil(menorDistancia - freeShippingRadius);
+      //   costoEnvio += extraKm * pricePerKm;
+      // } else {
+      //   costoEnvio = 0;
+      // }
 
       setSelectedKitchenId(mejorSucursal.id);
       setSelectedKitchenName(mejorSucursal.name); // si necesitás mostrarlo
