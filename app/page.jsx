@@ -72,6 +72,7 @@ const [loadingExtras, setLoadingExtras] = useState(false);
   );
   const [selectedFixedExtras, setSelectedFixedExtras] = useState([]);
   const [availableExtras, setAvailableExtras] = useState([]);
+const [showZonaEnvioModal, setShowZonaEnvioModal] = useState(false);
 
   const cardsRef = useRef(null);
   const sectionRefs = useRef({});
@@ -99,6 +100,13 @@ const [loadingExtras, setLoadingExtras] = useState(false);
       if (node) observer.unobserve(node);
     };
   }, []);
+useEffect(() => {
+  const yaMostrado = sessionStorage.getItem("zonaEnvioMostrada");
+  if (!yaMostrado) {
+    setShowZonaEnvioModal(true);
+    sessionStorage.setItem("zonaEnvioMostrada", "true");
+  }
+}, []);
 
   useEffect(() => {
     const checkHorario = async () => {
@@ -875,6 +883,35 @@ const [loadingExtras, setLoadingExtras] = useState(false);
           </motion.div>
         )}
       </AnimatePresence>
+      {showZonaEnvioModal && (
+  <div className="fixed inset-0 z-[9999] bg-black/60 flex items-center justify-center px-4">
+    <div className="bg-white max-w-sm w-full p-6 rounded-2xl shadow-lg text-center space-y-4">
+      <h2 className="text-xl font-bold text-[#E00000]">
+        ¡Atención! 🚚
+      </h2>
+      <p className="text-sm text-gray-700">
+        Consultá si tu dirección está dentro de nuestra zona con envío gratuito.
+      </p>
+      <div className="flex gap-4 justify-center mt-4">
+        <a
+          href="https://www.google.com/maps/d/u/0/edit?mid=1EblnsLyb516tLLh0e-o8qC_YJ17DOCE&usp=sharing"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="bg-[#E00000] text-white px-4 py-2 rounded-full font-semibold text-sm"
+        >
+          Ver mapa
+        </a>
+        <button
+          onClick={() => setShowZonaEnvioModal(false)}
+          className="bg-gray-200 text-gray-800 px-4 py-2 rounded-full font-semibold text-sm"
+        >
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
     </div>
   );
 }
