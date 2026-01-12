@@ -899,20 +899,13 @@ useEffect(() => {
           <span className="text-3xl">🚚</span>
         </div>
         <h2 className="text-2xl font-black text-white uppercase tracking-tight">
-          ¡Envío Gratis!
+          ¡Mira nuestra zona de envío gratis esta semana!
         </h2>
       </div>
     </div>
 
     {/* Cuerpo del Modal */}
     <div className="p-8 text-center space-y-6">
-      <div className="space-y-2">
-        <p className="text-gray-600 font-medium leading-relaxed">
-          ¡Buenas noticias! Mirá en el mapa nuestra zona de envío gratuito
-        </p>
-
-      </div>
-
       {/* Botones Estilizados */}
       <div className="flex flex-col gap-3">
         <a
@@ -921,7 +914,7 @@ useEffect(() => {
           rel="noopener noreferrer"
           className="bg-[#E00000] hover:bg-[#c00000] text-white py-4 rounded-2xl font-bold text-base transition-all shadow-[0_4px_0_rgb(150,0,0)] active:translate-y-1 active:shadow-none"
         >
-          📍 VER MAPA DE ZONAS
+          📍 VER ZONA DE ENVIO GRATIS
         </a>
         
         <button
