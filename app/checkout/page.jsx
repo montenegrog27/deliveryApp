@@ -173,6 +173,19 @@ export default function CheckoutPage() {
       }
 
       let costoEnvio = baseDeliveryCost;
+
+
+// 🚨 NUEVA CONDICIÓN: Envío gratis para sucursal godoyCruz
+if (mejorSucursal.id === "godoyCruz") {
+  costoEnvio = 0;
+} else if (menorDistancia > freeShippingRadius) {
+  const extraKm = Math.ceil(menorDistancia - freeShippingRadius);
+  costoEnvio += extraKm * pricePerKm;
+} else {
+  costoEnvio = 0;
+}
+
+
       if (menorDistancia > freeShippingRadius) {
         const extraKm = Math.ceil(menorDistancia - freeShippingRadius);
         costoEnvio += extraKm * pricePerKm;
@@ -691,6 +704,12 @@ export default function CheckoutPage() {
                         Envío: ${shippingCost}
                       </p>
                     )}
+                    {selectedKitchenId === "godoyCruz" && (
+  <p className="mt-1 text-sm text-green-700 font-semibold">
+    ¡Esta sucursal tiene envío gratis!
+  </p>
+)}
+
                   </>
                 )}
 
