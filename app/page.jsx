@@ -72,7 +72,7 @@ const [loadingExtras, setLoadingExtras] = useState(false);
   );
   const [selectedFixedExtras, setSelectedFixedExtras] = useState([]);
   const [availableExtras, setAvailableExtras] = useState([]);
-const [showZonaEnvioModal, setShowZonaEnvioModal] = useState(false);
+// const [showZonaEnvioModal, setShowZonaEnvioModal] = useState(false);
 
   const cardsRef = useRef(null);
   const sectionRefs = useRef({});
@@ -100,13 +100,13 @@ const [showZonaEnvioModal, setShowZonaEnvioModal] = useState(false);
       if (node) observer.unobserve(node);
     };
   }, []);
-useEffect(() => {
-  const yaMostrado = sessionStorage.getItem("zonaEnvioMostrada");
-  if (!yaMostrado) {
-    setShowZonaEnvioModal(true);
-    sessionStorage.setItem("zonaEnvioMostrada", "true");
-  }
-}, []);
+// useEffect(() => {
+//   const yaMostrado = sessionStorage.getItem("zonaEnvioMostrada");
+//   if (!yaMostrado) {
+//     setShowZonaEnvioModal(true);
+//     sessionStorage.setItem("zonaEnvioMostrada", "true");
+//   }
+// }, []);
 
   useEffect(() => {
     const checkHorario = async () => {
@@ -436,6 +436,14 @@ useEffect(() => {
             {showStickyNav && (
               <CategoryNav categories={menu} sectionRefs={sectionRefs} />
             )}{" "}
+        <a
+          href="https://www.google.com/maps/d/u/0/edit?mid=1EblnsLyb516tLLh0e-o8qC_YJ17DOCE&usp=sharing"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="bg-[#E00000] text-white px-4 py-2 rounded-full font-semibold text-sm"
+        >
+          Ver de envío gratis
+        </a>
             {menu
               .slice()
               .sort((a, b) => (a.inOrder ?? 0) - (b.inOrder ?? 0))
