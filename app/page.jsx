@@ -908,11 +908,9 @@ useEffect(() => {
     <div className="p-8 text-center space-y-6">
       <div className="space-y-2">
         <p className="text-gray-600 font-medium leading-relaxed">
-          ¡Buenas noticias! Estás en una zona con beneficios especiales.
+          ¡Buenas noticias! Mirá en el mapa nuestra zona de envío gratuito
         </p>
-        <p className="text-lg font-bold text-gray-800">
-          ¿Querés saber si llegamos <br/> a tu casa sin costo?
-        </p>
+
       </div>
 
       {/* Botones Estilizados */}
@@ -928,7 +926,7 @@ useEffect(() => {
         
         <button
           onClick={() => setShowZonaEnvioModal(false)}
-          className="text-gray-400 hover:text-gray-600 text-sm font-semibold transition-colors pt-2"
+          className="text-gray-400 hover:text-gray-600 text-md font-semibold transition-colors pt-2"
         >
           Ahora no, gracias
         </button>
