@@ -66,13 +66,13 @@ export default function HomePage() {
   const [activeTimeDiscountName, setActiveTimeDiscountName] = useState("");
   const [timeLeft, setTimeLeft] = useState("");
   const [showToast, setShowToast] = useState(false);
-const [loadingExtras, setLoadingExtras] = useState(false);
+  const [loadingExtras, setLoadingExtras] = useState(false);
   const [toastMessage, setToastMessage] = useState(
     "Producto agregado al carrito"
   );
   const [selectedFixedExtras, setSelectedFixedExtras] = useState([]);
   const [availableExtras, setAvailableExtras] = useState([]);
-// const [showZonaEnvioModal, setShowZonaEnvioModal] = useState(false);
+  // const [showZonaEnvioModal, setShowZonaEnvioModal] = useState(false);
 
   const cardsRef = useRef(null);
   const sectionRefs = useRef({});
@@ -100,13 +100,13 @@ const [loadingExtras, setLoadingExtras] = useState(false);
       if (node) observer.unobserve(node);
     };
   }, []);
-// useEffect(() => {
-//   const yaMostrado = sessionStorage.getItem("zonaEnvioMostrada");
-//   if (!yaMostrado) {
-//     setShowZonaEnvioModal(true);
-//     sessionStorage.setItem("zonaEnvioMostrada", "true");
-//   }
-// }, []);
+  // useEffect(() => {
+  //   const yaMostrado = sessionStorage.getItem("zonaEnvioMostrada");
+  //   if (!yaMostrado) {
+  //     setShowZonaEnvioModal(true);
+  //     sessionStorage.setItem("zonaEnvioMostrada", "true");
+  //   }
+  // }, []);
 
   useEffect(() => {
     const checkHorario = async () => {
@@ -281,9 +281,6 @@ const [loadingExtras, setLoadingExtras] = useState(false);
     fetchMenu();
   }, []);
 
-
-
-  
   function updateTimeLeft(ms) {
     const totalSeconds = Math.floor(ms / 1000);
     const hours = Math.floor(totalSeconds / 3600);
@@ -318,7 +315,6 @@ const [loadingExtras, setLoadingExtras] = useState(false);
     ?.items?.[0];
   const selectedDrink =
     drinksCategory?.items.find((item) => item.id === selectedDrinkId) || null;
-
 
   const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
 
@@ -405,7 +401,7 @@ const [loadingExtras, setLoadingExtras] = useState(false);
         >
           <img
             src="https://res.cloudinary.com/dsbrnqc5z/image/upload/v1763598203/Gemini_Generated_Image_i33tyci33tyci33t_wlqa6u.png"
-              // src="https://res.cloudinary.com/dsbrnqc5z/image/upload/v1765911868/Gemini_Generated_Image_gwm28fgwm28fgwm2_1_s6plqw.png"
+            // src="https://res.cloudinary.com/dsbrnqc5z/image/upload/v1765911868/Gemini_Generated_Image_gwm28fgwm28fgwm2_1_s6plqw.png"
 
             alt="portada Mordisco"
             className="w-full h-full object-cover"
@@ -436,14 +432,14 @@ const [loadingExtras, setLoadingExtras] = useState(false);
             {showStickyNav && (
               <CategoryNav categories={menu} sectionRefs={sectionRefs} />
             )}{" "}
-        <a
-          href="https://www.google.com/maps/d/u/0/edit?mid=1EblnsLyb516tLLh0e-o8qC_YJ17DOCE&usp=sharing"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="bg-[#E00000] text-white px-4 py-2 rounded-full font-semibold text-sm"
-        >
-          Ver de envío gratis
-        </a>
+            <a
+              href="https://www.google.com/maps/d/u/0/edit?mid=1EblnsLyb516tLLh0e-o8qC_YJ17DOCE&usp=sharing"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-[#E00000] text-white px-4 py-2 rounded-full font-semibold text-sm"
+            >
+              Ver de envío gratis
+            </a>
             {menu
               .slice()
               .sort((a, b) => (a.inOrder ?? 0) - (b.inOrder ?? 0))
@@ -510,14 +506,12 @@ const [loadingExtras, setLoadingExtras] = useState(false);
                               </div>
                             )} */}
 
-                            {(item.attributes.hasDiscount || timeDiscountPercent > 0) && (
-  <div className="absolute top-1 right-1 bg-green-600 text-white text-[11px] font-semibold px-2 py-0.5 rounded-full shadow-sm">
-    DESCUENTO
-  </div>
-)}
-
-
-
+                            {(item.attributes.hasDiscount ||
+                              timeDiscountPercent > 0) && (
+                              <div className="absolute top-1 right-1 bg-green-600 text-white text-[11px] font-semibold px-2 py-0.5 rounded-full shadow-sm">
+                                DESCUENTO
+                              </div>
+                            )}
                           </div>
                           <div className="flex-1 flex flex-col min-w-0">
                             {/* 🔴 Nombre: blanco si es la primera categoría */}
@@ -697,12 +691,12 @@ const [loadingExtras, setLoadingExtras] = useState(false);
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-100 bg-black/50 flex items-center justify-center px-4"
           >
-<motion.div
-  initial={{ scale: 0.95, opacity: 0 }}
-  animate={{ scale: 1, opacity: 1 }}
-  exit={{ scale: 0.95, opacity: 0 }}
-  transition={{ duration: 0.2 }}
-  className="
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="
     bg-white rounded-t-2xl md:rounded-xl 
     w-full max-w-md 
     p-6 shadow-xl space-y-4 text-left
@@ -711,8 +705,7 @@ const [loadingExtras, setLoadingExtras] = useState(false);
     overflow-y-auto     /* 🔥 Scroll interno */
     overscroll-contain  /* Evita que scrollee el fondo */
   "
->
-
+            >
               <h3 className="text-xl font-bold text-[#1A1A1A]">
                 {selectedItem.attributes.name}
               </h3>
@@ -722,51 +715,54 @@ const [loadingExtras, setLoadingExtras] = useState(false);
                   {selectedItem.attributes.description}
                 </p>
               )}
-      {loadingExtras ? (
-        // 🔁 LOADER mientras cargan los extras
-        <div className="flex justify-center items-center py-8">
-          <img
-            src="https://res.cloudinary.com/dsbrnqc5z/image/upload/v1744757019/Recurso_40_zti0fq.svg"
-            alt="Cargando extras"
-            className="h-12 w-auto animate-spin"
-          />
-        </div>
-      ) : (
-
-
-              <div>
-                <label className="block text-sm font-medium mt-5 mb-1 text-[#1A1A1A]">
-                  Observaciones
-                </label>
-                <textarea
-                  className="w-full border rounded p-2 text-base"
-                  placeholder="Ej: sin lechuga, sin tomate..."
-                  value={note}
-                  onChange={(e) => setNote(e.target.value)}
-                />
-                {selectedItem && (
-                  <IngredientNotes
-                    productId={selectedItem.id}
-                    currentNote={note}
-                    onAddNote={(newNote) => {
-                      setNote((prev) => {
-                        const notes = prev.split(", ").filter(Boolean);
-                        if (notes.includes(newNote)) {
-                          return notes.filter((n) => n !== newNote).join(", ");
-                        } else {
-                          return [...notes, newNote].join(", ");
-                        }
-                      });
-                    }}
-                    onExtrasChange={(extras) => setSelectedFixedExtras(extras)}
-                    extrasList={availableExtras.filter((extra) =>
-                      extra.productTypes?.includes(
-                        selectedItem.attributes.productType
-                      )
-                    )}
+              {loadingExtras ? (
+                // 🔁 LOADER mientras cargan los extras
+                <div className="flex justify-center items-center py-8">
+                  <img
+                    src="https://res.cloudinary.com/dsbrnqc5z/image/upload/v1744757019/Recurso_40_zti0fq.svg"
+                    alt="Cargando extras"
+                    className="h-12 w-auto animate-spin"
                   />
-                )}
-              </div>)}
+                </div>
+              ) : (
+                <div>
+                  <label className="block text-sm font-medium mt-5 mb-1 text-[#1A1A1A]">
+                    Observaciones
+                  </label>
+                  <textarea
+                    className="w-full border rounded p-2 text-base"
+                    placeholder="Ej: sin lechuga, sin tomate..."
+                    value={note}
+                    onChange={(e) => setNote(e.target.value)}
+                  />
+                  {selectedItem && (
+                    <IngredientNotes
+                      productId={selectedItem.id}
+                      currentNote={note}
+                      onAddNote={(newNote) => {
+                        setNote((prev) => {
+                          const notes = prev.split(", ").filter(Boolean);
+                          if (notes.includes(newNote)) {
+                            return notes
+                              .filter((n) => n !== newNote)
+                              .join(", ");
+                          } else {
+                            return [...notes, newNote].join(", ");
+                          }
+                        });
+                      }}
+                      onExtrasChange={(extras) =>
+                        setSelectedFixedExtras(extras)
+                      }
+                      extrasList={availableExtras.filter((extra) =>
+                        extra.productTypes?.includes(
+                          selectedItem.attributes.productType
+                        )
+                      )}
+                    />
+                  )}
+                </div>
+              )}
 
               {/* Total */}
               <div className="text-right text-sm font-semibold text-[#1A1A1A]">
@@ -891,78 +887,53 @@ const [loadingExtras, setLoadingExtras] = useState(false);
           </motion.div>
         )}
       </AnimatePresence>
-      {showZonaEnvioModal && (
-        <div className="fixed inset-0 z-[9999] bg-black/70 backdrop-blur-sm flex items-center justify-center px-4">
-  {/* Contenedor Principal con estilo de Flyer */}
-  <div className="bg-white max-w-sm w-full rounded-3xl shadow-2xl overflow-hidden transform transition-all border border-gray-100">
-    
-    {/* Cabecera con Color y Diseño */}
-    <div className="bg-[#E00000] p-8 text-center relative overflow-hidden">
-      {/* Círculos decorativos de fondo */}
-      <div className="absolute top-[-20px] left-[-20px] w-24 h-24 bg-white/10 rounded-full"></div>
-      <div className="absolute bottom-[-10px] right-[-10px] w-16 h-16 bg-black/10 rounded-full"></div>
       
-      <div className="relative z-10">
-        <div className="bg-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg">
-          <span className="text-3xl">🚚</span>
-        </div>
-        <h2 className="text-2xl font-black text-white uppercase tracking-tight">
-          ¡Mira nuestra zona de envío gratis esta semana!
-        </h2>
-      </div>
-    </div>
+     {
+  // showZonaEnvioModal && (
+        // <div className="fixed inset-0 z-[9999] bg-black/70 backdrop-blur-sm flex items-center justify-center px-4">
+        //   {/* Contenedor Principal con estilo de Flyer */}
+        //   <div className="bg-white max-w-sm w-full rounded-3xl shadow-2xl overflow-hidden transform transition-all border border-gray-100">
+        //     {/* Cabecera con Color y Diseño */}
+        //     <div className="bg-[#E00000] p-8 text-center relative overflow-hidden">
+        //       {/* Círculos decorativos de fondo */}
+        //       <div className="absolute top-[-20px] left-[-20px] w-24 h-24 bg-white/10 rounded-full"></div>
+        //       <div className="absolute bottom-[-10px] right-[-10px] w-16 h-16 bg-black/10 rounded-full"></div>
 
-    {/* Cuerpo del Modal */}
-    <div className="p-8 text-center space-y-6">
-      {/* Botones Estilizados */}
-      <div className="flex flex-col gap-3">
-        <a
-          href="https://www.google.com/maps/d/u/0/edit?mid=1EblnsLyb516tLLh0e-o8qC_YJ17DOCE&usp=sharing"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="bg-[#E00000] hover:bg-[#c00000] text-white py-4 rounded-2xl font-bold text-base transition-all shadow-[0_4px_0_rgb(150,0,0)] active:translate-y-1 active:shadow-none"
-        >
-          📍 VER ZONA DE ENVIO GRATIS
-        </a>
-        
-        <button
-          onClick={() => setShowZonaEnvioModal(false)}
-          className="text-gray-400 hover:text-gray-600 text-md font-semibold transition-colors pt-2"
-        >
-          Ahora no, gracias
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
-  // <div className="fixed inset-0 z-[9999] bg-black/60 flex items-center justify-center px-4">
-  //   <div className="bg-white max-w-sm w-full p-6 rounded-2xl shadow-lg text-center space-y-4">
-  //     <h2 className="text-xl font-bold text-[#E00000]">
-  //       ¡Atención! 🚚
-  //     </h2>
-  //     <p className="text-sm text-gray-700">
-  //       Mirá nuestra zona de envío gratis!
-  //     </p>
-  //     <div className="flex gap-4 justify-center mt-4">
-  //       <a
-  //         href="https://www.google.com/maps/d/u/0/edit?mid=1EblnsLyb516tLLh0e-o8qC_YJ17DOCE&usp=sharing"
-  //         target="_blank"
-  //         rel="noopener noreferrer"
-  //         className="bg-[#E00000] text-white px-4 py-2 rounded-full font-semibold text-sm"
-  //       >
-  //         Ver mapa
-  //       </a>
-  //       <button
-  //         onClick={() => setShowZonaEnvioModal(false)}
-  //         className="bg-gray-200 text-gray-800 px-4 py-2 rounded-full font-semibold text-sm"
-  //       >
-  //         Cerrar
-  //       </button>
-  //     </div>
-  //   </div>
-  // </div>
-)}
+        //       <div className="relative z-10">
+        //         <div className="bg-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg">
+        //           <span className="text-3xl">🚚</span>
+        //         </div>
+        //         <h2 className="text-2xl font-black text-white uppercase tracking-tight">
+        //           ¡Mira nuestra zona de envío gratis esta semana!
+        //         </h2>
+        //       </div>
+        //     </div>
 
+        //     {/* Cuerpo del Modal */}
+        //     <div className="p-8 text-center space-y-6">
+        //       {/* Botones Estilizados */}
+        //       <div className="flex flex-col gap-3">
+        //         <a
+        //           href="https://www.google.com/maps/d/u/0/edit?mid=1EblnsLyb516tLLh0e-o8qC_YJ17DOCE&usp=sharing"
+        //           target="_blank"
+        //           rel="noopener noreferrer"
+        //           className="bg-[#E00000] hover:bg-[#c00000] text-white py-4 rounded-2xl font-bold text-base transition-all shadow-[0_4px_0_rgb(150,0,0)] active:translate-y-1 active:shadow-none"
+        //         >
+        //           📍 VER ZONA DE ENVIO GRATIS
+        //         </a>
+
+        //         <button
+        //           onClick={() => setShowZonaEnvioModal(false)}
+        //           className="text-gray-400 hover:text-gray-600 text-md font-semibold transition-colors pt-2"
+        //         >
+        //           Ahora no, gracias
+        //         </button>
+        //       </div>
+        //     </div>
+        //   </div>
+        // </div>
+ //     )
+ }
     </div>
   );
 }
