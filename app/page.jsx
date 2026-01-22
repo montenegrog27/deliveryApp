@@ -432,14 +432,6 @@ export default function HomePage() {
             {showStickyNav && (
               <CategoryNav categories={menu} sectionRefs={sectionRefs} />
             )}{" "}
-            <a
-              href="https://www.google.com/maps/d/u/0/edit?mid=1EblnsLyb516tLLh0e-o8qC_YJ17DOCE&usp=sharing"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-green-600 w-full text-white px-4 py-2 rounded-full font-semibold text-sm"
-            >
-              Ver zona de envío gratis
-            </a>
             {menu
               .slice()
               .sort((a, b) => (a.inOrder ?? 0) - (b.inOrder ?? 0))
