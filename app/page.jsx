@@ -404,7 +404,7 @@ export default function HomePage() {
             // src="https://res.cloudinary.com/dsbrnqc5z/image/upload/v1765911868/Gemini_Generated_Image_gwm28fgwm28fgwm2_1_s6plqw.png"
 
             alt="portada Mordisco"
-            className="w-full h-full object-cover"
+            className="w-24 h-full object-cover"
           />
         </section>
       )}
