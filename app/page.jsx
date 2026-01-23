@@ -349,8 +349,8 @@ export default function HomePage() {
         <img
           src={
             showPromo
-              ? "https://res.cloudinary.com/dsbrnqc5z/image/upload/v1747913968/Versi%C3%B3n_principal_2_d3jz2q.png"
-              : "https://res.cloudinary.com/dsbrnqc5z/image/upload/v1744755147/Versi%C3%B3n_principal_xer7zs.svg"
+              ? "https://res.cloudinary.com/dsbrnqc5z/image/upload/v1769208785/unnamed_badwjx.jpg"
+              : "https://res.cloudinary.com/dsbrnqc5z/image/upload/v1769208785/unnamed_badwjx.jpg"
           }
           alt="MORDISCO"
           className="h-8"
