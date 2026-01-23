@@ -349,8 +349,8 @@ export default function HomePage() {
         <img
           src={
             showPromo
-              ? "https://res.cloudinary.com/dsbrnqc5z/image/upload/v1769208785/unnamed_badwjx.jpg"
-              : "https://res.cloudinary.com/dsbrnqc5z/image/upload/v1769208785/unnamed_badwjx.jpg"
+              ? "https://res.cloudinary.com/dsbrnqc5z/image/upload/v1747913968/Versi%C3%B3n_principal_2_d3jz2q.png"
+              : "https://res.cloudinary.com/dsbrnqc5z/image/upload/v1744755147/Versi%C3%B3n_principal_xer7zs.svg"
           }
           alt="MORDISCO"
           className="h-8"
@@ -400,7 +400,7 @@ export default function HomePage() {
           style={{ height: "60vh" }}
         >
           <img
-            src="https://res.cloudinary.com/dsbrnqc5z/image/upload/v1763598203/Gemini_Generated_Image_i33tyci33tyci33t_wlqa6u.png"
+            src="https://res.cloudinary.com/dsbrnqc5z/image/upload/v1769208785/unnamed_badwjx.jpg"
             // src="https://res.cloudinary.com/dsbrnqc5z/image/upload/v1765911868/Gemini_Generated_Image_gwm28fgwm28fgwm2_1_s6plqw.png"
 
             alt="portada Mordisco"
