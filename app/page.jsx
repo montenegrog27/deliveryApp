@@ -394,19 +394,20 @@ export default function HomePage() {
         </div>
       )}
       {showPromo && (
-        <section
-          // className="relative -mt-25 rounded-br-3xl rounded-bl-[25%] overflow-hidden"
-          className="relative -mt- rounded-br-3xl rounded-bl-[25%] overflow-hidden"
-          style={{ height: "60vh" }}
-        >
-          <img
-            src="https://res.cloudinary.com/dsbrnqc5z/image/upload/v1769208785/unnamed_badwjx.jpg"
-            // src="https://res.cloudinary.com/dsbrnqc5z/image/upload/v1765911868/Gemini_Generated_Image_gwm28fgwm28fgwm2_1_s6plqw.png"
+<section
+  className="relative -mt-16 rounded-br-3xl rounded-bl-[25%] overflow-hidden"
+  style={{ height: "60vh" }}
+>
+  <div className="h-full flex justify-center items-center">
+    <img
+      src="https://res.cloudinary.com/dsbrnqc5z/image/upload/v1769209480/unnamed_ns2g7v.jpg"
+      alt="portada Mordisco"
+      className="h-full object-contain"
+    />
+  </div>
+</section>
 
-            alt="portada Mordisco"
-            className="w-24 h-full object-cover"
-          />
-        </section>
+
       )}
 
       <Toast show={showToast} message={toastMessage} />
